@@ -21,6 +21,7 @@
   "homepage": "https://github.com/getapper/generator-g-next#readme",
   "dependencies": {
     "chalk": "2.1.0",
+    "inquirer-directory": "2.2.0",
     "kebab-case": "1.0.1",
     "pascal-case": "3.1.2",
     "yeoman-generator": "5.6.1",

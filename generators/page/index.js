@@ -2,10 +2,18 @@
 const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
+const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 
 module.exports = class extends Generator {
+  initializing() {
+    this.env.adapter.promptModule.registerPrompt(
+      "directory",
+      require("inquirer-directory")
+    );
+  }
+
   async prompting() {
     // Have Yeoman greet the user.
     this.log(
@@ -17,6 +25,12 @@ module.exports = class extends Generator {
     );
 
     const answers = await this.prompt([
+      {
+        type: "directory",
+        name: "pagePath",
+        message: "Select where to create the page:",
+        basePath: "./pages"
+      },
       {
         type: "input",
         name: "pageName",
@@ -35,31 +49,32 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    try {
-      const folderName = kebabCase(this.answers.pageName)
-        .split("-")
-        .filter(s => s !== "")
-        .join("-");
+    const { pagePath, pageName } = this.answers;
+    const folderName = kebabCase(pageName)
+      .split("-")
+      .filter(s => s !== "")
+      .join("-");
 
-      // Index.tsx page file
-      this.fs.copyTpl(
-        this.templatePath("index.ejs"),
-        this.destinationPath(`./pages/${folderName}/index.tsx`),
-        {
-          ...this.answers
-        }
-      );
+    const relativeToPagesPath = `./pages/${
+      pagePath ? pagePath + "/" : ""
+    }${folderName}`;
 
-      // Index.hooks.tsx hooks file
-      this.fs.copyTpl(
-        this.templatePath("index.hooks.ejs"),
-        this.destinationPath(`./pages/${folderName}/index.hooks.tsx`),
-        {
-          ...this.answers
-        }
-      );
-    } catch (e) {
-      console.error(e);
-    }
+    // Index.tsx page file
+    this.fs.copyTpl(
+      this.templatePath("index.ejs"),
+      this.destinationPath(path.join(relativeToPagesPath, "/index.tsx")),
+      {
+        ...this.answers
+      }
+    );
+
+    // Index.hooks.tsx hooks file
+    this.fs.copyTpl(
+      this.templatePath("index.hooks.ejs"),
+      this.destinationPath(path.join(relativeToPagesPath, "/index.hooks.tsx")),
+      {
+        ...this.answers
+      }
+    );
   }
 };
