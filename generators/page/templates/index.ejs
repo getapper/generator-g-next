@@ -1,0 +1,16 @@
+import React, { memo } from "react";
+import { use<%= pageName %> } from "./index.hooks";
+
+type <%= pageName %>Props = {}
+
+export const <%= pageName %> = memo(({}: <%= pageName %>Props) => {
+  const {
+    styles,
+    classes,
+    atomicStyles,
+  } = use<%= pageName %>();
+
+  return (
+    <div />
+  );
+});

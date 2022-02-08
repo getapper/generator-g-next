@@ -1,7 +1,15 @@
 # generator-g-next
 
-## TODO
+## Commands
 
-### yo g-next / yo g-next:app
+### yo g-next:app
 
 Execute `npx create-next-app@latest --ts`
+
+### yo g-next:page
+
+It creates a new page with a hook file
+
+## TODO
+
+### yo g-next:comp

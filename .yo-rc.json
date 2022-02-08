@@ -1,0 +1,9 @@
+{
+  "generator-node": {
+    "promptValues": {
+      "authorName": "antoniogiordano",
+      "authorEmail": "antonio.giordano@getapper.com",
+      "authorUrl": "http://www.getapper.com/"
+    }
+  }
+}
