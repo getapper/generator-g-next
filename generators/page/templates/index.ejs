@@ -3,14 +3,12 @@ import { use<%= pageName %> } from "./index.hooks";
 
 type <%= pageName %>Props = {}
 
-export const <%= pageName %> = memo(({}: <%= pageName %>Props) => {
-  const {
-    styles,
-    classes,
-    atomicStyles,
-  } = use<%= pageName %>();
+const <%= pageName %> = memo(({}: <%= pageName %>Props) => {
+  const {} = use<%= pageName %>();
 
   return (
     <div />
   );
 });
+
+export default <%= pageName %>;
