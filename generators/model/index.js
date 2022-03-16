@@ -55,14 +55,14 @@ module.exports = class extends Generator {
       .filter(s => s !== "")
       .join("-");
 
-    const relativeToRootPath = `./pages/${
+    const relativeToPagesPath = `./pages/${
       pagePath ? pagePath + "/" : ""
     }${folderName}`;
 
     // Index.tsx page file
     this.fs.copyTpl(
       this.templatePath("index.ejs"),
-      this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
+      this.destinationPath(path.join(relativeToPagesPath, "/index.tsx")),
       {
         ...this.answers
       }
@@ -71,7 +71,7 @@ module.exports = class extends Generator {
     // Index.hooks.tsx hooks file
     this.fs.copyTpl(
       this.templatePath("index.hooks.ejs"),
-      this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
+      this.destinationPath(path.join(relativeToPagesPath, "/index.hooks.tsx")),
       {
         ...this.answers
       }
