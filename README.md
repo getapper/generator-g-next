@@ -10,7 +10,7 @@ Execute `npx create-next-app@latest --ts`
 
 It creates a new page with a hook file
 
-### yo g-next:compo
+### yo g-next:comp
 
 It creates a new component with a hook file
 
