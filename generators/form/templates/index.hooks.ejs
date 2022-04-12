@@ -1,0 +1,33 @@
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { actions, selectors } from "redux-store";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+const schema = yup.object().shape({
+  // name: yup.string().required("Error message")
+});
+
+type <%= formName %>Data = {
+  // name: string;
+};
+
+export const use<%= formName %> = () => {
+  const { register, handleSubmit, errors } = useForm<<%= formName %>Data>({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = useMemo(
+    () =>
+      handleSubmit((formData) => {
+        // formData.name;
+      }),
+    [handleSubmit],
+  );
+
+  return {
+    register,
+    errors,
+    onSubmit,
+  };
+};
