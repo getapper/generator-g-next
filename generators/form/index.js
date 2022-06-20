@@ -12,7 +12,7 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-next"
+          "Getapper NextJS Yeoman Generator (GeNYG)"
         )} form generator, follow the quick and easy configuration to create a new form!`
       )
     );
@@ -21,8 +21,8 @@ module.exports = class extends Generator {
       {
         type: "input",
         name: "formName",
-        message: "What is your form name?"
-      }
+        message: "What is your form name?",
+      },
     ]);
 
     if (answers.formName === "") {
@@ -44,7 +44,7 @@ module.exports = class extends Generator {
       this.templatePath("index.ejs"),
       this.destinationPath(`./components/${this.answers.formName}/index.tsx`),
       {
-        ...this.answers
+        ...this.answers,
       }
     );
 
@@ -58,7 +58,7 @@ module.exports = class extends Generator {
         `./components/${this.answers.formName}/index.hooks.tsx`
       ),
       {
-        ...this.answers
+        ...this.answers,
       }
     );
 

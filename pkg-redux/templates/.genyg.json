@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "packages": {
+    "core": true,
+    "mui": false,
+    "mui-form-components": false,
+    "redux": false
+  }
+}

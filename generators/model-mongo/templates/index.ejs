@@ -1,0 +1,146 @@
+import { Filter, ObjectId, WithId } from "mongodb";
+import mongoDao from "lib/mongo-dao";
+
+export type I<%= modelName %> = {
+  _id?: ObjectId;
+  created: Date;
+  v: number;
+};
+
+export class <%= modelName %>
+  implements WithId<I<%= modelName %>>
+{
+  _id: ObjectId;
+  created: Date;
+  v: number;
+
+  static get collectionName() {
+    return "<%= modelCollection %>";
+  }
+
+  constructor(i<%= modelName %>: I<%= modelName %>) {
+    this.fromInterface(i<%= modelName %>);
+  }
+
+  static async create(): Promise<<%= modelName %> | null> {
+    const i<%= modelName %> =
+      await mongoDao.insertOne<I<%= modelName %>>(
+        <%= modelName %>.collectionName,
+        {
+          created: new Date(),
+          v: 1,
+        }
+      );
+    if (i<%= modelName %>) {
+      return new <%= modelName %>(i<%= modelName %>);
+    }
+    return null;
+  }
+
+  static async getById(_id: ObjectId): Promise<<%= modelName %> | null> {
+    const i<%= modelName %> =
+      await mongoDao.findOne<I<%= modelName %>>(
+        <%= modelName %>.collectionName,
+        {
+          _id,
+        }
+      );
+    if (i<%= modelName %>) {
+      return new <%= modelName %>(i<%= modelName %>);
+    }
+    return null;
+  }
+
+  async patch(fields: Partial<I<%= modelName %>>): Promise<void> {
+    const result = await mongoDao.updateOne<I<%= modelName %>>(
+      <%= modelName %>.collectionName,
+      {
+        _id: this._id,
+      },
+      {
+        $set: fields,
+      }
+    );
+    if (result.modifiedCount !== 1) {
+      throw new Error("Patch op was not applied successfully");
+    }
+    await this.refresh();
+  }
+
+  static async delete(_id: ObjectId): Promise<void> {
+    const result = await mongoDao.deleteOne<I<%= modelName %>>(
+      <%= modelName %>.collectionName,
+      {
+        _id,
+      }
+    );
+    if (result.deletedCount !== 1) {
+      throw new Error("Delete op was not applied successfully");
+    }
+  }
+
+  static async getList(
+    filter: Filter<I<%= modelName %>> = {},
+    {
+      limit = 10,
+      skip = 0,
+      sort = [],
+    }: {
+      limit?: number;
+      skip?: number;
+      sort?: {
+        by: keyof I<%= modelName %>;
+        asc: boolean;
+      }[];
+    } = {
+      limit: 10,
+      skip: 0,
+      sort: [],
+    }
+  ): Promise<<%= modelName %>[]> {
+    const i<%= modelName %>s =
+      await mongoDao.findMany<I<%= modelName %>>(
+        <%= modelName %>.collectionName,
+        filter,
+        {
+          limit,
+          skip,
+          sort: sort.length
+            ? Object.fromEntries(
+                sort.map((pair) => [pair.by, pair.asc ? 1 : -1])
+              )
+            : undefined,
+        }
+      );
+    return i<%= modelName %>s.map(
+      (i<%= modelName %>) =>
+        new <%= modelName %>(i<%= modelName %>)
+    );
+  }
+
+  /* Mostly for internal use */
+
+  fromInterface(i<%= modelName %>: I<%= modelName %>) {
+    if (!i<%= modelName %>._id) {
+      throw new Error("Interface object doesn't have an _id");
+    }
+    this._id = i<%= modelName %>._id;
+    this.created = i<%= modelName %>.created;
+    this.v = i<%= modelName %>.v;
+  }
+
+  async refresh() {
+    const i<%= modelName %> =
+      await mongoDao.findOne<I<%= modelName %>>(
+        <%= modelName %>.collectionName,
+        {
+          _id: this._id,
+        }
+      );
+    if (i<%= modelName %>) {
+      this.fromInterface(i<%= modelName %>);
+    } else {
+      throw new Error("Couldn't find document in DB");
+    }
+  }
+}

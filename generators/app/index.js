@@ -5,7 +5,9 @@ module.exports = class extends Generator {
   install() {
     this.spawnCommand("npx", [
       "create-next-app@latest",
-      "--ts"
+      ".",
+      "--ts",
+      "--use-npm",
     ]);
   }
 };

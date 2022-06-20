@@ -19,7 +19,7 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-next"
+          "Getapper NextJS Yeoman Generator (GeNYG)"
         )} component generator, follow the quick and easy configuration to create a new component!`
       )
     );
@@ -29,13 +29,13 @@ module.exports = class extends Generator {
         type: "directory",
         name: "componentPath",
         message: "Select where to create the component:",
-        basePath: "./components"
+        basePath: "./components",
       },
       {
         type: "input",
         name: "componentName",
-        message: "What is your component name?"
-      }
+        message: "What is your component name?",
+      },
     ]);
 
     if (answers.componentName === "") {
@@ -64,7 +64,7 @@ module.exports = class extends Generator {
       this.templatePath("index.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
       {
-        ...this.answers
+        ...this.answers,
       }
     );
 
@@ -73,7 +73,7 @@ module.exports = class extends Generator {
       this.templatePath("index.hooks.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
       {
-        ...this.answers
+        ...this.answers,
       }
     );
 

@@ -6,16 +6,16 @@ const { pascalCase } = require("pascal-case");
 const getEndpointInterfacesTemplate = require("./templates/endpoint/interfaces");
 const getEndpointValidationsTemplate = require("./templates/endpoint/validations");
 
-const camelCaseToDash = s =>
+const camelCaseToDash = (s) =>
   s.replace(/([a-zA-Z])(?=[A-Z])/g, "$1-").toLowerCase();
 
-const capitalize = s => `${s[0].toUpperCase()}${s.slice(1)}`;
+const capitalize = (s) => `${s[0].toUpperCase()}${s.slice(1)}`;
 
-const parseFromText = text => {
+const parseFromText = (text) => {
   const params = text
     .split("/")
-    .filter(p => p !== "")
-    .map(p => {
+    .filter((p) => p !== "")
+    .map((p) => {
       if (p[0] === "{") {
         return "{" + camelCaseToDash(p.replace("{", "").replace("}", "")) + "}";
       }
@@ -27,21 +27,21 @@ const parseFromText = text => {
 
 const getFunctionName = (method, params) => {
   const models = params
-    .filter(p => p[0] !== "{")
-    .map(p =>
+    .filter((p) => p[0] !== "{")
+    .map((p) =>
       p
         .split("-")
-        .map(p => capitalize(p))
+        .map((p) => capitalize(p))
         .join("")
     );
   const variables = params
-    .filter(p => p[0] === "{")
-    .map(p =>
+    .filter((p) => p[0] === "{")
+    .map((p) =>
       p
         .replace("{", "")
         .replace("}", "")
         .split("-")
-        .map(p => capitalize(p))
+        .map((p) => capitalize(p))
         .join("")
     );
   return `${method}${models.join("")}${
@@ -50,19 +50,19 @@ const getFunctionName = (method, params) => {
 };
 
 const getEndpointFolder = (method, params) => {
-  const models = params.filter(p => p[0] !== "{");
+  const models = params.filter((p) => p[0] !== "{");
   const variables = params
-    .filter(p => p[0] === "{")
-    .map(p => p.replace("{", "").replace("}", ""));
+    .filter((p) => p[0] === "{")
+    .map((p) => p.replace("{", "").replace("}", ""));
   return `${method}-${models.join("-")}${
     variables.length ? "-by-" : ""
   }${variables.join("-and-")}`;
 };
 
-const getAjaxPath = params => {
+const getAjaxPath = (params) => {
   const urlParams = params
-    .filter(p => p[0] === "{")
-    .map(p =>
+    .filter((p) => p[0] === "{")
+    .map((p) =>
       p
         .replace("{", "")
         .replace("}", "")
@@ -73,7 +73,7 @@ const getAjaxPath = params => {
   if (urlParams.length) {
     return [
       `\`/${params
-        .map(p => {
+        .map((p) => {
           if (p[0] === "{") {
             return `\${params.${p
               .replace("{", "")
@@ -86,7 +86,7 @@ const getAjaxPath = params => {
           return p;
         })
         .join("/")}\``,
-      urlParams
+      urlParams,
     ];
   }
 
@@ -99,7 +99,7 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-next"
+          "Getapper NextJS Yeoman Generator (GeNYG)"
         )} API generator, follow the quick and easy configuration to create a new API!`
       )
     );
@@ -108,15 +108,15 @@ module.exports = class extends Generator {
       {
         type: "input",
         name: "route",
-        message: "What is your API route path?"
+        message: "What is your API route path?",
       },
       {
         type: "list",
         name: "method",
         message: "What is your API http method?",
         choices: ["get", "post", "patch", "put", "delete"],
-        default: "get"
-      }
+        default: "get",
+      },
     ]);
 
     if (answers.route === "") {
@@ -139,7 +139,7 @@ module.exports = class extends Generator {
       apiName,
       params,
       routePath,
-      urlParams
+      urlParams,
     });
 
     // Endpoints folder

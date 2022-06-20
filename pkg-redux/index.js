@@ -32,25 +32,38 @@ module.exports = class extends Generator {
 
   writing() {
     // PACKAGE JSON
-    this.packageJson.merge({
+    const pkgJson = {
       devDependencies: {
         "env-cmd": "10.1.0",
         "eslint-config-prettier": "^8.5.0",
         husky: "4.2.5",
         "lint-staged": "10.2.11",
-        prettier: "2.7.1",
+      },
+      dependencies: {
+        "@reduxjs/toolkit": "1.4.0",
+        "@types/react-redux": "7.1.9",
+        axios: "0.19.2",
+        "react-redux": "7.2.0",
+        yup: "0.32.9",
       },
       husky: {
         hooks: {
           "pre-commit": "lint-staged",
         },
       },
-    });
+    };
+
+    // Extend or create package.json file in destination path
+    this.fs.extendJSON(this.destinationPath("package.json"), pkgJson);
 
     /**
      * Copy all other files
      */
     this.fs.copy(this.templatePath("."), this.destinationPath("."));
     this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+  }
+
+  install() {
+    this.npmInstall();
   }
 };

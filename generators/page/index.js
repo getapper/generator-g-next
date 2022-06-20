@@ -19,7 +19,7 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-next"
+          "Getapper NextJS Yeoman Generator (GeNYG)"
         )} page generator, follow the quick and easy configuration to create a new page!`
       )
     );
@@ -29,13 +29,13 @@ module.exports = class extends Generator {
         type: "directory",
         name: "pagePath",
         message: "Select where to create the page:",
-        basePath: "./pages"
+        basePath: "./pages",
       },
       {
         type: "input",
         name: "pageName",
-        message: "What is your page name?"
-      }
+        message: "What is your page name?",
+      },
     ]);
 
     if (answers.pageName === "") {
@@ -52,7 +52,7 @@ module.exports = class extends Generator {
     const { pagePath, pageName } = this.answers;
     const folderName = kebabCase(pageName)
       .split("-")
-      .filter(s => s !== "")
+      .filter((s) => s !== "")
       .join("-");
 
     const relativeToRootPath = `./pages/${
@@ -64,7 +64,7 @@ module.exports = class extends Generator {
       this.templatePath("index.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
       {
-        ...this.answers
+        ...this.answers,
       }
     );
 
@@ -73,7 +73,7 @@ module.exports = class extends Generator {
       this.templatePath("index.hooks.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
       {
-        ...this.answers
+        ...this.answers,
       }
     );
   }

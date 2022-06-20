@@ -18,5 +18,3 @@ export const AppHead = memo(({ title, description }: AppHeadProps) => {
     </Head>
   );
 });
-
-AppHead.displayName = "AppHead";

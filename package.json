@@ -24,6 +24,7 @@
     "inquirer-directory": "2.2.0",
     "kebab-case": "1.0.1",
     "pascal-case": "3.1.2",
+    "pluralize": "8.0.0",
     "yeoman-generator": "5.6.1",
     "yosay": "2.0.2"
   },

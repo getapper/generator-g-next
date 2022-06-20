@@ -2,7 +2,7 @@ import { NextApiResponse } from "next";
 import { ResponseHandler, StatusCodes } from "lib/response-handler";
 import { EndpointResponse, Request } from "./interfaces";
 
-export default function handler(
+export default async function handler(
   req: Request,
   res: NextApiResponse<EndpointResponse>
 ) {

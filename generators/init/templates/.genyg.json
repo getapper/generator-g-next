@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "packages": {
+    "core": true,
+    "mui": false,
+    "redux": false
+  }
+}
