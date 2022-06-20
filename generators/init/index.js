@@ -35,7 +35,7 @@ module.exports = class extends Generator {
     this.packageJson.merge({
       devDependencies: {
         "env-cmd": "10.1.0",
-        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-prettier": "8.5.0",
         husky: "4.2.5",
         "lint-staged": "10.2.11",
         prettier: "2.7.1",
