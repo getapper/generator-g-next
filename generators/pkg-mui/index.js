@@ -2,9 +2,7 @@
 const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
-const fs = require("fs");
-const path = require("path");
-const { getGenygConfigFile } = require("../../common");
+const { getGenygConfigFile, extendConfigFile } = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
@@ -32,27 +30,50 @@ module.exports = class extends Generator {
   }
 
   writing() {
+    // Config checks
     const configFile = getGenygConfigFile(this);
-    console.log(configFile);
+    if (!configFile.packages.core) {
+      this.log(
+        yosay(
+          chalk.red(
+            "It seems like the GeNYG core files are not installed yet. Run yo g-next:init to fix this."
+          )
+        )
+      );
+      process.exit(0);
+    }
+    if (configFile.packages.mui) {
+      this.log(
+        yosay(
+          chalk.red(
+            "It looks like the GeNYG MUI files are already been installed!"
+          )
+        )
+      );
+      process.exit(0);
+    }
 
-    // PACKAGE JSON
-    const pkgJson = {
+    // New dependencies
+    this.packageJson.merge({
       dependencies: {
         "@emotion/react": "11.8.2",
         "@emotion/styled": "11.8.1",
-        "@hookform/resolvers": "1.3.5",
+        "@hookform/resolvers": "2.8.8",
         "@mui/icons-material": "5.5.1",
         "@mui/material": "5.5.1",
-        "react-hook-form": "6.15.4",
+        "react-dropzone": "12.0.5",
+        "react-hook-form": "7.29.0",
         yup: "0.32.9",
       },
-    };
+    });
 
-    // Extend or create package.json file in destination path
-    // this.fs.extendJSON(this.destinationPath("package.json"), pkgJson);
-  }
+    // Copy MUI form components
+    this.fs.copy(this.templatePath(), this.destinationRoot());
 
-  install() {
-    // this.npmInstall();
+    extendConfigFile(this, {
+      packages: {
+        mui: true,
+      },
+    });
   }
 };

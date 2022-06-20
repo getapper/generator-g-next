@@ -14,6 +14,15 @@ This will:
 - add the AppHead component
 - add the GeNYG config file .genyg.json
 
+### yo g-next:pkg-mui
+
+It will install all MUI related dependencies, that is:
+- MUI core
+- MUI icons
+- react-hook-form
+- yup validation support
+- _form basic components based on MUI and react-hook-form
+
 ### yo g-next:page
 
 It creates a new page with a hook file

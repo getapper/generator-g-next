@@ -31,7 +31,7 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    // PACKAGE JSON
+    // New dependencies
     this.packageJson.merge({
       devDependencies: {
         "env-cmd": "10.1.0",
@@ -47,9 +47,7 @@ module.exports = class extends Generator {
       },
     });
 
-    /**
-     * Copy all other files
-     */
+    // Copy project files
     this.fs.copy(this.templatePath("."), this.destinationPath("."));
     this.fs.copy(this.templatePath(".*"), this.destinationRoot());
   }
