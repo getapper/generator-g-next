@@ -3,6 +3,7 @@
   "packages": {
     "core": true,
     "mui": false,
-    "redux": false
+    "mui-form-components": false,
+    "spa": false
   }
 }
