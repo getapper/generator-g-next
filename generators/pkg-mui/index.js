@@ -45,9 +45,7 @@ module.exports = class extends Generator {
     if (configFile.packages.mui) {
       this.log(
         yosay(
-          chalk.red(
-            "It looks like the GeNYG MUI files are already been installed!"
-          )
+          chalk.red("It looks like the GeNYG MUI files were already installed!")
         )
       );
       process.exit(0);

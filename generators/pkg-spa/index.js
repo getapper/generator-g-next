@@ -33,9 +33,7 @@ module.exports = class extends Generator {
     if (configFile.packages.spa) {
       this.log(
         yosay(
-          chalk.red(
-            "It looks like the GeNYG SPA files are already been installed!"
-          )
+          chalk.red("It looks like the GeNYG SPA files were already installed!")
         )
       );
       process.exit(0);
@@ -64,12 +62,15 @@ module.exports = class extends Generator {
       dependencies: {
         "@reduxjs/toolkit": "1.4.0",
         axios: "0.19.2",
-        "connected-react-router": "6.8.0",
+        "connected-react-router": "6.9.2",
         history: "4.10.1",
-        "react-redux": "7.2.0",
+        "react-redux": "8.0.2",
         "react-router-dom": "5.2.0",
         "redux-persist": "6.0.0",
         "redux-saga": "1.1.3",
+      },
+      scripts: {
+        postinstall: "npx patch-package",
       },
     });
 
@@ -77,6 +78,10 @@ module.exports = class extends Generator {
       packages: {
         spa: true,
       },
+    });
+
+    this.fs.copy(this.templatePath("."), this.destinationPath("."), {
+      globOptions: { dot: true },
     });
   }
 };

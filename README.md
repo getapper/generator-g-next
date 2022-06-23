@@ -60,8 +60,9 @@ It creates a new component with a hook file [WIP]
 
 ### yo g-next:spa
 
-- It should create a page that will act as a SPA, so all the subroutes should be caught by react-router instead of passing through Next
-- The SPA should have its own redux-store, created at the top level inside the `redux-stores` folder
+- It should create the SPA in the `./spas` folder
+- It should create a page that will render the SPA, so all the subroutes should be caught by react-router instead of passing through Next
+- The SPA should have its own redux-store
 
 ### yo g-next:pkg-mongo
 

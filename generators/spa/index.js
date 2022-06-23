@@ -5,7 +5,7 @@ const yosay = require("yosay");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
-const { getGenygConfigFile } = require("../../common");
+const { getGenygConfigFile, copyEjsTemplateFolder } = require("../../common");
 
 module.exports = class extends Generator {
   initializing() {
@@ -27,7 +27,7 @@ module.exports = class extends Generator {
 
     // Config checks
     const configFile = getGenygConfigFile(this);
-    if (!configFile.packages.redux) {
+    if (!configFile.packages.spa) {
       this.log(
         yosay(
           chalk.red(
@@ -37,68 +37,99 @@ module.exports = class extends Generator {
       );
       process.exit(0);
     }
-    if (configFile.packages.mui) {
-      this.log(
-        yosay(
-          chalk.red(
-            "It looks like the GeNYG MUI files are already been installed!"
-          )
-        )
-      );
-      process.exit(0);
-    }
 
+    /*
     const answers = await this.prompt([
       {
+        type: "input",
+        name: "spaName",
+        message: "What is your SPA name?",
+      },
+      {
         type: "directory",
-        name: "spaPath",
-        message: "Select where to create the SPA:",
+        name: "pagePath",
+        message: "Select where to create the page that will contain the SPA",
         basePath: "./pages",
       },
       {
         type: "input",
-        name: "spaName",
+        name: "pageName",
         message: "What is your page name?",
       },
     ]);
 
-    if (answers.spaName === "") {
+    if (answers.pageName === "" || answers.spaName === "") {
       this.log(yosay(chalk.red("Please give your SPA a name next time!")));
       process.exit(1);
       return;
     }
+    */
 
+    const answers = {
+      pageName: "app3",
+      spaName: "test3",
+    };
+    answers.pageName = pascalCase(answers.pageName).trim();
     answers.spaName = pascalCase(answers.spaName).trim();
     this.answers = answers;
   }
 
   writing() {
-    const { spaPath, spaName } = this.answers;
-    const folderName = kebabCase(spaName)
+    const { pagePath, pageName, spaName } = this.answers;
+
+    const folderName = kebabCase(pageName)
       .split("-")
       .filter((s) => s !== "")
       .join("-");
 
+    const spaFolderName = kebabCase(spaName)
+      .split("-")
+      .filter((s) => s !== "")
+      .join("-");
+
+    // Page files
     const relativeToRootPath = `./pages/${
-      spaPath ? spaPath + "/" : ""
+      pagePath ? pagePath + "/" : ""
     }${folderName}`;
 
     // Index.tsx page file
     this.fs.copyTpl(
-      this.templatePath("index.ejs"),
+      this.templatePath("page/index.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
       {
         ...this.answers,
+        spaFolderName,
       }
     );
 
     // Index.hooks.tsx hooks file
     this.fs.copyTpl(
-      this.templatePath("index.hooks.ejs"),
+      this.templatePath("page/index.hooks.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
       {
         ...this.answers,
       }
     );
+
+    // SPA files
+    const relativeToSpaFolder = `./spas/${spaFolderName}/`;
+
+    copyEjsTemplateFolder(
+      this,
+      this.templatePath("./spa"),
+      relativeToSpaFolder,
+      {
+        spaFolderName,
+      }
+    );
+    /*
+    this.fs.copyTpl(
+      this.templatePath("./spa/static/**"),
+      this.destinationPath(relativeToSpaFolder),
+      {
+        ...this.answers,
+      }
+    );
+     */
   }
 };

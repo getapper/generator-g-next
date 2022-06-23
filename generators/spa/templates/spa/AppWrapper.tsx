@@ -1,17 +1,23 @@
-import React, { memo, ReactNode } from "react";
+import React, { memo } from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import store, { persistor, history } from "redux-store";
+import store, {
+  persistor,
+  history,
+} from "spas/<%= spaFolderName %>/redux-store";
 import { ConnectedRouter } from "connected-react-router";
+import App from "./App";
 
-const AppWrapper: React.FC<{ children: ReactNode }> = (props) => {
+const TestAppWrapper = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={<div />} persistor={persistor}>
-        <ConnectedRouter history={history}>{props.children}</ConnectedRouter>
+        <ConnectedRouter history={history}>
+          <App />
+        </ConnectedRouter>
       </PersistGate>
     </Provider>
   );
 };
 
-export default memo(AppWrapper);
+export default memo(TestAppWrapper);
