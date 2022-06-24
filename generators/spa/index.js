@@ -121,5 +121,18 @@ module.exports = class extends Generator {
         basename,
       }
     );
+
+    const nextConfigOptionsJson = require(this.destinationPath(
+      "next.config.options.json"
+    ));
+    this.fs.extendJSON(this.destinationPath("next.config.options.json"), {
+      rewrites: [
+        ...nextConfigOptionsJson.rewrites,
+        {
+          source: `${basename}/:path*`,
+          destination: basename,
+        },
+      ],
+    });
   }
 };
