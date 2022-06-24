@@ -4,8 +4,6 @@ import createSagaMiddleware from "redux-saga";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { all } from "redux-saga/effects";
-import { connectRouter, routerMiddleware } from "connected-react-router";
-import { createBrowserHistory } from "history";
 import { actions, reducers, sagas, selectors } from "./slices";
 
 const rootSaga = function* () {
@@ -13,13 +11,8 @@ const rootSaga = function* () {
 };
 const sagaMiddleware = createSagaMiddleware();
 
-const createRootReducer = (history: any) =>
-  combineReducers({
-    router: connectRouter(history),
-    ...reducers,
-  });
-const history = createBrowserHistory();
-const rootReducer = createRootReducer(history);
+const createRootReducer = () => combineReducers(reducers);
+const rootReducer = createRootReducer();
 const persistConfig = {
   key: "root",
   storage,
@@ -29,7 +22,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
   reducer: persistedReducer,
-  middleware: [sagaMiddleware, routerMiddleware(history)],
+  middleware: [sagaMiddleware],
 });
 const persistor = persistStore(store);
 sagaMiddleware.run(rootSaga);
@@ -37,4 +30,4 @@ sagaMiddleware.run(rootSaga);
 export type RootState = ReturnType<typeof rootReducer>;
 
 export default store;
-export { actions, persistor, selectors, history };
+export { actions, persistor, selectors };

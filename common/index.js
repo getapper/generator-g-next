@@ -25,8 +25,13 @@ const copyEjsTemplateFolder = (genyg, srcFolder, destFolder, params) => {
   }
 };
 
+const getSpas = (genyg) => {
+  return fs.readdirSync(genyg.destinationPath("./spas"));
+};
+
 module.exports = {
   getGenygConfigFile,
   extendConfigFile,
   copyEjsTemplateFolder,
+  getSpas,
 };

@@ -31,14 +31,13 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "You need redux package installed in order to create a SPA. Run yo g-next:pkg-redux to fix this."
+            "You need SPA package installed in order to create a SPA. Run yo g-next:pkg-spa to fix this."
           )
         )
       );
       process.exit(0);
     }
 
-    /*
     const answers = await this.prompt([
       {
         type: "input",
@@ -63,12 +62,7 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
-    */
 
-    const answers = {
-      pageName: "app3",
-      spaName: "test3",
-    };
     answers.pageName = pascalCase(answers.pageName).trim();
     answers.spaName = pascalCase(answers.spaName).trim();
     this.answers = answers;
@@ -88,17 +82,17 @@ module.exports = class extends Generator {
       .join("-");
 
     // Page files
-    const relativeToRootPath = `./pages/${
-      pagePath ? pagePath + "/" : ""
-    }${folderName}`;
+    const basename = `/${pagePath ? pagePath + "/" : ""}${folderName}`;
+    const relativeToRootPath = `./pages${basename}`;
 
     // Index.tsx page file
     this.fs.copyTpl(
       this.templatePath("page/index.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
       {
-        ...this.answers,
+        spaName,
         spaFolderName,
+        pageName,
       }
     );
 
@@ -107,7 +101,9 @@ module.exports = class extends Generator {
       this.templatePath("page/index.hooks.ejs"),
       this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
       {
-        ...this.answers,
+        spaName,
+        spaFolderName,
+        pageName,
       }
     );
 
@@ -119,17 +115,11 @@ module.exports = class extends Generator {
       this.templatePath("./spa"),
       relativeToSpaFolder,
       {
+        spaName,
         spaFolderName,
+        pageName,
+        basename,
       }
     );
-    /*
-    this.fs.copyTpl(
-      this.templatePath("./spa/static/**"),
-      this.destinationPath(relativeToSpaFolder),
-      {
-        ...this.answers,
-      }
-    );
-     */
   }
 };

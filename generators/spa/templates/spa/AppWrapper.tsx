@@ -1,23 +1,17 @@
 import React, { memo } from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import store, {
-  persistor,
-  history,
-} from "spas/<%= spaFolderName %>/redux-store";
-import { ConnectedRouter } from "connected-react-router";
+import store, { persistor } from "spas/<%= spaFolderName %>/redux-store";
 import App from "./App";
 
-const TestAppWrapper = () => {
+const AppWrapper = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={<div />} persistor={persistor}>
-        <ConnectedRouter history={history}>
-          <App />
-        </ConnectedRouter>
+        <App />
       </PersistGate>
     </Provider>
   );
 };
 
-export default memo(TestAppWrapper);
+export default memo(AppWrapper);

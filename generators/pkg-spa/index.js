@@ -55,22 +55,13 @@ module.exports = class extends Generator {
   writing() {
     // New dependencies
     this.packageJson.merge({
-      devDependencies: {
-        "@types/react-redux": "7.1.9",
-        "@types/react-router-dom": "^5.1.5",
-      },
       dependencies: {
         "@reduxjs/toolkit": "1.4.0",
         axios: "0.19.2",
-        "connected-react-router": "6.9.2",
-        history: "4.10.1",
         "react-redux": "8.0.2",
-        "react-router-dom": "5.2.0",
+        "react-router-dom": "6.3.0",
         "redux-persist": "6.0.0",
         "redux-saga": "1.1.3",
-      },
-      scripts: {
-        postinstall: "npx patch-package",
       },
     });
 
@@ -80,8 +71,10 @@ module.exports = class extends Generator {
       },
     });
 
+    /*
     this.fs.copy(this.templatePath("."), this.destinationPath("."), {
       globOptions: { dot: true },
     });
+     */
   }
 };

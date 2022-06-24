@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import useAppHooks from "./index.hooks";
 
 const App: React.FC = () => {
@@ -9,11 +9,11 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Switch>
-        <Route path="/">
-          <span>TEST</span>
-        </Route>
-      </Switch>
+      <BrowserRouter basename="<%= basename %>">
+        <Routes>
+          <Route path="/" element={<span>TEST</span>} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   );
 };

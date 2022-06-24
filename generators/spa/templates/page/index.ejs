@@ -1,13 +1,13 @@
 import React, { memo } from "react";
 import { use<%= pageName %> } from "./index.hooks";
-import <%= spaName %>AppWrapper from "spas/<%= spaFolderName %>/AppWrapper";
+import <%= spaName %>Spa from "spas/<%= spaFolderName %>";
 
 type <%= pageName %>Props = {}
 
 const <%= pageName %> = memo(({}: <%= pageName %>Props) => {
   const {} = use<%= pageName %>();
 
-  return <<%= spaName %>AppWrapper />;
+  return <<%= spaName %>Spa />;
 });
 
 export default <%= pageName %>;
