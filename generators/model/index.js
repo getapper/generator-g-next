@@ -6,6 +6,7 @@ const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 const pluralize = require("pluralize");
+const { getGenygConfigFile } = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
@@ -17,6 +18,19 @@ module.exports = class extends Generator {
         )} model generator, follow the quick and easy configuration to create a new client model!`
       )
     );
+
+    // Config checks
+    const configFile = getGenygConfigFile(this);
+    if (!configFile.packages.core) {
+      this.log(
+        yosay(
+          chalk.red(
+            "It seems like the GeNYG core files are not installed yet. Run yo g-next:init to fix this."
+          )
+        )
+      );
+      process.exit(0);
+    }
 
     const answers = await this.prompt([
       {

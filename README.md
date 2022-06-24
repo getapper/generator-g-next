@@ -6,7 +6,7 @@
 
 Execute `npx create-next-app@latest` with support for NPM, TypeScript in the current directory (so you should first create a repo, clone locally, and tun this command inside this repo).
 
-### yo g-next:init
+### yo g-next:pkg-core
 
 This will:
 - install all basic packages for code linting and styling (by fixing the eslint plugin used by default by Next and installing prettier).
@@ -16,6 +16,8 @@ This will:
 
 ### yo g-next:pkg-mui
 
+#### dependencies: pkg-core
+
 It will install all MUI related dependencies, that is:
 - MUI core
 - MUI icons
@@ -23,10 +25,28 @@ It will install all MUI related dependencies, that is:
 - yup validation support
 - _form basic components based on MUI and react-hook-form
 
+### yo g-next:pkg-spa
+
+#### dependencies: pkg-core
+
+It installs everything needed to add an SPA page into the Next application.\
+In particular it will install:
+- react-router-dom libs
+- redux libs plus plugins
+- axios for ajax support
+
 ### yo g-next:model
 
+#### dependencies: pkg-core
+
 It creates a new model inside `./models/server` or `./models/client` folder, depending on the usage of the model, client if it is supposed to run in the frontend in React, server if it supposed to run in the backend with NodeJS.\
-Having different folders and files (even to represent the same entity) from backend and frontend avoids issues when loading browser-related code in the backend code, or file-system-related code in the frontend. 
+Having different folders and files (even to represent the same entity) from backend and frontend avoids issues when loading browser-related code in the backend code, or file-system-related code in the frontend.
+
+### yo g-next:scene
+
+#### dependencies: pkg-spa
+
+It creates a new scene for the specified SPA.
 
 ### yo g-next:page
 
@@ -38,7 +58,7 @@ It creates a new component with a hook file [WIP]
 
 ## TODO
 
-### yo g-next:core
+### yo g-next:pkg-core
 
 - Add support for [mocked HTTP calls](https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript) in order to test APIs
 - It should support more envs (at least locale, test, staging and production ones)
@@ -55,11 +75,9 @@ It creates a new component with a hook file [WIP]
 
 - It should allow to select also subfolders of ./components and ./pages
 
-### yo g-next:spa
+### yo g-next:ajax
 
-- It should create the SPA in the `./spas` folder
-- It should create a page that will render the SPA, so all the subroutes should be caught by react-router instead of passing through Next
-- The SPA should have its own redux-store
+- It should allow to create an AJAX function.\
 
 ### yo g-next:pkg-mongo
 
