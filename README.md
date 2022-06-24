@@ -23,6 +23,11 @@ It will install all MUI related dependencies, that is:
 - yup validation support
 - _form basic components based on MUI and react-hook-form
 
+### yo g-next:model
+
+It creates a new model inside `./models/server` or `./models/client` folder, depending on the usage of the model, client if it is supposed to run in the frontend in React, server if it supposed to run in the backend with NodeJS.\
+Having different folders and files (even to represent the same entity) from backend and frontend avoids issues when loading browser-related code in the backend code, or file-system-related code in the frontend. 
+
 ### yo g-next:page
 
 It creates a new page with a hook file [WIP]
@@ -38,15 +43,7 @@ It creates a new component with a hook file [WIP]
 - Add support for [mocked HTTP calls](https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript) in order to test APIs
 - It should support more envs (at least locale, test, staging and production ones)
 
-### yo g-next:model-server
-
-- It should create a new model inside `./models/server` folder
-
-### yo g-next:model-client
-
-- It should create a new model inside `./models/client` folder
-
-### yo g-next:model-server-mongo
+### yo g-next:model-mongo
 
 - It should create a new model inside `./models/server` folder with the mongoDB model template
 
