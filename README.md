@@ -4,7 +4,7 @@
 
 ### yo g-next:app
 
-Execute `npx create-next-app@latest` with support for NPM, TypeScript in the current directory (so you should first create a repo, clone locally, and tun this command inside this repo).
+Execute `npx create-next-app@latest` with support for NPM, TypeScript in the current directory (so you should first create a repo, clone locally, and run this command inside this repo).
 
 ### yo g-next:pkg-core
 

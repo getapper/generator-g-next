@@ -59,7 +59,7 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    const { modelName } = this.answers;
+    const { modelName, clientOrServer } = this.answers;
 
     const relativeToModelsPath = `./models/${clientOrServer}/${modelName}`;
 
