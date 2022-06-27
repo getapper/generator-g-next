@@ -71,6 +71,14 @@ module.exports = class extends Generator {
       },
     });
 
+
+    // ./components/index.tsx export file
+    const content = `export * from "./AppButton";\n`;
+    fs.appendFileSync(
+      path.join(this.destinationRoot(), "components", "index.tsx"),
+      content
+    );
+
     /*
     this.fs.copy(this.templatePath("."), this.destinationPath("."), {
       globOptions: { dot: true },

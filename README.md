@@ -69,15 +69,16 @@ It creates a new component with a hook file [WIP]
 
 ### yo g-next:page
 
-- It should allow to create dynamic routes (both single `[param]` and multiple `[[params]]`
+- It should allow creating dynamic routes (both single `[param]` and multiple `[[params]]`
+- It should create static NextJS methods like getStaticProps or getStaticPaths
 
 ### yo g-next:comp
 
-- It should allow to select also subfolders of ./components and ./pages
+- It should allow selecting also subfolders of ./components and ./pages
 
 ### yo g-next:ajax
 
-- It should allow to create an AJAX function.\
+- It should allow creating an AJAX function.\
 
 ### yo g-next:pkg-mongo
 
@@ -91,10 +92,16 @@ It creates a new component with a hook file [WIP]
 - It should create a new subfolder in the `./endpoints` folder with the API files inside
 - It should connect this endpoint function to the Next `./api` folder and its configuration files
 
-
 ### yo g-next:pkg-cognito
 
 - It should add all the backend library files inside the `./lib` folder
 - It should add all fe and be dependencies to the package json
 - It should copy the CognitoAuthManager model to the `./models/client` folder
 - It should add all the required env vars to all env files
+
+### yo g-next:pkg-translations
+
+- It should add i18next and react-i18next dependencies
+- It should add i18n as next config options
+- It should add `./translations` folder with templates and setup files
+- It should add the Language models and LanguageSelector component
