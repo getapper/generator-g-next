@@ -15,7 +15,7 @@ module.exports = class extends Generator {
       yosay(
         `Welcome to ${chalk.red(
           "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} model generator, follow the quick and easy configuration to create a new client model!`
+        )} model generator, follow the quick and easy configuration to create a new client or server model!`
       )
     );
 
