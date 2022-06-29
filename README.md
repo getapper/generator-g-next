@@ -76,6 +76,10 @@ It creates a new component with a hook file [WIP]
 
 - It should allow selecting also subfolders of ./components and ./pages
 
+### yo g-next:model
+
+- It should allow selecting also a `/models/common` folder for client/server shared data 
+
 ### yo g-next:ajax
 
 - It should allow creating an AJAX function.\
@@ -91,6 +95,28 @@ It creates a new component with a hook file [WIP]
 - It should allow to create a new API starting from a route and a method
 - It should create a new subfolder in the `./endpoints` folder with the API files inside
 - It should connect this endpoint function to the Next `./api` folder and its configuration files
+
+### yo g-next:pkg-spa
+
+It should check if pkg-translations is installed.\
+In this case, BrowserRouter basename shouldn't be set to "/page-route", since it will not take in consideration the `/:languageCode` parameter in the URI.\
+So something like this:
+```jsx
+  <BrowserRouter basename="/app">
+    <Routes>
+      <Route path="/" element={<span />} />
+    </Routes>
+  </BrowserRouter>
+```
+should become like this:
+```jsx
+  <BrowserRouter>
+    <Routes>
+      <Route path="/:languageCode/app/" element={<span />} />
+    </Routes>
+  </BrowserRouter>
+```
+
 
 ### yo g-next:pkg-cognito
 

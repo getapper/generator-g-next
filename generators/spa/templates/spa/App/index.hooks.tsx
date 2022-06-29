@@ -1,4 +1,4 @@
-import theme from "../themes";
+import theme from "themes";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { actions } from "spas/<%= spaFolderName %>/redux-store";

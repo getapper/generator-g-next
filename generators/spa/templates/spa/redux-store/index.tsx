@@ -14,7 +14,7 @@ const sagaMiddleware = createSagaMiddleware();
 const createRootReducer = () => combineReducers(reducers);
 const rootReducer = createRootReducer();
 const persistConfig = {
-  key: "root",
+  key: "<%= spaName %>-root",
   storage,
 };
 

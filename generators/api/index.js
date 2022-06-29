@@ -134,13 +134,6 @@ module.exports = class extends Generator {
     const endpointFolderName = getEndpointFolder(method, params);
     const apiName = getFunctionName(method, params);
     const [routePath, urlParams] = getAjaxPath(params);
-    console.log({
-      endpointFolderName,
-      apiName,
-      params,
-      routePath,
-      urlParams,
-    });
 
     // Endpoints folder
     this.fs.write(
