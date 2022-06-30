@@ -24,7 +24,7 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "It seems like the GeNYG core files are not installed yet. Run yo g-next:init to fix this."
+            "It seems like the GeNYG core files are not installed yet. Run yo g-next:pkg-core to fix this."
           )
         )
       );
@@ -70,7 +70,6 @@ module.exports = class extends Generator {
         spa: true,
       },
     });
-
 
     // ./components/index.tsx export file
     const content = `export * from "./AppButton";\n`;

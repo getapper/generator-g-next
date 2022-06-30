@@ -25,7 +25,7 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "It seems like the GeNYG core files are not installed yet. Run yo g-next:init to fix this."
+            "It seems like the GeNYG core files are not installed yet. Run yo g-next:pkg-core to fix this."
           )
         )
       );
@@ -63,17 +63,12 @@ module.exports = class extends Generator {
 
     const relativeToModelsPath = `./models/${clientOrServer}/${modelName}`;
 
-    const modelCollection = kebabCase(
-      pluralize(modelName.charAt(0).toLowerCase() + modelName.slice(1), 2)
-    );
-
     // Index.tsx model file
     this.fs.copyTpl(
       this.templatePath("index.ejs"),
       this.destinationPath(path.join(relativeToModelsPath, "/index.ts")),
       {
         modelName,
-        modelCollection,
       }
     );
   }

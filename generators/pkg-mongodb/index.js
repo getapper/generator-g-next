@@ -11,7 +11,7 @@ module.exports = class extends Generator {
         `Hi! Welcome to the official ${chalk.blue(
           "Getapper NextJS Yeoman Generator (GeNYG)"
         )}. ${chalk.red(
-          "This command must be executed only once, and it will install al MUI dependencies."
+          "This command must be executed only once, and it will install all MongoDB dependencies."
         )}`
       )
     );
@@ -42,10 +42,12 @@ module.exports = class extends Generator {
       );
       process.exit(0);
     }
-    if (configFile.packages.mui) {
+    if (configFile.packages.mongodb) {
       this.log(
         yosay(
-          chalk.red("It looks like the GeNYG MUI files were already installed!")
+          chalk.red(
+            "It looks like the GeNYG MongoDB deps were already installed!"
+          )
         )
       );
       process.exit(0);
@@ -54,14 +56,7 @@ module.exports = class extends Generator {
     // New dependencies
     this.packageJson.merge({
       dependencies: {
-        "@emotion/react": "11.8.2",
-        "@emotion/styled": "11.8.1",
-        "@hookform/resolvers": "2.8.8",
-        "@mui/icons-material": "5.5.1",
-        "@mui/material": "5.5.1",
-        "react-dropzone": "12.0.5",
-        "react-hook-form": "7.29.0",
-        yup: "0.32.9",
+        mongodb: "4.4.0",
       },
     });
 
@@ -70,7 +65,7 @@ module.exports = class extends Generator {
 
     extendConfigFile(this, {
       packages: {
-        mui: true,
+        mongodb: true,
       },
     });
   }

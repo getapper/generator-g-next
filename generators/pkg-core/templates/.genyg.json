@@ -4,6 +4,8 @@
     "core": true,
     "mui": false,
     "mui-form-components": false,
-    "spa": false
+    "spa": false,
+    "translations": false,
+    "mongodb": false
   }
 }

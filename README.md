@@ -35,6 +35,15 @@ In particular it will install:
 - redux libs plus plugins
 - axios for ajax support
 
+### yo g-next:pkg-translations
+
+#### dependencies: pkg-core
+
+It installs everything needed to handle translations with i18next, in particular:
+- `./translations` folder with translations files types and contents for each locale
+- a next config file option to support i18n
+- 2 react hooks to initialize and use translations with react
+
 ### yo g-next:model
 
 #### dependencies: pkg-core
@@ -96,7 +105,7 @@ It creates a new component with a hook file [WIP]
 - It should create a new subfolder in the `./endpoints` folder with the API files inside
 - It should connect this endpoint function to the Next `./api` folder and its configuration files
 
-### yo g-next:pkg-spa
+### yo g-next:spa
 
 It should check if pkg-translations is installed.\
 In this case, BrowserRouter basename shouldn't be set to "/page-route", since it will not take in consideration the `/:languageCode` parameter in the URI.\
@@ -116,7 +125,25 @@ should become like this:
     </Routes>
   </BrowserRouter>
 ```
+Also, if pkg-translations is installed, the `<App />` component should call the `useInitializeTranslations();` hook, like:
+```jsx
+// .....
 
+const useAppHooks = () => {
+  useInitializeTranslations();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(actions.appStartup());
+  }, [dispatch]);
+
+  return {
+    theme,
+  };
+};
+
+export default useAppHooks;
+```
 
 ### yo g-next:pkg-cognito
 

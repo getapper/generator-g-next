@@ -40,10 +40,17 @@ module.exports = class extends Generator {
         "lint-staged": "10.2.11",
         prettier: "2.7.1",
       },
+      dependencies: {
+        "module-alias": "2.2.2",
+      },
       husky: {
         hooks: {
           "pre-commit": "lint-staged",
         },
+      },
+      _moduleAliases: {
+        lib: "dist/lib",
+        models: "dist/models",
       },
     });
 
