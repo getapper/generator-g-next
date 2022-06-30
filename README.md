@@ -57,6 +57,12 @@ Having different folders and files (even to represent the same entity) from back
 
 It creates a new scene for the specified SPA.
 
+### yo g-next:model-mongodb
+
+#### dependencies: pkg-mongodb
+
+- It creates a new model inside `./models/server` folder with the mongoDB model template
+
 ### yo g-next:page
 
 It creates a new page with a hook file [WIP]
@@ -71,10 +77,6 @@ It creates a new component with a hook file [WIP]
 
 - Add support for [mocked HTTP calls](https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript) in order to test APIs
 - It should support more envs (at least locale, test, staging and production ones)
-
-### yo g-next:model-mongo
-
-- It should create a new model inside `./models/server` folder with the mongoDB model template
 
 ### yo g-next:page
 
@@ -91,18 +93,15 @@ It creates a new component with a hook file [WIP]
 
 ### yo g-next:ajax
 
-- It should allow creating an AJAX function.\
+- It should allow creating an AJAX function.
 
-### yo g-next:pkg-mongo
+### yo g-next:pkg-mongodb
 
-- It should copy mongo db libraries inside the `lib` folder
-- It should install mongodb dependencies to the package json
-- It should also add mongo env vars to the env files
+- It should add mongo env vars to the env files
 
 ### yo g-next:api
 
-- It should allow to create a new API starting from a route and a method
-- It should create a new subfolder in the `./endpoints` folder with the API files inside
+- It should create unit test index.test.ts file
 - It should connect this endpoint function to the Next `./api` folder and its configuration files
 
 ### yo g-next:spa
@@ -149,12 +148,4 @@ export default useAppHooks;
 
 - It should add all the backend library files inside the `./lib` folder
 - It should add all fe and be dependencies to the package json
-- It should copy the CognitoAuthManager model to the `./models/client` folder
 - It should add all the required env vars to all env files
-
-### yo g-next:pkg-translations
-
-- It should add i18next and react-i18next dependencies
-- It should add i18n as next config options
-- It should add `./translations` folder with templates and setup files
-- It should add the Language models and LanguageSelector component
