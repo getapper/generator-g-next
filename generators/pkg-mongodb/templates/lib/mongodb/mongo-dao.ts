@@ -9,11 +9,39 @@ import {
   FindOptions,
   InsertManyResult,
   MongoClient,
+  ObjectId,
   OptionalUnlessRequiredId,
   UpdateFilter,
   UpdateOptions,
   UpdateResult,
 } from "mongodb";
+import * as yup from "yup";
+
+export const yupObjectId = () =>
+  yup
+    .mixed()
+    .transform((value, originalValue) => {
+      if (value === null) {
+        return null;
+      }
+      if (!ObjectId.isValid(value)) {
+        return null;
+      }
+      return new ObjectId(value);
+    })
+    .test(
+      "isValidObjectId",
+      "Argument passed in must be a single String of 12 bytes or a string of 24 hex characters",
+      function (value) {
+        const { path, createError } = this;
+
+        if (value === null) {
+          return createError({ path });
+        }
+
+        return true;
+      }
+    );
 
 export type WithoutId<Interface> = Omit<Interface, "_id">;
 

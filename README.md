@@ -48,7 +48,7 @@ It installs everything needed to handle translations with i18next, in particular
 
 #### dependencies: pkg-core
 
-It creates a new model inside `./models/server` or `./models/client` folder, depending on the usage of the model, client if it is supposed to run in the frontend in React, server if it supposed to run in the backend with NodeJS.\
+It creates a new model inside `./models/server`, `./models/common` or `./models/client` folder, depending on the usage of the model, client if it is supposed to run in the frontend in React, server if it supposed to run in the backend with NodeJS, common for both.\
 Having different folders and files (even to represent the same entity) from backend and frontend avoids issues when loading browser-related code in the backend code, or file-system-related code in the frontend.
 
 ### yo g-next:scene
@@ -71,6 +71,14 @@ It creates a new page with a hook file [WIP]
 
 It creates a new component with a hook file [WIP]
 
+### yo g-next:ajax
+
+It creates a new AJAX function for the specified SPA.
+
+### yo g-next:slice
+
+It creates a new redux slice for the specified SPA.
+
 ## TODO
 
 ### yo g-next:pkg-core
@@ -86,14 +94,6 @@ It creates a new component with a hook file [WIP]
 ### yo g-next:comp
 
 - It should allow selecting also subfolders of ./components and ./pages
-
-### yo g-next:model
-
-- It should allow selecting also a `/models/common` folder for client/server shared data 
-
-### yo g-next:ajax
-
-- It should allow creating an AJAX function.
 
 ### yo g-next:pkg-mongodb
 

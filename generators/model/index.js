@@ -35,11 +35,11 @@ module.exports = class extends Generator {
     const answers = await this.prompt([
       {
         type: "list",
-        name: "clientOrServer",
+        name: "location",
         message:
           "The model will be used in the client side with React, or in the backend with NodeJS?",
-        choices: ["client", "server"],
-        default: "client",
+        choices: ["client", "server", "common"],
+        default: "common",
       },
       {
         type: "input",
@@ -59,9 +59,9 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    const { modelName, clientOrServer } = this.answers;
+    const { modelName, location } = this.answers;
 
-    const relativeToModelsPath = `./models/${clientOrServer}/${modelName}`;
+    const relativeToModelsPath = `./models/${location}/${modelName}`;
 
     // Index.tsx model file
     this.fs.copyTpl(
@@ -70,6 +70,13 @@ module.exports = class extends Generator {
       {
         modelName,
       }
+    );
+
+    // /models/***/index.ts export file
+    const content = `export * from './${modelName}';\n`;
+    fs.appendFileSync(
+      path.join(this.destinationRoot(), "models", location, "index.ts"),
+      content
     );
   }
 };

@@ -13,7 +13,7 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-react"
+          "generator-g-next"
         )} scene generator, follow the quick and easy configuration to create a new scene in  your SPA!`
       )
     );
