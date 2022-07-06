@@ -1,17 +1,15 @@
 import React, { memo } from "react";
-import { use<%= pageName %> } from "./index.hooks";
 import { AppHead } from "components";
 
 type <%= pageName %>Props = {}
 
 const <%= pageName %> = memo(({}: <%= pageName %>Props) => {
-  const {} = use<%= pageName %>();
-
   return (
     <>
       <AppHead title="" description="" />
     </>
   );
 });
+<%= pageName %>.displayName = "<%= pageName %>";
 
 export default <%= pageName %>;

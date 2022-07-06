@@ -67,14 +67,5 @@ module.exports = class extends Generator {
         ...this.answers,
       }
     );
-
-    // Index.hooks.tsx hooks file
-    this.fs.copyTpl(
-      this.templatePath("index.hooks.ejs"),
-      this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
-      {
-        ...this.answers,
-      }
-    );
   }
 };
