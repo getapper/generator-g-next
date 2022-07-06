@@ -69,7 +69,7 @@ It creates a new page with a hook file [WIP]
 
 ### yo g-next:comp
 
-It creates a new component with a hook file [WIP]
+It creates a new component with a hook file. A subfolder of the components one can be selected as well.
 
 ### yo g-next:ajax
 
@@ -85,15 +85,16 @@ It creates a new redux slice for the specified SPA.
 
 - Add support for [mocked HTTP calls](https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript) in order to test APIs
 - It should support more envs (at least locale, test, staging and production ones)
+- Add custom tasks support with ts-plugins for path resolution
+
+### yo g-next:task
+
+- It should create a new task.ts file in the tasks' folder, with the env files requires and a script in the package.json to run it. 
 
 ### yo g-next:page
 
 - It should allow creating dynamic routes (both single `[param]` and multiple `[[params]]`
 - It should create static NextJS methods like getStaticProps or getStaticPaths
-
-### yo g-next:comp
-
-- It should allow selecting also subfolders of ./components and ./pages
 
 ### yo g-next:pkg-mongodb
 
