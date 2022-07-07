@@ -33,6 +33,9 @@ module.exports = class extends Generator {
   writing() {
     // New dependencies
     this.packageJson.merge({
+      scripts: {
+        "TASK:compile-tasks": "rimraf dist && npx ttsc --p tsconfig-tasks.json",
+      },
       devDependencies: {
         "custom-env": "2.0.1",
         "env-cmd": "10.1.0",
@@ -40,6 +43,7 @@ module.exports = class extends Generator {
         husky: "4.2.5",
         "lint-staged": "10.2.11",
         prettier: "2.7.1",
+        rimraf: "3.0.2",
         ttypescript: "1.5.13",
         "typescript-transform-paths": "3.3.1",
       },
