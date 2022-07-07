@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDirs": [".", "./dist"],
+    "rootDir": ".",
+    "outDir": "dist",
+    "paths": {
+      "lib/*": [
+        "./lib/*"
+      ],
+      "models/*": [
+        "./models/*"
+      ],
+      "tasks/*": [
+        "./tasks/*"
+      ]
+    },
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      { "transform": "typescript-transform-paths", "useRootDirs": true },
+      { "transform": "typescript-transform-paths", "useRootDirs": true, "afterDeclarations": true }
+    ]
+  },
+  "include": ["lib/**/*.ts", "models/**/*.ts", "tasks/**/*.ts"],
+  "exclude": ["node_modules"]
+}

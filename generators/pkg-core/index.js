@@ -34,23 +34,19 @@ module.exports = class extends Generator {
     // New dependencies
     this.packageJson.merge({
       devDependencies: {
+        "custom-env": "2.0.1",
         "env-cmd": "10.1.0",
         "eslint-config-prettier": "8.5.0",
         husky: "4.2.5",
         "lint-staged": "10.2.11",
         prettier: "2.7.1",
-      },
-      dependencies: {
-        "module-alias": "2.2.2",
+        ttypescript: "1.5.13",
+        "typescript-transform-paths": "3.3.1",
       },
       husky: {
         hooks: {
           "pre-commit": "lint-staged",
         },
-      },
-      _moduleAliases: {
-        lib: "dist/lib",
-        models: "dist/models",
       },
     });
 
