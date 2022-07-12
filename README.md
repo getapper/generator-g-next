@@ -85,7 +85,6 @@ It creates a new redux slice for the specified SPA.
 
 - Add support for [mocked HTTP calls](https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript) in order to test APIs
 - It should support more envs (at least locale, test, staging and production ones)
-- Add custom tasks support with ts-plugins for path resolution
 
 ### yo g-next:task
 

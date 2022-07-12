@@ -3,6 +3,7 @@ const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
 const path = require("path");
+const fs = require("fs");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 const pluralize = require("pluralize");
