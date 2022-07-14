@@ -8,6 +8,7 @@ Execute `npx create-next-app@latest` with support for NPM, TypeScript in the cur
 
 ### yo g-next:pkg-core
 
+**Thanks to this package you will get basic linting support with eslint + prettier and initialize GeNYG configuration.**\
 This will:
 - install all basic packages for code linting and styling (by fixing the eslint plugin used by default by Next and installing prettier).
 - add husky and lint-staged in order to clean the code before committing to the repo.
@@ -18,6 +19,8 @@ This will:
 
 #### dependencies: pkg-core
 
+**Thanks to this package you will be able to use MUI components, and to create forms based on MUI input fields plus
+react-hook-form library with yup validation support.**\
 It will install all MUI related dependencies, that is:
 - MUI core
 - MUI icons
@@ -29,7 +32,7 @@ It will install all MUI related dependencies, that is:
 
 #### dependencies: pkg-core
 
-It installs everything needed to add an SPA page into the Next application.\
+**Thanks to this package you will be able to add one or multiple Single Page Application to your app.**\
 In particular it will install:
 - react-router-dom libs
 - redux libs plus plugins
@@ -149,3 +152,9 @@ export default useAppHooks;
 - It should add all the backend library files inside the `./lib` folder
 - It should add all fe and be dependencies to the package json
 - It should add all the required env vars to all env files
+
+### yo g-next:form
+
+- It should create a new form component in the selected folder
+- It should add a FormProvider
+- Current _form components will need to be refactored in order to get form fields from the provider
