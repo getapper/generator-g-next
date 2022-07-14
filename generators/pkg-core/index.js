@@ -34,7 +34,10 @@ module.exports = class extends Generator {
     // New dependencies
     this.packageJson.merge({
       scripts: {
-        "TASK:compile-tasks": "rimraf dist && npx ttsc --p tsconfig-tasks.json",
+        lint: "next lint",
+        tsc: "tsc",
+        "tsc-backend": "rimraf dist && npx ttsc --p tsconfig-tasks.json",
+        test: "npm run tsc-backend && jest --runInBand",
       },
       devDependencies: {
         "custom-env": "2.0.1",
@@ -51,6 +54,16 @@ module.exports = class extends Generator {
         hooks: {
           "pre-commit": "lint-staged",
         },
+      },
+      jest: {
+        testTimeout: 10000,
+        rootDir: "dist",
+        moduleNameMapper: {
+          "models/(.*)": "<rootDir>/models/$1",
+          "endpoints/(.*)": "<rootDir>/endpoints/$1",
+          "tasks/(.*)": "<rootDir>/tasks/$1",
+        },
+        setupFiles: ["<rootDir>/lib/test-utils/setup-tests"],
       },
     });
 

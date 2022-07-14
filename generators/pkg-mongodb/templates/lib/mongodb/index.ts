@@ -30,6 +30,11 @@ if (process.env.NODE_ENV === "development") {
   clientPromise = client.connect();
 }
 
+export const closeDbConnection = async () => {
+  const mongoClient = await clientPromise;
+  await mongoClient.close();
+};
+
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;

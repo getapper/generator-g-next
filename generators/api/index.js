@@ -5,6 +5,7 @@ const yosay = require("yosay");
 const { pascalCase } = require("pascal-case");
 const getEndpointInterfacesTemplate = require("./templates/endpoint/interfaces");
 const getEndpointValidationsTemplate = require("./templates/endpoint/validations");
+const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
 
 const camelCaseToDash = (s) =>
   s.replace(/([a-zA-Z])(?=[A-Z])/g, "$1-").toLowerCase();
@@ -143,6 +144,10 @@ module.exports = class extends Generator {
     this.fs.write(
       this.destinationPath(`./endpoints/${endpointFolderName}/validations.ts`),
       getEndpointValidationsTemplate(urlParams)
+    );
+    this.fs.write(
+      this.destinationPath(`./endpoints/${endpointFolderName}/index.test.ts`),
+      getEndpointTestsTemplate(endpointFolderName, apiName)
     );
     this.fs.copy(
       this.templatePath("./endpoint/index.ts"),

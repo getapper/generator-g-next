@@ -5,15 +5,11 @@
     "rootDir": ".",
     "outDir": "dist",
     "paths": {
-      "lib/*": [
-        "./lib/*"
-      ],
-      "models/*": [
-        "./models/*"
-      ],
-      "tasks/*": [
-        "./tasks/*"
-      ]
+      "lib/*": ["./lib/*"],
+      "models/common/*": ["./models/common/*"],
+      "models/server/*": ["./models/server/*"],
+      "tasks/*": ["./tasks/*"],
+      "endpoints/*": ["./endpoints/*"]
     },
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -29,9 +25,19 @@
     "incremental": true,
     "plugins": [
       { "transform": "typescript-transform-paths", "useRootDirs": true },
-      { "transform": "typescript-transform-paths", "useRootDirs": true, "afterDeclarations": true }
+      {
+        "transform": "typescript-transform-paths",
+        "useRootDirs": true,
+        "afterDeclarations": true
+      }
     ]
   },
-  "include": ["lib/**/*.ts", "models/**/*.ts", "tasks/**/*.ts"],
+  "include": [
+    "lib/**/*.ts",
+    "models/common/*.ts",
+    "models/server/*.ts",
+    "tasks/**/*.ts",
+    "endpoints/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
