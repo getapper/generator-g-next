@@ -36,7 +36,7 @@ module.exports = class extends Generator {
       scripts: {
         lint: "next lint",
         tsc: "tsc",
-        "tsc-backend": "rimraf dist && npx ttsc --p tsconfig-tasks.json",
+        "tsc-backend": "rimraf dist && npx ttsc --p tsconfig-backend.json",
         test: "npm run tsc-backend && jest --runInBand",
       },
       devDependencies: {

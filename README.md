@@ -84,11 +84,6 @@ It creates a new redux slice for the specified SPA.
 
 ## TODO
 
-### yo g-next:pkg-core
-
-- Add support for [mocked HTTP calls](https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript) in order to test APIs
-- It should support more envs (at least locale, test, staging and production ones)
-
 ### yo g-next:task
 
 - It should create a new task.ts file in the tasks' folder, with the env files requires and a script in the package.json to run it. 
