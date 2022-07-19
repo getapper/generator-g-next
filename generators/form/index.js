@@ -5,9 +5,13 @@ const yosay = require("yosay");
 const fs = require("fs");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
+const { requirePackages } = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["mui"]);
+
     // Have Yeoman greet the user.
     this.log(
       yosay(

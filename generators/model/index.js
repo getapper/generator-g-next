@@ -5,10 +5,13 @@ const yosay = require("yosay");
 const path = require("path");
 const fs = require("fs");
 const { pascalCase } = require("pascal-case");
-const { getGenygConfigFile } = require("../../common");
+const { getGenygConfigFile, requirePackages } = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["core"]);
+
     // Have Yeoman greet the user.
     this.log(
       yosay(

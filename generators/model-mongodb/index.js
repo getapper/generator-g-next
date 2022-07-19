@@ -6,9 +6,13 @@ const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 const pluralize = require("pluralize");
+const { requirePackages } = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["mongodb"]);
+
     // Have Yeoman greet the user.
     this.log(
       yosay(

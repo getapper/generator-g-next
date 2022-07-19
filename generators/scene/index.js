@@ -5,10 +5,17 @@ const yosay = require("yosay");
 const fs = require("fs");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
-const { getGenygConfigFile, getSpas } = require("../../common");
+const {
+  getGenygConfigFile,
+  getSpas,
+  requirePackages,
+} = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["spa"]);
+
     // Have Yeoman greet the user.
     this.log(
       yosay(
@@ -17,19 +24,6 @@ module.exports = class extends Generator {
         )} scene generator, follow the quick and easy configuration to create a new scene in  your SPA!`
       )
     );
-
-    // Config checks
-    const configFile = getGenygConfigFile(this);
-    if (!configFile.packages.spa) {
-      this.log(
-        yosay(
-          chalk.red(
-            "You need SPA package installed in order to create a SPA. Run yo g-next:pkg-spa to fix this."
-          )
-        )
-      );
-      process.exit(0);
-    }
 
     const answers = await this.prompt([
       {

@@ -2,10 +2,17 @@
 const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
-const { getGenygConfigFile, extendConfigFile } = require("../../common");
+const {
+  getGenygConfigFile,
+  extendConfigFile,
+  requirePackages,
+} = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["core"]);
+
     this.log(
       yosay(
         `Hi! Welcome to the official ${chalk.blue(
@@ -32,16 +39,6 @@ module.exports = class extends Generator {
   writing() {
     // Config checks
     const configFile = getGenygConfigFile(this);
-    if (!configFile.packages.core) {
-      this.log(
-        yosay(
-          chalk.red(
-            "It seems like the GeNYG core files are not installed yet. Run yo g-next:pkg-core to fix this."
-          )
-        )
-      );
-      process.exit(0);
-    }
     if (configFile.packages.mongodb) {
       this.log(
         yosay(

@@ -3,10 +3,17 @@ const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
 const { pascalCase } = require("pascal-case");
-const { getGenygConfigFile, getSpas } = require("../../common");
+const {
+  getGenygConfigFile,
+  getSpas,
+  requirePackages,
+} = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["spa"]);
+
     this.log(
       yosay(
         `Welcome to ${chalk.red(
@@ -14,19 +21,6 @@ module.exports = class extends Generator {
         )} redux slice generator, follow the quick and easy configuration to create a new slice!`
       )
     );
-
-    // Config checks
-    const configFile = getGenygConfigFile(this);
-    if (!configFile.packages.spa) {
-      this.log(
-        yosay(
-          chalk.red(
-            "You need SPA package installed in order to create a SPA. Run yo g-next:pkg-spa to fix this."
-          )
-        )
-      );
-      process.exit(0);
-    }
 
     const answers = await this.prompt([
       {

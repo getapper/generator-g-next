@@ -5,7 +5,11 @@ const yosay = require("yosay");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
-const { getGenygConfigFile, copyEjsTemplateFolder } = require("../../common");
+const {
+  getGenygConfigFile,
+  copyEjsTemplateFolder,
+  requirePackages,
+} = require("../../common");
 
 module.exports = class extends Generator {
   initializing() {
@@ -16,6 +20,9 @@ module.exports = class extends Generator {
   }
 
   async prompting() {
+    // Config checks
+    requirePackages(this, ["spa"]);
+
     // Have Yeoman greet the user.
     this.log(
       yosay(
@@ -24,19 +31,6 @@ module.exports = class extends Generator {
         )} SPA generator, follow the quick and easy configuration to create a new Single Page Application!`
       )
     );
-
-    // Config checks
-    const configFile = getGenygConfigFile(this);
-    if (!configFile.packages.spa) {
-      this.log(
-        yosay(
-          chalk.red(
-            "You need SPA package installed in order to create a SPA. Run yo g-next:pkg-spa to fix this."
-          )
-        )
-      );
-      process.exit(0);
-    }
 
     const answers = await this.prompt([
       {

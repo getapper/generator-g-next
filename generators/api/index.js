@@ -6,6 +6,7 @@ const { pascalCase } = require("pascal-case");
 const getEndpointInterfacesTemplate = require("./templates/endpoint/interfaces");
 const getEndpointValidationsTemplate = require("./templates/endpoint/validations");
 const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
+const { requirePackages } = require("../../common");
 
 const camelCaseToDash = (s) =>
   s.replace(/([a-zA-Z])(?=[A-Z])/g, "$1-").toLowerCase();
@@ -96,6 +97,9 @@ const getAjaxPath = (params) => {
 
 module.exports = class extends Generator {
   async prompting() {
+    // Config checks
+    requirePackages(this, ["core"]);
+
     // Have Yeoman greet the user.
     this.log(
       yosay(
