@@ -6,6 +6,7 @@ const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 const { requirePackages } = require("../../common");
+const getPageTemplate = require("./templates");
 
 module.exports = class extends Generator {
   initializing() {
@@ -28,7 +29,7 @@ module.exports = class extends Generator {
       )
     );
 
-    const answers = await this.prompt([
+    let answers = await this.prompt([
       {
         type: "directory",
         name: "pagePath",
@@ -38,38 +39,91 @@ module.exports = class extends Generator {
       {
         type: "input",
         name: "pageName",
-        message: "What is your page name?",
+        message:
+          "What is your page name? (Use squared brackets for single parameters - eg. [postId] -, double square brackets with trailing dots for multiple parameters - eg. [[...params]])",
       },
     ]);
 
-    if (answers.pageName === "") {
+    if (answers.pageName[0] === "[") {
+      answers.dynamic = true;
+      answers.multipleParameters = answers.pageName[1] === "[";
+      answers = {
+        ...answers,
+        ...(await this.prompt([
+          {
+            type: "input",
+            name: "componentName",
+            message: "What is your page component name?",
+          },
+        ])),
+      };
+    }
+
+    answers = {
+      ...answers,
+      ...(await this.prompt([
+        {
+          type: "list",
+          name: "renderingStrategy",
+          message: "Which function for rendering should be used?",
+          choices: [
+            "none",
+            "Static Generation Props (SSG)",
+            "Server-side Rendering Props (SSR)",
+          ],
+          default: "none",
+        },
+      ])),
+    };
+
+    if (
+      answers.pageName === "" ||
+      (answers.dynamic && answers.componentName === "")
+    ) {
       this.log(yosay(chalk.red("Please give your page a name next time!")));
       process.exit(1);
       return;
     }
 
-    answers.pageName = pascalCase(answers.pageName).trim();
+    if (answers.dynamic) {
+      answers.componentName = pascalCase(answers.componentName).trim();
+    } else {
+      answers.componentName = pascalCase(answers.pageName).trim();
+    }
     this.answers = answers;
   }
 
   writing() {
-    const { pagePath, pageName } = this.answers;
-    const folderName = kebabCase(pageName)
-      .split("-")
-      .filter((s) => s !== "")
-      .join("-");
+    const {
+      pagePath,
+      pageName,
+      dynamic,
+      componentName,
+      renderingStrategy,
+      multipleParameters,
+    } = this.answers;
+    const folderName = dynamic
+      ? pageName
+      : kebabCase(pageName)
+          .split("-")
+          .filter((s) => s !== "")
+          .join("-");
 
     const relativeToRootPath = `./pages/${
       pagePath ? pagePath + "/" : ""
     }${folderName}`;
 
     // Index.tsx page file
-    this.fs.copyTpl(
-      this.templatePath("index.ejs"),
+    this.fs.write(
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
-      {
-        ...this.answers,
-      }
+      getPageTemplate(
+        componentName,
+        dynamic && renderingStrategy !== "Server-side Rendering Props (SSR)",
+        renderingStrategy === "Static Generation Props (SSG)",
+        renderingStrategy === "Server-side Rendering Props (SSR)",
+        multipleParameters,
+        multipleParameters ? null : pageName.replace("[", "").replace("]", "")
+      )
     );
   }
 };

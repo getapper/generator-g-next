@@ -68,7 +68,12 @@ It creates a new scene for the specified SPA.
 
 ### yo g-next:page
 
-It creates a new page with a hook file [WIP]
+It creates a new page inside NextJS project, inside /pages root folder or one of its subfolders.\
+It also allows specifying if the component is:
+- a normal page (eg. /news)
+- a dynamic page with a parameter (eg. /news/\[newsId\])
+- a dynamic page with multiple parameters (eg. /news/\[\[...parameters]])\
+It also gives the possibility to specify the server rendering mode (SSG or SSR).
 
 ### yo g-next:comp
 
@@ -87,11 +92,6 @@ It creates a new redux slice for the specified SPA.
 ### yo g-next:task
 
 - It should create a new task.ts file in the tasks' folder, with the env files requires and a script in the package.json to run it. 
-
-### yo g-next:page
-
-- It should allow creating dynamic routes (both single `[param]` and multiple `[[params]]`
-- It should create static NextJS methods like getStaticProps or getStaticPaths
 
 ### yo g-next:pkg-mongodb
 
