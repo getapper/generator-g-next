@@ -1,1 +1,1 @@
-export * from "./NextUtility";
+export * from "./JsUtility";

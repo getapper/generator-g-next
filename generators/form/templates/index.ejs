@@ -1,16 +1,18 @@
 import React, { memo } from "react";
+import { FormProvider } from "react-hook-form";
 import { use<%= formName %> } from "./index.hooks";
 
 type <%= formName %>Props = {}
 
 export const <%= formName %> = memo(({}: <%= formName %>Props) => {
   const {
-    register,
-    errors,
+    formData,
     onSubmit,
   } = use<%= formName %>();
 
   return (
-    <form onSubmit={onSubmit}></form>
+    <FormProvider {...formData}>
+      <form onSubmit={onSubmit}></form>
+    </FormProvider>
   );
 });

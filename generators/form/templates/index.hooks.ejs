@@ -13,9 +13,10 @@ type <%= formName %>Data = {
 };
 
 export const use<%= formName %> = () => {
-  const { register, handleSubmit, errors } = useForm<<%= formName %>Data>({
+  const formData = useForm<<%= formName %>Data>({
     resolver: yupResolver(schema),
   });
+  const { handleSubmit } = formData;
 
   const onSubmit = useMemo(
     () =>
@@ -26,8 +27,7 @@ export const use<%= formName %> = () => {
   );
 
   return {
-    register,
-    errors,
+    formData,
     onSubmit,
   };
 };
