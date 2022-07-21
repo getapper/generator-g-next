@@ -124,3 +124,4 @@ export const FormImageDropZone = memo(
     );
   },
 );
+FormImageDropZone.displayName = "FormImageDropZone";

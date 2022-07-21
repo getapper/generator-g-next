@@ -47,3 +47,4 @@ export const FormDateTimePicker = memo(
     );
   }
 );
+FormDateTimePicker.displayName = "FormDateTimePicker";

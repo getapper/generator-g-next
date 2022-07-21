@@ -77,3 +77,4 @@ export const FormRadioGroup = memo(
     );
   }
 );
+FormRadioGroup.displayName = "FormRadioGroup";

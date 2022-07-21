@@ -55,3 +55,4 @@ export const FormDatePicker = memo(({ name, label }: FormDatePickerProps) => {
     />
   );
 });
+FormDatePicker.displayName = "FormDatePicker";

@@ -45,3 +45,4 @@ export const FormTimePicker = memo(({ name, label }: FormTimePickerProps) => {
     />
   );
 });
+FormTimePicker.displayName = "FormTimePicker";

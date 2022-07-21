@@ -60,3 +60,4 @@ export const FormCheckbox = memo(
     );
   }
 );
+FormCheckbox.displayName = "FormCheckbox";
