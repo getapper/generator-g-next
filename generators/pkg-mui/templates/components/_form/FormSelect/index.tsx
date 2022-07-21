@@ -9,86 +9,61 @@ import {
   Select,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
+import { JsUtility } from "models/common";
 
 export type FormSelectProps = {
-  control?: any;
   options: {
     value: number | string;
     label: number | string;
   }[];
   label?: string;
-  className?: string;
-  selectClassName?: string;
   name?: string;
-  helperText?: string;
-  value?: any;
-  onChange?: any;
 } & FormControlProps;
 
 export const FormSelect = memo(
-  ({
-    control,
-    options,
-    label,
-    className,
-    selectClassName,
-    name,
-    value,
-    onChange,
-    error,
-    helperText,
-    ...props
-  }: FormSelectProps) => {
-    const {} = useFormSelect();
+  ({ options, label, name, ...props }: FormSelectProps) => {
+    const { control, errors } = useFormSelect();
 
-    const renderSelect = (
-      value1: string,
-      onChange1: (newValue: string) => void,
-    ) => {
-      return (
-        <FormControl
-          error={error}
-          variant="outlined"
-          className={className}
-          {...props}
-        >
-          {label && (
-            <InputLabel id={`mui-select-${name!.trim()}`}>{label}</InputLabel>
-          )}
-          <Select
-            className={selectClassName}
-            labelId={label ? `mui-select-${name!.trim()}` : ""}
-            value={value1}
-            onChange={(ev) => onChange1(ev.target.value)}
-            variant="outlined"
-            name={name}
-            label={label}
-            error={error}
-          >
-            {options.map((option) => (
-              <MenuItem value={option.value} key={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-          {helperText && (
-            <FormHelperText error={error}>{helperText}</FormHelperText>
-          )}
-        </FormControl>
-      );
-    };
-
-    if (!control) {
-      return renderSelect(value, onChange);
-    }
     return (
       <Controller
         control={control}
         name={name!}
-        render={({ field: { onChange, value, name, ref } }) =>
-          renderSelect(value, onChange)
-        }
+        render={({ field: { onChange, value, name, ref } }) => (
+          <FormControl
+            error={!!JsUtility.accessObjectByDotSeparatedKeys(errors, name)}
+            variant="outlined"
+            {...props}
+          >
+            {label && (
+              <InputLabel id={`mui-select-${name!.trim()}`}>{label}</InputLabel>
+            )}
+            <Select
+              labelId={label ? `mui-select-${name!.trim()}` : ""}
+              value={value}
+              onChange={(ev) => onChange(ev.target.value)}
+              variant="outlined"
+              name={name}
+              label={label}
+              error={!!JsUtility.accessObjectByDotSeparatedKeys(errors, name)}
+            >
+              {options.map((option) => (
+                <MenuItem value={option.value} key={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+            {!!JsUtility.accessObjectByDotSeparatedKeys(errors, name)
+              ?.message && (
+              <FormHelperText error>
+                {
+                  JsUtility.accessObjectByDotSeparatedKeys(errors, name)
+                    ?.message
+                }
+              </FormHelperText>
+            )}
+          </FormControl>
+        )}
       />
     );
-  },
+  }
 );

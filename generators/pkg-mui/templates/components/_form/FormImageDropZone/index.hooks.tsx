@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useFormContext } from "react-hook-form";
 
 const convertFileToBase64 = (file: any): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -13,10 +14,15 @@ const convertFileToBase64 = (file: any): Promise<string> => {
 export const useFormImageDropZone = (
   name: string,
   setValue: any,
-  watch: any,
-  trigger: any,
-  fileMetadata?: boolean
+  fileMetadata?: boolean,
 ) => {
+  const {
+    control,
+    formState: { errors },
+    watch,
+    trigger,
+  } = useFormContext();
+
   const fileRef = useRef<{ name: string; type: string }>(null);
 
   const onDrop = useCallback(
@@ -32,7 +38,7 @@ export const useFormImageDropZone = (
         trigger(name);
       }
     },
-    [setValue, trigger]
+    [setValue, trigger],
   );
 
   const [dragAndDropError, setDragAndDropError] = useState(false);
@@ -62,5 +68,8 @@ export const useFormImageDropZone = (
     onDrop,
     handleRemove,
     isDragActive,
+    watch,
+    control,
+    errors,
   };
 };

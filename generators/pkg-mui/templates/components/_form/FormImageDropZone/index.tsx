@@ -5,36 +5,32 @@ import { Controller } from "react-hook-form";
 import { DeleteOutlined } from "@mui/icons-material";
 
 export type FormImageDropZoneProps = {
-  error: boolean;
   name: string;
-  control: any;
+  helperText: string;
   setValue: any;
-  helperText?: string;
-  watch: any;
-  trigger: any;
   preview?: boolean;
+  error: boolean;
   fileMetadata?: boolean;
 };
 
 export const FormImageDropZone = memo(
   ({
-    control,
-    name,
-    setValue,
-    error,
-    helperText,
-    watch,
-    trigger,
-    fileMetadata,
-    preview = true,
-  }: FormImageDropZoneProps) => {
+     name,
+     helperText,
+     setValue,
+     fileMetadata,
+     error,
+     preview = true,
+   }: FormImageDropZoneProps) => {
     const {
       getRootProps,
       getInputProps,
       dragAndDropError,
       handleRemove,
       isDragActive,
-    } = useFormImageDropZone(name, setValue, watch, trigger, fileMetadata);
+      watch,
+      control,
+    } = useFormImageDropZone(name, setValue, fileMetadata);
 
     return (
       <>
@@ -53,8 +49,8 @@ export const FormImageDropZone = memo(
                     dragAndDropError || error
                       ? "2px dashed #F00"
                       : isDragActive
-                      ? "2px dashed #33e"
-                      : "2px dashed #E8E8E8",
+                        ? "2px dashed #33e"
+                        : "2px dashed #E8E8E8",
                   background: isDragActive ? "#f0f0f0" : undefined,
                   transition: "all .2s",
                   borderRadius: "4px",
@@ -126,5 +122,5 @@ export const FormImageDropZone = memo(
         )}
       </>
     );
-  }
+  },
 );

@@ -1,10 +1,14 @@
-import { DatePicker, DatePickerProps, LocalizationProvider } from "@mui/lab";
+import {
+  DatePicker,
+  DatePickerProps,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
 import AdapterMoment from "@mui/lab/AdapterMoment";
-import { TextField, SxProps, Theme } from "@mui/material";
+import { TextField } from "@mui/material";
 import React, { memo } from "react";
 import { useFormDatePicker } from "components/_form/FormDatePicker/index.hooks";
-import { Moment } from "moment";
-import { Control, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import { JsUtility } from "models/common";
 
 interface OmittedProps {
   renderInput: any;
@@ -14,60 +18,40 @@ interface OmittedProps {
 
 type FormDatePickerProps = {
   name: string;
-  control?: any;
   label: string;
-  error?: boolean;
-  helperText?: string;
-  sx?: SxProps<Theme>;
-  value?: Moment;
-  onChange?: (newValue: Moment) => void;
 } & Omit<DatePickerProps, keyof OmittedProps>;
 
-export const FormDatePicker = memo(
-  ({
-    control,
-    name,
-    label,
-    error,
-    helperText,
-    sx,
-    value,
-    onChange,
-  }: FormDatePickerProps) => {
-    const {} = useFormDatePicker();
+export const FormDatePicker = memo(({ name, label }: FormDatePickerProps) => {
+  const { control, errors } = useFormDatePicker();
 
-    const renderDatePicker = (onChange, value, name, onBlur = null) => {
-      return (
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-          <DatePicker
-            label={label}
-            value={value}
-            onChange={onChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                onBlur={onBlur}
-                error={error}
-                helperText={helperText}
-              />
-            )}
-          />
-        </LocalizationProvider>
-      );
-    };
-
-    if (!!control) {
-      return (
-        <Controller
-          control={control}
-          name={name}
-          render={({ field: { onChange, onBlur, value, name } }) => {
-            return renderDatePicker(onChange, value, name, onBlur);
-          }}
-        />
-      );
-    } else {
-      return renderDatePicker(onChange, value, name);
-    }
-  },
-);
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field: { onChange, onBlur, value, name } }) => {
+        return (
+          <LocalizationProvider dateAdapter={AdapterMoment}>
+            <DatePicker
+              label={label}
+              value={value}
+              onChange={onChange}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  onBlur={onBlur}
+                  error={
+                    !!JsUtility.accessObjectByDotSeparatedKeys(errors, name)
+                  }
+                  helperText={
+                    JsUtility.accessObjectByDotSeparatedKeys(errors, name)
+                      ?.message
+                  }
+                />
+              )}
+            />
+          </LocalizationProvider>
+        );
+      }}
+    />
+  );
+});

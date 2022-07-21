@@ -1,3 +1,13 @@
+import { useFormContext } from "react-hook-form";
+
 export const useFormSelect = () => {
-  return {};
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
+
+  return {
+    control,
+    errors,
+  };
 };
