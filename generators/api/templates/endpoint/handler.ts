@@ -17,7 +17,7 @@ export default async function handler(
       );
     }
 
-    ResponseHandler.json<EndpointResponse>(res, {});
+    return ResponseHandler.json<EndpointResponse>(res, {});
   } catch (e) {
     console.error(e);
     return ResponseHandler.json(
