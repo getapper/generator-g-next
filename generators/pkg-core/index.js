@@ -50,6 +50,9 @@ module.exports = class extends Generator {
         ttypescript: "1.5.13",
         "typescript-transform-paths": "3.3.1",
       },
+      dependencies: {
+        yup: "0.32.9",
+      },
       husky: {
         hooks: {
           "pre-commit": "lint-staged",
