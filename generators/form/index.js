@@ -8,6 +8,13 @@ const { pascalCase } = require("pascal-case");
 const { requirePackages } = require("../../common");
 
 module.exports = class extends Generator {
+  initializing() {
+    this.env.adapter.promptModule.registerPrompt(
+      "directory",
+      require("inquirer-directory")
+    );
+  }
+
   async prompting() {
     // Config checks
     requirePackages(this, ["mui"]);
@@ -22,6 +29,12 @@ module.exports = class extends Generator {
     );
 
     const answers = await this.prompt([
+      {
+        type: "directory",
+        name: "formPath",
+        message: "Select where to create the form:",
+        basePath: "./components",
+      },
       {
         type: "input",
         name: "formName",
@@ -40,38 +53,34 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    /**
-     * Index.tsx form file
-     */
+    const { formPath, formName } = this.answers;
 
+    const relativeToComponentsPath = `./${
+      formPath ? formPath + "/" : ""
+    }${formName}`;
+
+    const relativeToRootPath = `./components/${relativeToComponentsPath}`;
+
+    // Index.tsx component file
     this.fs.copyTpl(
       this.templatePath("index.ejs"),
-      this.destinationPath(`./components/${this.answers.formName}/index.tsx`),
+      this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
       {
         ...this.answers,
       }
     );
 
-    /**
-     * Index.hooks.tsx hooks file
-     */
-
+    // Index.hooks.tsx hooks file
     this.fs.copyTpl(
       this.templatePath("index.hooks.ejs"),
-      this.destinationPath(
-        `./components/${this.answers.formName}/index.hooks.tsx`
-      ),
+      this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
       {
         ...this.answers,
       }
     );
 
-    /**
-     * /src/forms/index.tsx export file
-     */
-
-    const content = `export * from './${this.answers.formName}';\n`;
-
+    // ./components/index.tsx export file
+    const content = `export * from '${relativeToComponentsPath}';\n`;
     fs.appendFileSync(
       path.join(this.destinationRoot(), "components", "index.tsx"),
       content
