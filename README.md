@@ -87,6 +87,12 @@ It creates a new AJAX function for the specified SPA.
 
 It creates a new redux slice for the specified SPA.
 
+### yo g-next:form
+
+#### dependencies: pkg-mui
+
+It creates a new form component in the selected folder, with FormProvider and yup schema validation support.
+
 ## TODO
 
 ### yo g-next:task
@@ -147,9 +153,3 @@ export default useAppHooks;
 - It should add all the backend library files inside the `./lib` folder
 - It should add all fe and be dependencies to the package json
 - It should add all the required env vars to all env files
-
-### yo g-next:form
-
-- It should create a new form component in the selected folder
-- It should add a FormProvider
-- Current _form components will need to be refactored in order to get form fields from the provider
