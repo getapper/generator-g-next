@@ -3,13 +3,14 @@ module.exports = (
   useGetStaticPaths,
   useGetStaticProps,
   userGetServerSideProps,
+  dynamic,
   multipleParameters,
   paramName
 ) => `import React, { memo } from "react";
 import { AppHead } from "components/AppHead";${
   useGetStaticProps
     ? `
-import { GetStaticPropsResult } from "next";`
+import { GetStaticPropsResult, GetStaticPropsContext } from "next";`
     : ""
 }${
   useGetStaticPaths
@@ -19,7 +20,7 @@ import { GetStaticPathsResult } from "next";`
 }${
   userGetServerSideProps
     ? `
-import { GetServerSidePropsResult } from "next";`
+import { GetServerSidePropsResult, GetServerSidePropsContext } from "next";`
     : ""
 }
 
@@ -54,7 +55,9 @@ export async function getStaticPaths(): Promise<
           ? `
         ${paramName}: "",
 `
-          : ""
+          : `
+        ${paramName}: [],
+`
       }     },
     }],
     fallback: true,
@@ -66,7 +69,11 @@ export async function getStaticPaths(): Promise<
   useGetStaticProps
     ? `
 
-export async function getStaticProps({}): Promise<GetStaticPropsResult<${componentName}Props>> {
+export async function getStaticProps({${
+        dynamic ? `params: { ${paramName} },` : ""
+      }}: GetStaticPropsContext<{ ${paramName}: string${
+        multipleParameters ? "[]" : ""
+      } }>): Promise<GetStaticPropsResult<${componentName}Props>> {
   return {
     props: {},
   };
@@ -78,7 +85,11 @@ export async function getStaticProps({}): Promise<GetStaticPropsResult<${compone
   userGetServerSideProps
     ? `
 
-export async function getServerSideProps({}): Promise<GetServerSidePropsResult<${componentName}Props>> {
+export async function getServerSideProps({${
+        dynamic ? `params: { ${paramName} },` : ""
+      }}: GetServerSidePropsContext<{ ${paramName}: string${
+        multipleParameters ? "[]" : ""
+      } }>): Promise<GetServerSidePropsResult<${componentName}Props>> {
   return {
     props: {},
   };

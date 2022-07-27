@@ -121,8 +121,11 @@ module.exports = class extends Generator {
         dynamic && renderingStrategy !== "Server-side Rendering Props (SSR)",
         renderingStrategy === "Static Generation Props (SSG)",
         renderingStrategy === "Server-side Rendering Props (SSR)",
+        dynamic,
         multipleParameters,
-        multipleParameters ? null : pageName.replace("[", "").replace("]", "")
+        multipleParameters
+          ? pageName.replace("[[...", "").replace("]]", "")
+          : pageName.replace("[", "").replace("]", "")
       )
     );
   }
