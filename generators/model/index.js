@@ -73,12 +73,5 @@ module.exports = class extends Generator {
         modelName,
       }
     );
-
-    // /models/***/index.ts export file
-    const content = `export * from './${modelName}';\n`;
-    fs.appendFileSync(
-      path.join(this.destinationRoot(), "models", location, "index.ts"),
-      content
-    );
   }
 };

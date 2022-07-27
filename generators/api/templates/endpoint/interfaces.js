@@ -1,10 +1,30 @@
-module.exports = urlParams => `import { ErrorResponse, RequestI } from "lib/response-handler";
+module.exports = (
+  apiNameCapital,
+  urlParams,
+  hasPayload
+) => `import { ErrorResponse, RequestI } from "lib/response-handler";
 
-export type QueryStringParameters = {${
-  urlParams ? urlParams.map(p => `\n  ${p}: string,`).join("\n") + "\n" : ""
-}};
+export namespace ${apiNameCapital}Api {
+  export type QueryStringParameters = {${
+    urlParams
+      ? urlParams.map((p) => `\n    ${p}: string,`).join("\n") + "\n  "
+      : ""
+  }};${
+  hasPayload
+    ? `
 
-export type EndpointResponse = {} | ErrorResponse;
+  export type Payload = {};`
+    : ""
+}
 
-export interface Request extends RequestI<QueryStringParameters, null> {}
+  export type SuccessResponse = {
+    message?: string;
+  };
+
+  export type EndpointResponse = SuccessResponse | ErrorResponse;
+
+  export interface Request extends RequestI<QueryStringParameters, ${
+    hasPayload ? "Payload" : "null"
+  }> {}
+}
 `;

@@ -2,11 +2,19 @@
 const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
-const { pascalCase } = require("pascal-case");
+const getEndpointHandlersTemplate = require("./templates/endpoint/handler");
 const getEndpointInterfacesTemplate = require("./templates/endpoint/interfaces");
 const getEndpointValidationsTemplate = require("./templates/endpoint/validations");
 const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
 const { requirePackages } = require("../../common");
+
+const HttpMethods = {
+  GET: "get",
+  POST: "post",
+  DELETE: "delete",
+  PUT: "put",
+  PATCH: "patch",
+};
 
 const camelCaseToDash = (s) =>
   s.replace(/([a-zA-Z])(?=[A-Z])/g, "$1-").toLowerCase();
@@ -119,7 +127,7 @@ module.exports = class extends Generator {
         type: "list",
         name: "method",
         message: "What is your API http method?",
-        choices: ["get", "post", "patch", "put", "delete"],
+        choices: Object.values(HttpMethods),
         default: "get",
       },
     ]);
@@ -139,27 +147,32 @@ module.exports = class extends Generator {
     const endpointFolderName = getEndpointFolder(method, params);
     const apiName = getFunctionName(method, params);
     const [routePath, urlParams] = getAjaxPath(params);
+    const hasPayload = [
+      HttpMethods.PATCH,
+      HttpMethods.POST,
+      HttpMethods.PUT,
+    ].includes(method);
 
     // Endpoints folder
     this.fs.write(
       this.destinationPath(`./endpoints/${endpointFolderName}/interfaces.ts`),
-      getEndpointInterfacesTemplate(urlParams)
+      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload)
     );
     this.fs.write(
       this.destinationPath(`./endpoints/${endpointFolderName}/validations.ts`),
-      getEndpointValidationsTemplate(urlParams)
+      getEndpointValidationsTemplate(capitalize(apiName), urlParams)
+    );
+    this.fs.write(
+      this.destinationPath(`./endpoints/${endpointFolderName}/handler.ts`),
+      getEndpointHandlersTemplate(capitalize(apiName))
     );
     this.fs.write(
       this.destinationPath(`./endpoints/${endpointFolderName}/index.test.ts`),
-      getEndpointTestsTemplate(endpointFolderName, apiName)
+      getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
     this.fs.copy(
       this.templatePath("./endpoint/index.ts"),
       this.destinationPath(`./endpoints/${endpointFolderName}/index.ts`)
-    );
-    this.fs.copy(
-      this.templatePath("./endpoint/handler.ts"),
-      this.destinationPath(`./endpoints/${endpointFolderName}/handler.ts`)
     );
   }
 };

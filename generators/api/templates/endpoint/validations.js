@@ -1,14 +1,17 @@
-module.exports = urlParams => `import { YupShapeByInterface } from "lib/response-handler";
+module.exports = (
+  apiNameCapital,
+  urlParams
+) => `import { YupShapeByInterface } from "lib/response-handler";
 import * as yup from "yup";
-import { QueryStringParameters } from "./interfaces";
+import { ${apiNameCapital}Api } from "./interfaces";
 
 const queryStringParametersValidations =
-  (): YupShapeByInterface<QueryStringParameters> => ({${
-    urlParams
-      ? urlParams.map(p => `\n    ${p}: yup.string().required(),`).join("\n") +
-        "\n"
-      : ""
-  }  });
+  (): YupShapeByInterface<${apiNameCapital}Api.QueryStringParameters> => ({${
+  urlParams
+    ? urlParams.map((p) => `\n    ${p}: yup.string().required(),`).join("\n") +
+      "\n"
+    : ""
+}  });
 
 export default () => ({
   queryStringParameters: yup.object().shape(queryStringParametersValidations()),
