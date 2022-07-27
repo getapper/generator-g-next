@@ -80,12 +80,5 @@ module.exports = class extends Generator {
         ...this.answers,
       }
     );
-
-    // ./components/index.tsx export file
-    const content = `export * from '${relativeToComponentsPath}';\n`;
-    fs.appendFileSync(
-      path.join(this.destinationRoot(), "components", "index.tsx"),
-      content
-    );
   }
 };
