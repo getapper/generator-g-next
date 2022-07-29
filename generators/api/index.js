@@ -6,7 +6,9 @@ const getEndpointHandlersTemplate = require("./templates/endpoint/handler");
 const getEndpointInterfacesTemplate = require("./templates/endpoint/interfaces");
 const getEndpointValidationsTemplate = require("./templates/endpoint/validations");
 const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
+const getEndpointPageTemplate = require("./templates/page");
 const { requirePackages } = require("../../common");
+const fs = require("fs");
 
 const HttpMethods = {
   GET: "get",
@@ -59,14 +61,33 @@ const getFunctionName = (method, params) => {
   }${variables.join("And")}`;
 };
 
-const getEndpointFolder = (method, params) => {
+const getEndpointRoutePath = (params) => {
   const models = params.filter((p) => p[0] !== "{");
   const variables = params
     .filter((p) => p[0] === "{")
     .map((p) => p.replace("{", "").replace("}", ""));
-  return `${method}-${models.join("-")}${
-    variables.length ? "-by-" : ""
-  }${variables.join("-and-")}`;
+  return `${models.join("-")}${variables.length ? "-by-" : ""}${variables.join(
+    "-and-"
+  )}`;
+};
+
+const getPagesApiFolders = (params) => {
+  return params.map((p) =>
+    p[0] === "{"
+      ? "[" +
+        p
+          .replace("{", "")
+          .replace("}", "")
+          .split("-")
+          .map((p2, index) => (index ? capitalize(p2) : p2))
+          .join("") +
+        "]"
+      : p
+  );
+};
+
+const getEndpointFolder = (method, endpointRoutePath) => {
+  return `${method}-${endpointRoutePath}`;
 };
 
 const getAjaxPath = (params) => {
@@ -144,14 +165,37 @@ module.exports = class extends Generator {
   writing() {
     const { method, route } = this.answers;
     const params = parseFromText(route);
-    const endpointFolderName = getEndpointFolder(method, params);
+    const endpointRoutePath = getEndpointRoutePath(params);
+    const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
     const apiName = getFunctionName(method, params);
     const [routePath, urlParams] = getAjaxPath(params);
+    const pagesApiFolders = getPagesApiFolders(params);
     const hasPayload = [
       HttpMethods.PATCH,
       HttpMethods.POST,
       HttpMethods.PUT,
     ].includes(method);
+
+    let currentRoute = "";
+    for (let i = 0; i < pagesApiFolders.length; i++) {
+      const folder = pagesApiFolders[i];
+      currentRoute += folder + "/";
+      const relativeToPagesFolder = `./pages/api/${currentRoute}/`;
+      if (
+        !(
+          fs.existsSync(relativeToPagesFolder) &&
+          fs.lstatSync(relativeToPagesFolder).isDirectory()
+        )
+      ) {
+        fs.mkdirSync(relativeToPagesFolder);
+      }
+      if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
+        this.fs.write(
+          this.destinationPath(`${relativeToPagesFolder}index.ts`),
+          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
+        );
+      }
+    }
 
     // Endpoints folder
     this.fs.write(

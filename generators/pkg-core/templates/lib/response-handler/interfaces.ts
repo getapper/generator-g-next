@@ -82,7 +82,7 @@ interface Response {
 }
 
 type ErrorResponse = {
-  message: string;
+  message?: string;
 };
 
 type YupShapeByInterface<T> = {
@@ -101,8 +101,15 @@ export interface RequestI<Q, P> {
   validationResult: ValidationResult;
   queryStringParameters: Q;
   payload: P;
-  session?: any;
   headers?: { [name: string]: string };
+}
+
+export enum HttpMethods {
+  GET = "get",
+  POST = "post",
+  DELETE = "delete",
+  PUT = "put",
+  PATCH = "patch",
 }
 
 export { StatusCodes };

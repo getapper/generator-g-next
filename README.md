@@ -68,6 +68,8 @@ It creates a new scene for the specified SPA.
 
 ### yo g-next:page
 
+#### dependencies: pkg-core
+
 It creates a new page inside NextJS project, inside /pages root folder or one of its subfolders.\
 It also allows specifying if the component is:
 - a normal page (eg. /news)
@@ -77,13 +79,19 @@ It also gives the possibility to specify the server rendering mode (SSG or SSR).
 
 ### yo g-next:comp
 
+#### dependencies: pkg-core
+
 It creates a new component with a hook file. A subfolder of the components one can be selected as well.
 
 ### yo g-next:ajax
 
+#### dependencies: pkg-spa
+
 It creates a new AJAX function for the specified SPA.
 
 ### yo g-next:slice
+
+#### dependencies: pkg-spa
 
 It creates a new redux slice for the specified SPA.
 
@@ -92,6 +100,13 @@ It creates a new redux slice for the specified SPA.
 #### dependencies: pkg-mui
 
 It creates a new form component in the selected folder, with FormProvider and yup schema validation support.
+
+### yo g-next:api
+
+#### dependencies: pkg-core
+
+It creates a new API endpoint folder insider /endpoints, with interfaces, validations, tests and handler function.\
+It also connects this endpoint function to the Next `./api` folder and its configuration files
 
 ## TODO
 
@@ -102,11 +117,6 @@ It creates a new form component in the selected folder, with FormProvider and yu
 ### yo g-next:pkg-mongodb
 
 - It should add mongo env vars to the env files
-
-### yo g-next:api
-
-- It should create unit test index.test.ts file
-- It should connect this endpoint function to the Next `./api` folder and its configuration files
 
 ### yo g-next:spa
 
