@@ -45,6 +45,7 @@ module.exports = class extends Generator {
         "eslint-config-prettier": "8.5.0",
         husky: "4.2.5",
         "lint-staged": "10.2.11",
+        "node-mocks-http": "1.11.0",
         prettier: "2.7.1",
         rimraf: "3.0.2",
         ttypescript: "1.5.13",
