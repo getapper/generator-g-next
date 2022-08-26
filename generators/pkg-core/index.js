@@ -40,10 +40,12 @@ module.exports = class extends Generator {
         test: "npm run tsc-backend && jest --runInBand",
       },
       devDependencies: {
+        "@types/jest": "27.5.2",
         "custom-env": "2.0.1",
         "env-cmd": "10.1.0",
         "eslint-config-prettier": "8.5.0",
         husky: "4.2.5",
+        jest: "27.5.1",
         "lint-staged": "10.2.11",
         "node-mocks-http": "1.11.0",
         prettier: "2.7.1",

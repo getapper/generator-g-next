@@ -1,6 +1,7 @@
 module.exports = (
   apiNameCapital,
-  urlParams
+  urlParams,
+  hasPayload
 ) => `import { YupShapeByInterface } from "lib/response-handler";
 import * as yup from "yup";
 import { ${apiNameCapital}Api } from "./interfaces";
@@ -12,8 +13,20 @@ const queryStringParametersValidations =
       "\n"
     : ""
 }  });
-
+${
+  hasPayload
+    ? `
+const payloadValidations =
+  (): YupShapeByInterface<PostProjectsApi.Payload> => ({});
+`
+    : ""
+}
 export default () => ({
-  queryStringParameters: yup.object().shape(queryStringParametersValidations()),
+  queryStringParameters: yup.object().shape(queryStringParametersValidations()),${
+    hasPayload
+      ? `
+  payload: yup.object().shape(payloadValidations()),`
+      : ""
+  }
 });
 `;

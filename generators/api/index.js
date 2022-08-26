@@ -204,7 +204,7 @@ module.exports = class extends Generator {
     );
     this.fs.write(
       this.destinationPath(`./endpoints/${endpointFolderName}/validations.ts`),
-      getEndpointValidationsTemplate(capitalize(apiName), urlParams)
+      getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
     );
     this.fs.write(
       this.destinationPath(`./endpoints/${endpointFolderName}/handler.ts`),
