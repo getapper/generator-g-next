@@ -100,7 +100,7 @@ const getAjaxPath = (params) => {
     );
   if (urlParams.length) {
     return [
-      `\`/${params
+      `\`/api/${params
         .map((p) => {
           if (p[0] === "{") {
             return `\${params.${p

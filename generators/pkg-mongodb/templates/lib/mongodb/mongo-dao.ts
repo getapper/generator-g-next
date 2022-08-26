@@ -1,4 +1,3 @@
-import "module-alias/register";
 import mongoClientPromise from "lib/mongodb";
 import {
   BulkWriteOptions,
@@ -58,7 +57,7 @@ class MongoDao<Interface, Class> {
 
   async init() {
     if (!process.env.MONGODB_NAME) {
-      throw new Error("Please specify process.env.MONGODB_NAME");
+      throw new Error("Please specify process.env.MONGO_DB_NAME");
     }
     if (!this.db) {
       this.mongoClient = await mongoClientPromise;

@@ -26,7 +26,7 @@ module.exports = class extends Generator {
       {
         type: "list",
         name: "spaFolderName",
-        message: "In which SPA you want to create a scene?",
+        message: "In which SPA you want to create a slice?",
         choices: getSpas(this),
       },
       {
