@@ -12,12 +12,12 @@ const queryStringParametersValidations =
     ? urlParams.map((p) => `\n    ${p}: yup.string().required(),`).join("\n") +
       "\n"
     : ""
-}  });
+}});
 ${
   hasPayload
     ? `
 const payloadValidations =
-  (): YupShapeByInterface<PostProjectsApi.Payload> => ({});
+  (): YupShapeByInterface<${apiNameCapital}Api.Payload> => ({});
 `
     : ""
 }
