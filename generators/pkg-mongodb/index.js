@@ -6,6 +6,7 @@ const {
   getGenygConfigFile,
   extendConfigFile,
   requirePackages,
+  extendEnv,
 } = require("../../common");
 
 module.exports = class extends Generator {
@@ -57,7 +58,21 @@ module.exports = class extends Generator {
       },
     });
 
-    // Copy MUI form components
+    //Environment variables
+    extendEnv(
+      this,
+      "local",
+      `MONGODB_URI=mongodb://localhost:27017
+MONGODB_NAME=*`
+    );
+    extendEnv(
+      this,
+      "test",
+      `MONGODB_URI=mongodb://localhost:27017
+MONGODB_NAME=*-test`
+    );
+
+    // Copy MongoDB lib files
     this.fs.copy(this.templatePath(), this.destinationRoot());
 
     extendConfigFile(this, {

@@ -1,5 +1,7 @@
 # generator-g-next
 
+Welcome to the GeNYG project! GeNYG is a generator made with Yeoman by Getapper for scaffolding, development, testing and deployment of applications in NextJS.
+
 ## Commands
 
 ### yo g-next:app
@@ -60,6 +62,15 @@ Having different folders and files (even to represent the same entity) from back
 
 It creates a new scene for the specified SPA.
 
+
+### yo g-next:pkg-mongodb
+
+#### dependencies: pkg-core
+
+- It adds mongodb node dependency
+- It adds mongodb library files inside /lib
+- It adds mongo env vars to the env files
+
 ### yo g-next:model-mongodb
 
 #### dependencies: pkg-mongodb
@@ -113,10 +124,6 @@ It also connects this endpoint function to the Next `./api` folder and its confi
 ### yo g-next:task
 
 - It should create a new task.ts file in the tasks' folder, with the env files requires and a script in the package.json to run it. 
-
-### yo g-next:pkg-mongodb
-
-- It should add mongo env vars to the env files
 
 ### yo g-next:spa
 

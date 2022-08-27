@@ -48,10 +48,22 @@ const getSpas = (genyg) => {
   return fs.readdirSync(genyg.destinationPath("./spas"));
 };
 
+const extendEnv = (genyg, envName, newContent) => {
+  const envFileContent = genyg.fs.read(
+    genyg.destinationPath(`.env.${envName}`)
+  );
+  genyg.fs.write(
+    genyg.destinationPath(`.env.${envName}`),
+    `${envFileContent}
+${newContent}`
+  );
+};
+
 module.exports = {
   getGenygConfigFile,
   requirePackages,
   extendConfigFile,
   copyEjsTemplateFolder,
   getSpas,
+  extendEnv,
 };

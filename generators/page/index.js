@@ -57,6 +57,8 @@ module.exports = class extends Generator {
           },
         ])),
       };
+    } else {
+      answers.dynamic = false;
     }
 
     answers = {
@@ -116,17 +118,20 @@ module.exports = class extends Generator {
     // Index.tsx page file
     this.fs.write(
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
-      getPageTemplate(
+      getPageTemplate({
         componentName,
-        dynamic && renderingStrategy !== "Server-side Rendering Props (SSR)",
-        renderingStrategy === "Static Generation Props (SSG)",
-        renderingStrategy === "Server-side Rendering Props (SSR)",
+        useGetStaticPaths:
+          dynamic && renderingStrategy !== "Server-side Rendering Props (SSR)",
+        useGetStaticProps:
+          renderingStrategy === "Static Generation Props (SSG)",
+        userGetServerSideProps:
+          renderingStrategy === "Server-side Rendering Props (SSR)",
         dynamic,
         multipleParameters,
-        multipleParameters
+        paramName: multipleParameters
           ? pageName.replace("[[...", "").replace("]]", "")
-          : pageName.replace("[", "").replace("]", "")
-      )
+          : pageName.replace("[", "").replace("]", ""),
+      })
     );
   }
 };
