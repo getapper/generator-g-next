@@ -1,0 +1,14 @@
+require("custom-env").env("local");
+require("custom-env");
+
+const exec = async () => {};
+
+exec()
+  .then(() => {
+    console.log("DONE!");
+  })
+  .catch(console.error)
+  .finally(() => {
+    // mongoDao.mongoClient?.close();
+    process.exit(0);
+  });
