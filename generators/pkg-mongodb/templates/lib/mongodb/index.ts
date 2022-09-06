@@ -6,7 +6,7 @@ declare global {
 
 if (!process.env.MONGODB_URI) {
   throw new Error(
-    "Missing MONGODB_URI env var. Check you local .env.local file or your CI env vars configuration."
+    "Missing MONGODB_URI env var. Check you local .env.template file or your CI env vars configuration."
   );
 }
 
