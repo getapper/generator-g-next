@@ -5,6 +5,7 @@
     "mui": false,
     "spa": false,
     "translations": false,
-    "mongodb": false
+    "mongodb": false,
+    "cognito": false
   }
 }

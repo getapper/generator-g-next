@@ -56,6 +56,7 @@ module.exports = class extends Generator {
       {
         modelName,
         modelCollection,
+        modelNamePluralized: pluralize(modelName),
       }
     );
   }

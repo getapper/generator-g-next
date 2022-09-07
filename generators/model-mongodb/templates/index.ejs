@@ -31,10 +31,7 @@ export class <%= modelName %>
           v: 1,
         }
       );
-    if (i<%= modelName %>) {
-      return new <%= modelName %>(i<%= modelName %>);
-    }
-    return null;
+    return i<%= modelName %> ? new <%= modelName %>(i<%= modelName %>) : null;
   }
 
   static async getById(_id: ObjectId): Promise<<%= modelName %> | null> {
@@ -45,10 +42,7 @@ export class <%= modelName %>
           _id,
         }
       );
-    if (i<%= modelName %>) {
-      return new <%= modelName %>(i<%= modelName %>);
-    }
-    return null;
+      return i<%= modelName %> ? new <%= modelName %>(i<%= modelName %>) : null;
   }
 
   async patch(fields: Partial<I<%= modelName %>>): Promise<void> {
@@ -98,7 +92,7 @@ export class <%= modelName %>
       sort: [],
     }
   ): Promise<<%= modelName %>[]> {
-    const i<%= modelName %>s =
+    const i<%= modelNamePluralized %> =
       await mongoDao.findMany<I<%= modelName %>>(
         <%= modelName %>.collectionName,
         filter,
@@ -112,7 +106,7 @@ export class <%= modelName %>
             : undefined,
         }
       );
-    return i<%= modelName %>s.map(
+    return i<%= modelNamePluralized %>.map(
       (i<%= modelName %>) =>
         new <%= modelName %>(i<%= modelName %>)
     );
