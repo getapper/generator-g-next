@@ -17,7 +17,7 @@ export const feedbackStore = createSlice({
   reducers: {
     setFeedback: (state, { payload }: SetFeedbackAction) => {
       state.open = true;
-      state.type = payload.type ?? 0;
+      state.type = payload.type ?? AlertTypes.Info;
       state.message = payload.message || state.message;
     },
     closeFeedback: (state) => {

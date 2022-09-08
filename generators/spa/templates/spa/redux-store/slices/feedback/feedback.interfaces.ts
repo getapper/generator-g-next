@@ -1,9 +1,10 @@
 import { Action } from "redux";
 
 export enum AlertTypes {
-  Success,
-  Info,
-  Error,
+  Success = "success",
+  Info = "info",
+  Error = "error",
+  Warning = "warning",
 }
 
 export interface FeedbackState {

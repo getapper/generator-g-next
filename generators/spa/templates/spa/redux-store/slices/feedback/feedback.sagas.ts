@@ -18,17 +18,22 @@ export function* closeFeedbackSaga() {
 }
 
 export function* ajaxSuccessFeedbackSaga() {
-  /*
-  yield takeEvery(actions.postSomethingApi.success.type, function* () {
-    yield put(
-      actions.setFeedback({
-        type: AlertTypes.success,
-        icon: AlertIcons.info,
-        message: "Api succes message!",
-      })
-    );
-  });
-   */
+  yield takeEvery(
+    (action: Action) => /^apis\/(.*?)\/success$/.test(action.type),
+    function* (action: any) {
+      if (action?.payload?.data?.message) {
+        switch (action.type) {
+          default:
+            yield put(
+              actions.setFeedback({
+                type: AlertTypes.Success,
+                message: action.payload.data.message,
+              })
+            );
+        }
+      }
+    }
+  );
 }
 
 export function* ajaxFailFeedbackSaga() {
