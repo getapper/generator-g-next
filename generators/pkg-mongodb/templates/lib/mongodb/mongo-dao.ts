@@ -15,16 +15,17 @@ import {
   UpdateResult,
 } from "mongodb";
 import * as yup from "yup";
+import { BaseSchema } from "yup";
 
 export const yupObjectId = () =>
   yup
     .mixed()
-    .transform((value, originalValue) => {
+    .transform((value: string, originalValue: string, schema: BaseSchema) => {
       if (value === null) {
-        return null;
+        return schema.spec.nullable ? null : "error";
       }
       if (!ObjectId.isValid(value)) {
-        return null;
+        return "error";
       }
       return new ObjectId(value);
     })
@@ -34,7 +35,7 @@ export const yupObjectId = () =>
       function (value) {
         const { path, createError } = this;
 
-        if (value === null) {
+        if (value === "error") {
           return createError({ path });
         }
 
@@ -57,7 +58,7 @@ class MongoDao<Interface, Class> {
 
   async init() {
     if (!process.env.MONGODB_NAME) {
-      throw new Error("Please specify process.env.MONGO_DB_NAME");
+      throw new Error("Please specify process.env.MONGODB_NAME");
     }
     if (!this.db) {
       this.mongoClient = await mongoClientPromise;
