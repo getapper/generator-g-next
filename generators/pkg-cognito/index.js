@@ -85,7 +85,15 @@ RLN_COGNITO_AUTH_USER_REGION=***`
     );
 
     // Copy project files
-    this.fs.copy(this.templatePath("."), this.destinationPath("."));
-    this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+    try {
+      this.fs.copy(this.templatePath("."), this.destinationPath("."));
+    } catch (err) {
+      console.log(err);
+    }
+    try {
+      this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+    } catch (err) {
+      console.log(err);
+    }
   }
 };
