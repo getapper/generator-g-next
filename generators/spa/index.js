@@ -90,17 +90,6 @@ module.exports = class extends Generator {
       }
     );
 
-    // Index.hooks.tsx hooks file
-    this.fs.copyTpl(
-      this.templatePath("page/index.hooks.ejs"),
-      this.destinationPath(path.join(relativeToRootPath, "/index.hooks.tsx")),
-      {
-        spaName,
-        spaFolderName,
-        pageName,
-      }
-    );
-
     // SPA files
     const relativeToSpaFolder = `./spas/${spaFolderName}/`;
 
