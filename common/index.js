@@ -49,9 +49,12 @@ const getSpas = (genyg) => {
 };
 
 const extendEnv = (genyg, envName, newContent) => {
-  const envFileContent = genyg.fs.read(
-    genyg.destinationPath(`.env${envName ? "." + envName : ""}`)
-  );
+  let envFileContent = "";
+  try {
+    envFileContent = genyg.fs.read(
+      genyg.destinationPath(`.env${envName ? "." + envName : ""}`)
+    );
+  } catch (e) {}
   genyg.fs.write(
     genyg.destinationPath(`.env${envName ? "." + envName : ""}`),
     `${envFileContent}

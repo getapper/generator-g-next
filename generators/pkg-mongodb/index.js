@@ -75,6 +75,13 @@ MONGODB_NAME=*-test`
     // Copy MongoDB lib files
     this.fs.copy(this.templatePath(), this.destinationRoot());
 
+    const nextConfigOptionsJson = require(this.destinationPath(
+      "next.config.options.json"
+    ));
+    this.fs.extendJSON(this.destinationPath("next.config.options.json"), {
+      env: [...nextConfigOptionsJson.env, "MONGODB_NAME", "MONGODB_URI"],
+    });
+
     extendConfigFile(this, {
       packages: {
         mongodb: true,
