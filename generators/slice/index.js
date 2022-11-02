@@ -120,7 +120,7 @@ module.exports = class extends Generator {
 
 `
     );
-    match = slicesIndex.match(/(.*):(.*)Store(.*?).reducer,?\n}/)[0];
+    match = slicesIndex.match(/(.*)Store(.*?).reducer,?\n}/)[0];
     slicesIndex = slicesIndex.replace(
       match,
       `${match.slice(
