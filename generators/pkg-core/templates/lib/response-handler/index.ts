@@ -118,3 +118,20 @@ class TestHandler {
 export { ResponseHandler, TestHandler };
 
 export * from "./interfaces";
+
+export const nextApiEndpointHandler =
+  (route: string) => async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      const endpoint = await import(
+        `endpoints/${req.method.toLowerCase()}-${route}`
+      );
+      if (endpoint.default) {
+        return endpoint.default(req, res);
+      } else {
+        return res.status(StatusCodes.MethodNotAllowed).json({});
+      }
+    } catch (e) {
+      console.error(e);
+      return res.status(StatusCodes.InternalServerError).json({});
+    }
+  };
