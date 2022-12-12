@@ -39,7 +39,6 @@ class ResponseHandler {
     handler: any,
   ) {
     let queryStringParameters: any = req.query || {};
-    console.log(queryStringParameters);
     let payload = req.body;
     const validations = validationsBuilder();
     const validationResult: ValidationResult = {

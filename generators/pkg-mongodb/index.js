@@ -79,7 +79,11 @@ MONGODB_NAME=*-test`
       "next.config.options.json"
     ));
     this.fs.extendJSON(this.destinationPath("next.config.options.json"), {
-      env: [...nextConfigOptionsJson.env, "MONGODB_NAME", "MONGODB_URI"],
+      env: [
+        ...(nextConfigOptionsJson?.env ?? []),
+        "MONGODB_NAME",
+        "MONGODB_URI",
+      ],
     });
 
     extendConfigFile(this, {

@@ -121,6 +121,14 @@ It also connects this endpoint function to the Next `./api` folder and its confi
 
 ## TODO
 
+### yo g-next:pkg-core
+
+- Add sitemap.xml generation
+
+### yo g-next:model-mongodb
+
+- Add project to getList
+
 ### yo g-next:task
 
 - It should create a new task.ts file in the tasks' folder, with the env files requires and a script in the package.json to run it. 
