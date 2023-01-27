@@ -29,6 +29,9 @@
     "yosay": "2.0.2"
   },
   "devDependencies": {
+    "@aws-sdk/client-eventbridge": "^3.259.0",
+    "@aws-sdk/client-iam": "^3.259.0",
+    "@aws-sdk/client-scheduler": "^3.259.0",
     "prettier": "2.5.1"
   }
 }
