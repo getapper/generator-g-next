@@ -62,6 +62,8 @@ ${newContent}`
   );
 };
 
+const checkGenygVersion = (genyg) => {};
+
 module.exports = {
   getGenygConfigFile,
   requirePackages,

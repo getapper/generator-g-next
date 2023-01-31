@@ -43,6 +43,7 @@ module.exports = class extends Generator {
         "@types/jest": "27.5.2",
         "custom-env": "2.0.1",
         "env-cmd": "10.1.0",
+        eslint: "8.22.0",
         "eslint-config-prettier": "8.5.0",
         husky: "4.2.5",
         jest: "27.5.1",
@@ -76,5 +77,10 @@ module.exports = class extends Generator {
     // Copy project files
     this.fs.copy(this.templatePath("."), this.destinationPath("."));
     this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+  }
+
+  install() {
+    // this.spawnCommand("npm", ["uninstall", "eslint"]);
+    this.spawnCommand("npm", ["i", "eslint@8.22.0", "--save-dev", "--E"]);
   }
 };

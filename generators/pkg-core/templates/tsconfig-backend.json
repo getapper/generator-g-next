@@ -5,11 +5,7 @@
     "rootDir": ".",
     "outDir": "dist",
     "paths": {
-      "lib/*": ["./lib/*"],
-      "models/common/*": ["./models/common/*"],
-      "models/server/*": ["./models/server/*"],
-      "tasks/*": ["./tasks/*"],
-      "endpoints/*": ["./endpoints/*"]
+      "@/*": ["./src/*"]
     },
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -33,11 +29,11 @@
     ]
   },
   "include": [
-    "lib/**/*.ts",
-    "models/common/*.ts",
-    "models/server/*.ts",
-    "tasks/**/*.ts",
-    "endpoints/**/*.ts"
+    "src/lib/**/*.ts",
+    "src/models/common/*.ts",
+    "src/models/server/*.ts",
+    "src/tasks/**/*.ts",
+    "src/endpoints/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

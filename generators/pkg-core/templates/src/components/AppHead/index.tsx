@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useAppHead } from "./index.hooks";
+import { useAppHead } from "src/components/AppHead/index.hooks";
 import Head from "next/head";
 
 type AppHeadProps = {
