@@ -2,7 +2,7 @@ import { TimePicker, LocalizationProvider } from "@mui/lab";
 import AdapterMoment from "@mui/lab/AdapterMoment";
 import { TextField } from "@mui/material";
 import React, { memo } from "react";
-import { useFormTimePicker } from "./index.hooks";
+import { useFormTimePicker } from "generators/pkg-mui/templates/src/components/_form/FormTimePicker/index.hooks";
 import { Controller } from "react-hook-form";
 import { JsUtility } from "models/common";
 

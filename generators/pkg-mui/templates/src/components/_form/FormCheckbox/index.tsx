@@ -6,7 +6,7 @@ import {
   FormControlLabel,
   FormHelperText,
 } from "@mui/material";
-import { useFormCheckbox } from "./index.hooks";
+import { useFormCheckbox } from "generators/pkg-mui/templates/src/components/_form/FormCheckbox/index.hooks";
 import { Controller } from "react-hook-form";
 import { JsUtility } from "models/common";
 

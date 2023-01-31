@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useFormChipsField } from "./index.hooks";
+import { useFormChipsField } from "generators/pkg-mui/templates/src/components/_form/FormChipsField/index.hooks";
 import { Box, Chip, Stack, TextField, TextFieldProps } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { SystemCssProperties } from "@mui/system";

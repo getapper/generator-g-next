@@ -6,7 +6,7 @@ import {
 import AdapterMoment from "@mui/lab/AdapterMoment";
 import { TextField } from "@mui/material";
 import React, { memo } from "react";
-import { useFormDatePicker } from "components/_form/FormDatePicker/index.hooks";
+import { useFormDatePicker } from "generators/pkg-mui/templates/src/components/_form/FormDatePicker/index.hooks";
 import { Controller } from "react-hook-form";
 import { JsUtility } from "models/common";
 

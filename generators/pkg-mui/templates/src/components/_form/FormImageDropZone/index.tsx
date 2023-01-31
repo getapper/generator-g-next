@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Box, FormHelperText, IconButton } from "@mui/material";
-import { useFormImageDropZone } from "./index.hooks";
+import { useFormImageDropZone } from "generators/pkg-mui/templates/src/components/_form/FormImageDropZone/index.hooks";
 import { Controller } from "react-hook-form";
 import { DeleteOutlined } from "@mui/icons-material";
 
@@ -15,13 +15,13 @@ export type FormImageDropZoneProps = {
 
 export const FormImageDropZone = memo(
   ({
-     name,
-     helperText,
-     setValue,
-     fileMetadata,
-     error,
-     preview = true,
-   }: FormImageDropZoneProps) => {
+    name,
+    helperText,
+    setValue,
+    fileMetadata,
+    error,
+    preview = true,
+  }: FormImageDropZoneProps) => {
     const {
       getRootProps,
       getInputProps,
@@ -49,8 +49,8 @@ export const FormImageDropZone = memo(
                     dragAndDropError || error
                       ? "2px dashed #F00"
                       : isDragActive
-                        ? "2px dashed #33e"
-                        : "2px dashed #E8E8E8",
+                      ? "2px dashed #33e"
+                      : "2px dashed #E8E8E8",
                   background: isDragActive ? "#f0f0f0" : undefined,
                   transition: "all .2s",
                   borderRadius: "4px",
@@ -122,6 +122,6 @@ export const FormImageDropZone = memo(
         )}
       </>
     );
-  },
+  }
 );
 FormImageDropZone.displayName = "FormImageDropZone";

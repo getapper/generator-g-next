@@ -2,7 +2,7 @@ import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import AdapterMoment from "@mui/lab/AdapterMoment";
 import { TextField } from "@mui/material";
 import React, { memo } from "react";
-import { useFormDateTimePicker } from "components/_form/FormDateTimePicker/index.hooks";
+import { useFormDateTimePicker } from "generators/pkg-mui/templates/src/components/_form/FormDateTimePicker/index.hooks";
 import { Controller } from "react-hook-form";
 import { JsUtility } from "models/common";
 

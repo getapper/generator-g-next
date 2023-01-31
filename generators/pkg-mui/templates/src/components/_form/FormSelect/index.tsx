@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useFormSelect } from "./index.hooks";
+import { useFormSelect } from "generators/pkg-mui/templates/src/components/_form/FormSelect/index.hooks";
 import {
   FormControl,
   FormControlProps,

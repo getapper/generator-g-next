@@ -8,7 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material";
-import { useFormRadioGroup } from "components/_form/FormRadioGroup/index.hooks";
+import { useFormRadioGroup } from "generators/pkg-mui/templates/src/components/_form/FormRadioGroup/index.hooks";
 import { Controller, RefCallBack } from "react-hook-form";
 import { JsUtility } from "models/common";
 

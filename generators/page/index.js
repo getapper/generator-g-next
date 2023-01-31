@@ -34,7 +34,7 @@ module.exports = class extends Generator {
         type: "directory",
         name: "pagePath",
         message: "Select where to create the page:",
-        basePath: "./pages",
+        basePath: "./src/pages",
       },
       {
         type: "input",
@@ -42,56 +42,39 @@ module.exports = class extends Generator {
         message:
           "What is your page name? (Use squared brackets for single parameters - eg. [postId] -, double square brackets with trailing dots for multiple parameters - eg. [[...params]])",
       },
+      {
+        type: "input",
+        name: "componentName",
+        message: "What is your page component name?",
+      },
+      {
+        type: "list",
+        name: "renderingStrategy",
+        message: "Which function for rendering should be used?",
+        choices: [
+          "none",
+          "Static Generation Props (SSG)",
+          "Server-side Rendering Props (SSR)",
+        ],
+        default: "none",
+      },
     ]);
 
     if (answers.pageName[0] === "[") {
       answers.dynamic = true;
       answers.multipleParameters = answers.pageName[1] === "[";
-      answers = {
-        ...answers,
-        ...(await this.prompt([
-          {
-            type: "input",
-            name: "componentName",
-            message: "What is your page component name?",
-          },
-        ])),
-      };
     } else {
       answers.dynamic = false;
     }
 
-    answers = {
-      ...answers,
-      ...(await this.prompt([
-        {
-          type: "list",
-          name: "renderingStrategy",
-          message: "Which function for rendering should be used?",
-          choices: [
-            "none",
-            "Static Generation Props (SSG)",
-            "Server-side Rendering Props (SSR)",
-          ],
-          default: "none",
-        },
-      ])),
-    };
-
-    if (
-      answers.pageName === "" ||
-      (answers.dynamic && answers.componentName === "")
-    ) {
+    if (answers.pageName === "" || answers.componentName === "") {
       this.log(yosay(chalk.red("Please give your page a name next time!")));
       process.exit(1);
       return;
     }
 
-    if (answers.dynamic) {
-      answers.componentName = pascalCase(answers.componentName).trim();
-    } else {
-      answers.componentName = pascalCase(answers.pageName).trim();
-    }
+    answers.componentName = pascalCase(answers.componentName).trim();
+    answers.pageName = kebabCase(answers.pageName).trim();
     this.answers = answers;
   }
 
@@ -106,12 +89,12 @@ module.exports = class extends Generator {
     } = this.answers;
     const folderName = dynamic
       ? pageName
-      : kebabCase(pageName)
+      : pageName
           .split("-")
           .filter((s) => s !== "")
           .join("-");
 
-    const relativeToRootPath = `./pages/${
+    const relativeToRootPath = `./src/pages/${
       pagePath ? pagePath + "/" : ""
     }${folderName}`;
 

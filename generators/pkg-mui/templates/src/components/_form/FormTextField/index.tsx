@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useFormTextField } from "./index.hooks";
+import { useFormTextField } from "generators/pkg-mui/templates/src/components/_form/FormTextField/index.hooks";
 import { TextFieldProps, TextField } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { JsUtility } from "models/common";

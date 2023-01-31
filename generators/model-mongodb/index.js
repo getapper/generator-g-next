@@ -43,7 +43,7 @@ module.exports = class extends Generator {
   writing() {
     const { modelName } = this.answers;
 
-    const relativeToModelsPath = `./models/server/${modelName}`;
+    const relativeToModelsPath = `./src/models/server/${modelName}`;
 
     const modelCollection = kebabCase(
       pluralize(modelName.charAt(0).toLowerCase() + modelName.slice(1), 2)

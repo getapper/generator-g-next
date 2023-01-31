@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Button, ButtonProps, CircularProgress } from "@mui/material";
-import { useAppButton } from "./index.hooks";
+import { useAppButton } from "generators/pkg-spa/templates/src/components/AppButton/index.hooks";
 
 type AppButtonProps = {
   loading?: boolean;
@@ -25,5 +25,5 @@ export const AppButton = memo(
     }
 
     return <Button {...props} onClick={onButtonClicked} />;
-  },
+  }
 );
