@@ -1,50 +1,30 @@
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import AdapterMoment from "@mui/lab/AdapterMoment";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
 import React, { memo } from "react";
-import { useFormDateTimePicker } from "generators/pkg-mui/templates/src/components/_form/FormDateTimePicker/index.hooks";
-import { Controller } from "react-hook-form";
-import { JsUtility } from "models/common";
+import { useFormDateTimePicker } from "./index.hooks";
 
 type FormDateTimePickerProps = {
   name: string;
-  label: string;
+  label?: string;
 };
 
 export const FormDateTimePicker = memo(
   ({ name, label }: FormDateTimePickerProps) => {
-    const { control, errors } = useFormDateTimePicker();
+    const { value, setValue, error } = useFormDateTimePicker(name);
 
     return (
-      <Controller
-        control={control}
-        name={name}
-        render={({ field: { onChange, onBlur, value, name } }) => {
-          return (
-            <LocalizationProvider dateAdapter={AdapterMoment}>
-              <DateTimePicker
-                label={label}
-                value={value}
-                onChange={onChange}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    onBlur={onBlur}
-                    error={
-                      !!JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                    }
-                    helperText={
-                      JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                        ?.message
-                    }
-                  />
-                )}
-              />
-            </LocalizationProvider>
-          );
-        }}
-      />
+      <LocalizationProvider dateAdapter={AdapterMoment}>
+        <DateTimePicker
+          label={label}
+          value={value}
+          onChange={setValue}
+          renderInput={(params) => (
+            <TextField {...params} error={!!error} helperText={error} />
+          )}
+        />
+      </LocalizationProvider>
     );
-  }
+  },
 );
 FormDateTimePicker.displayName = "FormDateTimePicker";

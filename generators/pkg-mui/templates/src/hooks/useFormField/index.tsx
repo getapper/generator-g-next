@@ -9,8 +9,9 @@ type useFormFieldProps = {
 const useFormField = <T,>({ name }: useFormFieldProps) => {
   const {
     control,
-    formState: { errors },
+    formState: { errors, isSubmitted },
     setValue: _setValue,
+    trigger,
   } = useFormContext();
 
   const value: T = useWatch({
@@ -19,14 +20,18 @@ const useFormField = <T,>({ name }: useFormFieldProps) => {
   });
 
   const setValue = useCallback(
-    (newValue: T) => _setValue(name, newValue),
-    [name, _setValue],
+    (newValue: T) => {
+      _setValue(name, newValue);
+      if (isSubmitted) {
+        trigger(name);
+      }
+    },
+    [name, _setValue, isSubmitted, trigger],
   );
 
   const error: string | null = useMemo(
-    () =>
-      JsUtility.accessObjectByDotSeparatedKeys(errors, name)?.message ?? null,
-    [errors, name],
+    () => JsUtility.accessObjectByDotSeparatedKeys(errors, name)?.message,
+    [JsUtility.accessObjectByDotSeparatedKeys(errors, name), errors, name],
   );
 
   return {

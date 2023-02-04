@@ -8,9 +8,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material";
-import { useFormRadioGroup } from "generators/pkg-mui/templates/src/components/_form/FormRadioGroup/index.hooks";
-import { Controller, RefCallBack } from "react-hook-form";
-import { JsUtility } from "models/common";
+import { useFormRadioGroup } from "./index.hooks";
 
 type FormRadioGroupProps = {
   name: string;
@@ -23,58 +21,31 @@ type FormRadioGroupProps = {
 
 export const FormRadioGroup = memo(
   ({ name, label, options, ...props }: FormRadioGroupProps) => {
-    const { control, errors } = useFormRadioGroup();
+    const { value, handleChange, error } = useFormRadioGroup(name);
 
     return (
-      <Controller
-        control={control}
-        name={name}
-        render={({ field: { onChange, onBlur, value, name, ref } }) => {
-          return (
-            <FormControl
-              error={!!JsUtility.accessObjectByDotSeparatedKeys(errors, name)}
-              variant="standard"
-            >
-              <FormLabel id={`${name}-controlled-radio-buttons-group`}>
-                {label}
-              </FormLabel>
-              <RadioGroup
-                aria-labelledby={`${name}-controlled-radio-buttons-group`}
-                name={name}
-                value={value}
-                onChange={
-                  onChange ? (ev) => onChange(ev.target.value) : undefined
-                }
-                onBlur={onBlur}
-              >
-                {options.map(({ label, value }) => (
-                  <FormControlLabel
-                    key={value}
-                    value={value}
-                    control={<Radio {...props} />}
-                    inputRef={(e) => {
-                      if (ref) {
-                        ref(e);
-                      }
-                    }}
-                    label={label}
-                  />
-                ))}
-              </RadioGroup>
-              {!!JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                ?.message && (
-                <FormHelperText error>
-                  {
-                    JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                      ?.message
-                  }
-                </FormHelperText>
-              )}
-            </FormControl>
-          );
-        }}
-      />
+      <FormControl error={!!error} variant="standard">
+        <FormLabel id={`${name}-controlled-radio-buttons-group`}>
+          {label}
+        </FormLabel>
+        <RadioGroup
+          aria-labelledby={`${name}-controlled-radio-buttons-group`}
+          name={name}
+          value={value}
+          onChange={handleChange}
+        >
+          {options.map(({ label, value }) => (
+            <FormControlLabel
+              key={value}
+              value={value}
+              control={<Radio {...props} />}
+              label={label}
+            />
+          ))}
+        </RadioGroup>
+        {!!error && <FormHelperText error>{error}</FormHelperText>}
+      </FormControl>
     );
-  }
+  },
 );
 FormRadioGroup.displayName = "FormRadioGroup";

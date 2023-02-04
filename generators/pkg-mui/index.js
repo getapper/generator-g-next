@@ -56,6 +56,8 @@ module.exports = class extends Generator {
         "@hookform/resolvers": "2.8.8",
         "@mui/icons-material": "5.11.0",
         "@mui/material": "5.11.7",
+        "@mui/x-date-pickers": "5.0.17",
+        moment: "2.29.4",
         "react-dropzone": "12.0.5",
         "react-hook-form": "7.29.0",
         yup: "0.32.9",

@@ -25,19 +25,31 @@ module.exports = class extends Generator {
       )
     );
 
-    const answers = await this.prompt([
-      {
-        type: "list",
-        name: "spaFolderName",
-        message: "In which SPA you want to create a scene?",
-        choices: getSpas(this),
-      },
-      {
-        type: "input",
-        name: "sceneName",
-        message: "What is your scene name?",
-      },
-    ]);
+    let answers = {};
+    const spas = getSpas(this);
+    if (spas.length > 1) {
+      answers = await this.prompt([
+        {
+          type: "list",
+          name: "spaFolderName",
+          message: "In which SPA you want to create a scene?",
+          choices: getSpas(this),
+        },
+      ]);
+    } else {
+      answers.spaFolderName = spas[0];
+    }
+
+    answers = {
+      ...answers,
+      ...(await this.prompt([
+        {
+          type: "input",
+          name: "sceneName",
+          message: "What is your scene name?",
+        },
+      ])),
+    };
 
     if (answers.sceneName === "") {
       this.log(yosay(chalk.red("Please give your scene a name next time!")));
@@ -56,7 +68,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath("index.ejs"),
       this.destinationPath(
-        `./spas/${spaFolderName}/scenes/${sceneName}/index.tsx`
+        `./src/spas/${spaFolderName}/scenes/${sceneName}/index.tsx`
       ),
       {
         sceneName,
@@ -67,7 +79,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath("index.hooks.ejs"),
       this.destinationPath(
-        `./spas/${spaFolderName}/scenes/${sceneName}/index.hooks.tsx`
+        `./src/spas/${spaFolderName}/scenes/${sceneName}/index.hooks.tsx`
       ),
       {
         ...this.answers,
@@ -80,6 +92,7 @@ module.exports = class extends Generator {
     fs.appendFileSync(
       path.join(
         this.destinationRoot(),
+        "src",
         "spas",
         spaFolderName,
         "scenes",

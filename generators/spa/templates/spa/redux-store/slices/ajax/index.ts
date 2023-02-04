@@ -1,4 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import {
+  AjaxState,
+} from "./ajax.interfaces";
 import * as selectors from "./ajax.selectors";
 import * as sagas from "./ajax.sagas";
 
@@ -6,12 +9,6 @@ export interface SetApiLoadingAction {
   payload: {
     api: string;
     isLoading: boolean;
-  };
-}
-
-interface AjaxState {
-  isLoading: {
-    [key: string]: boolean;
   };
 }
 

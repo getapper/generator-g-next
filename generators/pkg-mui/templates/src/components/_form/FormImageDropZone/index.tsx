@@ -1,74 +1,56 @@
 import React, { memo } from "react";
 import { Box, FormHelperText, IconButton } from "@mui/material";
-import { useFormImageDropZone } from "generators/pkg-mui/templates/src/components/_form/FormImageDropZone/index.hooks";
-import { Controller } from "react-hook-form";
+import { useFormImageDropZone } from "./index.hooks";
 import { DeleteOutlined } from "@mui/icons-material";
 
 export type FormImageDropZoneProps = {
   name: string;
   helperText: string;
-  setValue: any;
   preview?: boolean;
-  error: boolean;
-  fileMetadata?: boolean;
+  accept?: string;
 };
 
 export const FormImageDropZone = memo(
-  ({
-    name,
-    helperText,
-    setValue,
-    fileMetadata,
-    error,
-    preview = true,
-  }: FormImageDropZoneProps) => {
+  ({ name, helperText, accept, preview = true }: FormImageDropZoneProps) => {
     const {
+      value,
+      error,
       getRootProps,
       getInputProps,
       dragAndDropError,
       handleRemove,
       isDragActive,
-      watch,
-      control,
-    } = useFormImageDropZone(name, setValue, fileMetadata);
+    } = useFormImageDropZone(name, accept);
 
     return (
       <>
-        <Controller
-          control={control}
-          name={name!}
-          render={({ field: { onChange } }) => {
-            return (
-              <Box
-                component={"div"}
-                {...getRootProps()}
-                sx={{
-                  display: !watch(name) ? "block" : "none",
-                  cursor: "pointer",
-                  border:
-                    dragAndDropError || error
-                      ? "2px dashed #F00"
-                      : isDragActive
-                      ? "2px dashed #33e"
-                      : "2px dashed #E8E8E8",
-                  background: isDragActive ? "#f0f0f0" : undefined,
-                  transition: "all .2s",
-                  borderRadius: "4px",
-                  padding: "10px 10px 10px 10px",
-                  "&:hover": {
-                    background: "#fafafa",
-                    border: "2px dashed #ccc",
-                  },
-                }}
-              >
-                <Box component={"div"}>
-                  <input {...getInputProps()} />
-                  <p>Drag 'n' drop an image or click to select</p>
-                </Box>
-              </Box>
-            );
+        <Box
+          component={"div"}
+          {...getRootProps()}
+          sx={{
+            display: !value ? "block" : "none",
+            cursor: "pointer",
+            border:
+              dragAndDropError || error
+                ? "2px dashed #F00"
+                : isDragActive
+                ? "2px dashed #33e"
+                : "2px dashed #E8E8E8",
+            background: isDragActive ? "#f0f0f0" : undefined,
+            transition: "all .2s",
+            borderRadius: "4px",
+            padding: "10px 10px 10px 10px",
+            "&:hover": {
+              background: "#fafafa",
+              border: "2px dashed #ccc",
+            },
           }}
-        />
+        >
+          <Box component={"div"}>
+            <input {...getInputProps()} />
+            <p>Drag 'n' drop an image or click to select</p>
+          </Box>
+        </Box>
         {dragAndDropError && (
           <FormHelperText
             error={true}
@@ -78,7 +60,7 @@ export const FormImageDropZone = memo(
           </FormHelperText>
         )}
 
-        {preview && !!watch(name) && (
+        {preview && !!value && (
           <Box
             component={"div"}
             sx={{
@@ -89,7 +71,7 @@ export const FormImageDropZone = memo(
           >
             <Box
               component={"img"}
-              src={watch(name)}
+              src={value.fileData}
               sx={{
                 alignSelf: "center",
                 height: "100%",
@@ -122,6 +104,6 @@ export const FormImageDropZone = memo(
         )}
       </>
     );
-  }
+  },
 );
 FormImageDropZone.displayName = "FormImageDropZone";

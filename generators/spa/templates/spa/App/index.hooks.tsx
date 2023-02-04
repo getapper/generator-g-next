@@ -1,7 +1,7 @@
-import theme from "themes";
+import theme from "@/themes";
 import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { actions, selectors } from "spas/<%= spaFolderName %>/redux-store";
+import { actions, selectors } from "@/spas/<%= spaFolderName %>/redux-store";
 
 const useAppHooks = () => {
   const dispatch = useDispatch();

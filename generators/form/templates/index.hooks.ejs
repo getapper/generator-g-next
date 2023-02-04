@@ -14,10 +14,17 @@ type <%= formName %>Data = {
 export const use<%= formName %> = () => {
   const formData = useForm<<%= formName %>Data>({
     resolver: yupResolver(schema),
+    defaultValues: {
+      // name: "",
+    },
   });
-  const { handleSubmit } = formData;
+  const {
+  handleSubmit,
+    formState: { isValid, isSubmitted },
+  } = formData;
+  const submitDisabled = isSubmitted && !isValid;
 
-  const onSubmit = useMemo(
+  const triggerSubmit = useMemo(
     () =>
       handleSubmit((data) => {
         // data.name;
@@ -28,5 +35,6 @@ export const use<%= formName %> = () => {
   return {
     formData,
     onSubmit,
+    submitDisabled,
   };
 };

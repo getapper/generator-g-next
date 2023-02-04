@@ -3,12 +3,11 @@ import {
   DatePickerProps,
   LocalizationProvider,
 } from "@mui/x-date-pickers";
-import AdapterMoment from "@mui/lab/AdapterMoment";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
 import React, { memo } from "react";
-import { useFormDatePicker } from "generators/pkg-mui/templates/src/components/_form/FormDatePicker/index.hooks";
-import { Controller } from "react-hook-form";
-import { JsUtility } from "models/common";
+import { useFormDatePicker } from "./index.hooks";
+import { Moment } from "moment";
 
 interface OmittedProps {
   renderInput: any;
@@ -18,41 +17,23 @@ interface OmittedProps {
 
 type FormDatePickerProps = {
   name: string;
-  label: string;
-} & Omit<DatePickerProps, keyof OmittedProps>;
+  label?: string;
+} & Omit<DatePickerProps<Moment, Moment>, keyof OmittedProps>;
 
 export const FormDatePicker = memo(({ name, label }: FormDatePickerProps) => {
-  const { control, errors } = useFormDatePicker();
+  const { value, setValue, error } = useFormDatePicker(name);
 
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field: { onChange, onBlur, value, name } }) => {
-        return (
-          <LocalizationProvider dateAdapter={AdapterMoment}>
-            <DatePicker
-              label={label}
-              value={value}
-              onChange={onChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  onBlur={onBlur}
-                  error={
-                    !!JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                  }
-                  helperText={
-                    JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                      ?.message
-                  }
-                />
-              )}
-            />
-          </LocalizationProvider>
-        );
-      }}
-    />
+    <LocalizationProvider dateAdapter={AdapterMoment}>
+      <DatePicker
+        label={label}
+        value={value}
+        onChange={setValue}
+        renderInput={(params) => (
+          <TextField {...params} error={!!error} helperText={error} />
+        )}
+      />
+    </LocalizationProvider>
   );
 });
 FormDatePicker.displayName = "FormDatePicker";

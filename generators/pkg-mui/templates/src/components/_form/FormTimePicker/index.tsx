@@ -1,48 +1,33 @@
-import { TimePicker, LocalizationProvider } from "@mui/lab";
-import AdapterMoment from "@mui/lab/AdapterMoment";
+import {
+  TimePicker,
+  TimePickerProps,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
 import React, { memo } from "react";
-import { useFormTimePicker } from "generators/pkg-mui/templates/src/components/_form/FormTimePicker/index.hooks";
-import { Controller } from "react-hook-form";
-import { JsUtility } from "models/common";
+import { useFormTimePicker } from "./index.hooks";
+import { Moment } from "moment";
 
 type FormTimePickerProps = {
   name: string;
-  label: string;
-};
+  label?: string;
+} & Omit<TimePickerProps<Moment, Moment>, "renderInput" | "onChange" | "value">;
 
 export const FormTimePicker = memo(({ name, label }: FormTimePickerProps) => {
-  const { control, errors } = useFormTimePicker();
+  const { value, setValue, error } = useFormTimePicker(name);
 
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field: { onChange, onBlur, value, name, ref } }) => {
-        return (
-          <LocalizationProvider dateAdapter={AdapterMoment}>
-            <TimePicker
-              label={label}
-              value={value}
-              onChange={onChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  onBlur={onBlur}
-                  error={
-                    !!JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                  }
-                  helperText={
-                    JsUtility.accessObjectByDotSeparatedKeys(errors, name)
-                      ?.message
-                  }
-                />
-              )}
-            />
-          </LocalizationProvider>
-        );
-      }}
-    />
+    <LocalizationProvider dateAdapter={AdapterMoment}>
+      <TimePicker
+        label={label}
+        value={value}
+        onChange={setValue}
+        renderInput={(params) => (
+          <TextField {...params} error={!!error} helperText={error} />
+        )}
+      />
+    </LocalizationProvider>
   );
 });
 FormTimePicker.displayName = "FormTimePicker";

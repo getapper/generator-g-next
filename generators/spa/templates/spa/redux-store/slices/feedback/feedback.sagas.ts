@@ -1,6 +1,6 @@
-import { put, takeEvery, delay, take, call, race } from "redux-saga/effects";
-import { actions } from "spas/<%= spaFolderName %>/redux-store/slices";
 import { Action } from "redux";
+import { put, takeEvery, delay, take, call, race } from "redux-saga/effects";
+import { actions } from "@/spas/<%= spaFolderName %>/redux-store/slices";
 import { AlertTypes } from "./feedback.interfaces";
 
 function* closeFeedbackTask() {

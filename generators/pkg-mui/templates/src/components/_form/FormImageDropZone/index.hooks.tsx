@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { useFormContext } from "react-hook-form";
+import useFormField from "@/hooks/useFormField";
 
 const convertFileToBase64 = (file: any): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -11,34 +11,23 @@ const convertFileToBase64 = (file: any): Promise<string> => {
   });
 };
 
-export const useFormImageDropZone = (
-  name: string,
-  setValue: any,
-  fileMetadata?: boolean,
-) => {
-  const {
-    control,
-    formState: { errors },
-    watch,
-    trigger,
-  } = useFormContext();
+export const useFormImageDropZone = (name: string, accept?: string) => {
+  const { value, setValue, error } = useFormField<{
+    fileName: string;
+    fileType: string;
+    fileData: string;
+  }>({ name });
 
   const fileRef = useRef<{ name: string; type: string }>(null);
 
-  const onDrop = useCallback(
+  const handleDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      trigger(name);
-      if (acceptedFiles[0]?.type.startsWith("image/")) {
-        const fileName = acceptedFiles[0].name;
-        const fileType = acceptedFiles[0].type;
-        const base64 = await convertFileToBase64(acceptedFiles[0]);
-        !fileMetadata
-          ? setValue(name, base64)
-          : setValue(name, { fileName, fileType, file: base64 });
-        trigger(name);
-      }
+      const fileName = acceptedFiles[0].name;
+      const fileType = acceptedFiles[0].type;
+      const fileData = await convertFileToBase64(acceptedFiles[0]);
+      setValue({ fileName, fileType, fileData });
     },
-    [setValue, trigger],
+    [setValue],
   );
 
   const [dragAndDropError, setDragAndDropError] = useState(false);
@@ -50,26 +39,24 @@ export const useFormImageDropZone = (
     onDropAccepted: () => {
       setDragAndDropError(false);
     },
-    onDrop,
+    onDrop: handleDrop,
     maxFiles: 1,
-    accept: "image/*",
+    accept,
   });
 
   const handleRemove = useCallback(() => {
     fileRef.current = null;
-    setValue(name, null);
-    trigger(name);
+    setValue(null);
   }, []);
 
   return {
+    value,
+    error,
     getRootProps,
     getInputProps,
     dragAndDropError,
-    onDrop,
+    handleDrop,
     handleRemove,
     isDragActive,
-    watch,
-    control,
-    errors,
   };
 };
