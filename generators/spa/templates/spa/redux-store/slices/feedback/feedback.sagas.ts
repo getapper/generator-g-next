@@ -26,13 +26,13 @@ export function* ajaxSuccessFeedbackSaga() {
           default:
             yield put(
               actions.setFeedback({
-                type: AlertTypes.Success,
+                type: "success",
                 message: action.payload.data.message,
-              })
+              }),
             );
         }
       }
-    }
+    },
   );
 }
 
@@ -44,11 +44,11 @@ export function* ajaxFailFeedbackSaga() {
         default:
           yield put(
             actions.setFeedback({
-              type: AlertTypes.Error,
+              type: "error",
               message: action.payload.message,
-            })
+            }),
           );
       }
-    }
+    },
   );
 }
