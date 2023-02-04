@@ -1,7 +1,13 @@
 module.exports = (
   apiNameCapital,
   urlParams,
-  projectName
+  projectName,
+  destinationRole,
+  customDestination,
+  schedulerRole,
+  customScheduler,
+  connection,
+  customConnection,
 ) => `
 require("custom-env").env("local");
 require("custom-env");
@@ -28,8 +34,32 @@ const exec = async () => {
     },
     region: process.env.REGION_AWS_BACKEND,
   };
-  const APIDestinationRoleArn =
-    "non lo sappiamo";
+  ${
+  customDestination
+    ? `
+    const APIDestinationRoleParams = {
+    AssumeRolePolicyDocument: "{
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": {
+           "Service": "events.amazonaws.com"
+          },
+         "Action": "sts:AssumeRole"
+       }
+     ]
+   }"
+    RoleName: "Test-Role"}
+    const APIDestinationRoleResponse = await iam..createRole(APIDestinationRoleParams);
+    `
+    : `
+    const APIDestinationRoleParams = {RoleName:${destinationRole}}
+    const APIDestinationRoleResponse = await iam.getRole(APIDestinationRoleParams);`
+}
+
+    // Questo qua sopra o lo otteniamo dai parametri passati (se utente a scelto destinationRole preesistente) o ne creiamo uno nuovo
+    // dandogli il nome inserito dall'utente
   /*
    Any role with following policy
    {
@@ -45,8 +75,32 @@ const exec = async () => {
      ]
    }
    * */
-  const SchedulerRoleArn =
-    "non lo sappiamo";
+   ${
+  customScheduler
+    ? `
+    const schedulerRoleParams = {
+    AssumeRolePolicyDocument: "{
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": {
+           "Service": "scheduler.amazonaws.com"
+          },
+         "Action": "sts:AssumeRole"
+       }
+     ]
+   }"
+    RoleName: "Test-Role"}
+    const SchedulerRoleResponse = await iam.createRole(schedulerRoleParams);
+    `
+    : `const schedulerRoleParams = {RoleName:${schedulerRole}}
+    const SchedulerRoleResponse = await iam.getRole(schedulerRoleParams);`
+}
+
+
+    // Questo qua sopra o lo otteniamo dai parametri passati (se utente a scelto schedulerRole preesistente) o ne creiamo uno nuovo
+    // dandogli il nome inserito dall'utente
   /*
   Any role with following policy
    {
@@ -67,8 +121,11 @@ const exec = async () => {
   const eventBridge = new EventBridge(AWSConfig);
   const scheduler = new Scheduler(AWSConfig);
 
-  // Creaa una connessione che invierà le richieste autenticate
-  const createConnectionParams: CreateConnectionRequest = {
+  ${
+  customConnection
+    ? `
+    // Creaa una connessione che invierà le richieste autenticate
+    const createConnectionParams: CreateConnectionRequest = {
     AuthorizationType: "API_KEY",
     AuthParameters: {
       ApiKeyAuthParameters: {
@@ -80,8 +137,16 @@ const exec = async () => {
   };
 
   const createConnectionResponse = await eventBridge.createConnection(
-    createConnectionParams
-  );
+    createConnectionParams);
+    `
+    : "// qua pigliamo l'ARN della connessione preesistente"
+}
+
+
+
+
+
+
 
   // Crea l'endpoint e specifica quale connessione utilizzare
   const createApiDestinationParams: CreateApiDestinationCommandInput = {
@@ -115,7 +180,7 @@ const exec = async () => {
       {
         Id: "genyg-${projectName}-${urlParams}-${apiNameCapital}-target",
         Arn: createApiDestinationResponse.ApiDestinationArn,
-        RoleArn: APIDestinationRoleArn,
+        RoleArn: APIDestinationRoleResponse.Arn,
       },
     ],
   };
@@ -130,8 +195,8 @@ const exec = async () => {
     ScheduleExpression: "rate(1 minute)",
     State: RuleState.DISABLED,
     Target: {
-      RoleArn: SchedulerRoleArn,
-      Arn: "arn:aws:events:eu-west-1:718483217265:event-bus/default",
+      RoleArn: SchedulerRoleResponse.Arn,
+      Arn: "arn:aws:events:eu-west-1:718483217265:event-bus/default", //cambia questo ARN!!!
       EventBridgeParameters: {
         Source: "Novacoop-POST-storesUpdate",
         DetailType: JSON.stringify({}),
