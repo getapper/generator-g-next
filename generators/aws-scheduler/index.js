@@ -169,22 +169,7 @@ module.exports = class extends Generator {
 
     if(answers.destinationRole === "create a new destination role"){
       answers.customDestination = true;
-      answers = {
-        ...answers,
-        ...(await this.prompt([
-          {
-            type: "input",
-            name: "customDestinationRole",
-            message: "What is your destination role name?",
-          }]))
-        }
       }
-
-    if (answers.destinationRole === "" && answers.customDestinationRole === "") {
-        this.log(yosay(chalk.red("Please give your destination role a name next time!")));
-        process.exit(1);
-        return;
-    }
 
     answers = {...answers,...(await this.prompt([
         {
@@ -197,22 +182,8 @@ module.exports = class extends Generator {
       ]))}
     if(answers.schedulerRole === "create a new schedule role"){
       answers.customScheduler = true;
-      answers = {
-        ...answers,
-        ...(await this.prompt([
-          {
-            type: "input",
-            name: "customSchedulerRole",
-            message: "What is your scheduler role name?",
-          }]))
-      }
     }
 
-    if (answers.schedulerRole === "" && answers.customSchedulerRole === "") {
-      this.log(yosay(chalk.red("Please give your scheduler role a name next time!")));
-      process.exit(1);
-      return;
-    }
     answers = {...answers,...(await this.prompt([
         {
           type: "list",
@@ -254,10 +225,8 @@ module.exports = class extends Generator {
     const {
       destinationRole,
       customDestination,
-      customDestinationRole,
       schedulerRole,
       customScheduler,
-      customSchedulerRole,
       connection,
       customConnection,
       route,
