@@ -26,6 +26,12 @@ import {
   Scheduler,
 } from "@aws-sdk/client-scheduler";
 
+import {
+  IAMClient,
+  GetRoleCommandInput,
+  CreateRoleCommandInput,
+} from "@aws-sdk/client-iam";
+
 const exec = async () => {
   const AWSConfig = {
     credentials: {
@@ -34,10 +40,11 @@ const exec = async () => {
     },
     region: process.env.REGION_AWS_BACKEND,
   };
+  const iamClient = new IAMClient(AWSConfig);
   ${
   customDestination
     ? `
-    const APIDestinationRoleParams = {
+    const APIDestinationRoleParams: CreateRoleCommandInput = {
     AssumeRolePolicyDocument: "{
      "Version": "2012-10-17",
      "Statement": [
@@ -51,11 +58,11 @@ const exec = async () => {
      ]
    }"
     RoleName: "Test-Role"}
-    const APIDestinationRoleResponse = await iam..createRole(APIDestinationRoleParams);
+    const APIDestinationRoleResponse = await iamClient.createRole(APIDestinationRoleParams);
     `
     : `
-    const APIDestinationRoleParams = {RoleName:${destinationRole}}
-    const APIDestinationRoleResponse = await iam.getRole(APIDestinationRoleParams);`
+    const APIDestinationRoleParams: GetRoleCommandInput = {RoleName:${destinationRole}}
+    const APIDestinationRoleResponse = await iamClient.getRole(APIDestinationRoleParams);`
 }
 
     // Questo qua sopra o lo otteniamo dai parametri passati (se utente a scelto destinationRole preesistente) o ne creiamo uno nuovo
@@ -78,7 +85,7 @@ const exec = async () => {
    ${
   customScheduler
     ? `
-    const schedulerRoleParams = {
+    const schedulerRoleParams: CreateRoleCommandInput = {
     AssumeRolePolicyDocument: "{
      "Version": "2012-10-17",
      "Statement": [
@@ -92,10 +99,10 @@ const exec = async () => {
      ]
    }"
     RoleName: "Test-Role"}
-    const SchedulerRoleResponse = await iam.createRole(schedulerRoleParams);
+    const SchedulerRoleResponse = await iamClient.createRole(schedulerRoleParams);
     `
-    : `const schedulerRoleParams = {RoleName:${schedulerRole}}
-    const SchedulerRoleResponse = await iam.getRole(schedulerRoleParams);`
+    : `const schedulerRoleParams: GetRoleCommandInput = {RoleName:${schedulerRole}}
+    const SchedulerRoleResponse = await iamClient.getRole(schedulerRoleParams);`
 }
 
 
