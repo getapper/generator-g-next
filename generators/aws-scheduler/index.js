@@ -2,6 +2,7 @@ const Generator = require("yeoman-generator");
 const {requirePackages} = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
+const { IAMClient} = require("@aws-sdk/client-iam");
 
 const HttpMethods = {
   GET: "get",
@@ -33,12 +34,47 @@ const parseFromText = (text) => {
 
 module.exports = class extends Generator {
   async prompting() {
-    // dovremmo trovare un modo per vedere se esiste pacchetto aws
-    // non sono sicura che quello che ho scritto sia corretto
-    const c = this.readDestination("package.json").devDependencies
-    if (c){}
     // Config checks
     requirePackages(this, ["core"]);
+    const AWSConfig = {
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY_ID_AWS_BACKEND,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY_AWS_BACKEND,
+      },
+      region: process.env.REGION_AWS_BACKEND,
+    };
+    const iamClient = new IAMClient(AWSConfig);
+    const roles= await iamClient.listRoles({});
+    let scheduleRoles = ["create a new schedule role"];
+    let ApiDestinationRoles = ["create a new destination role"];
+    roles.map(member=>{if(member.AssumeRolePolicyDocument === "{\n" +
+      "     \"Version\": \"2012-10-17\",\n" +
+      "     \"Statement\": [\n" +
+      "       {\n" +
+      "         \"Effect\": \"Allow\",\n" +
+      "         \"Principal\": {\n" +
+      "           \"Service\": \"events.amazonaws.com\"\n" +
+      "          },\n" +
+      "         \"Action\": \"sts:AssumeRole\"\n" +
+      "       }\n" +
+      "     ]\n" +
+      "   }"){
+      ApiDestinationRoles.push(member.RoleName);
+    }
+    else{if(member.AssumeRolePolicyDocument === "{\n" +
+      "     \"Version\": \"2012-10-17\",\n" +
+      "     \"Statement\": [\n" +
+      "       {\n" +
+      "         \"Effect\": \"Allow\",\n" +
+      "         \"Principal\": {\n" +
+      "           \"Service\": \"scheduler.amazonaws.com\"\n" +
+      "          },\n" +
+      "         \"Action\": \"sts:AssumeRole\"\n" +
+      "       }\n" +
+      "     ]\n" +
+      "   }"){
+      scheduleRoles.push(member.RoleName);
+    }}})
 
     // Have Yeoman greet the user.
     this.log(
@@ -54,9 +90,10 @@ module.exports = class extends Generator {
       type: "list",
       name:"destinationRole",
       message: "Choose an existing destination role or create a new one.",
-      default: "",}]);
+      choices: ApiDestinationRoles,
+      default: "create a new destination role",}]);
 
-    if(answers.destinationRole === ""){
+    if(answers.destinationRole === "create a new destination role"){
       answers.customDestination = true;
       answers = {
         ...answers,
@@ -80,10 +117,11 @@ module.exports = class extends Generator {
           type: "list",
           name:"schedulerRole",
           message: "Choose an existing scheduler role or create a new one.",
-          default: "",
+          choices: scheduleRoles,
+          default: "create a new schedule role",
         },
       ]))}
-    if(answers.schedulerRole === ""){
+    if(answers.schedulerRole === "create a new schedule role"){
       answers.customScheduler = true;
       answers = {
         ...answers,
