@@ -57,7 +57,7 @@ module.exports = class extends Generator {
       default: "",}]);
 
     if(answers.destinationRole === ""){
-      answers.customD = true;
+      answers.customDestination = true;
       answers = {
         ...answers,
         ...(await this.prompt([
@@ -84,7 +84,7 @@ module.exports = class extends Generator {
         },
       ]))}
     if(answers.schedulerRole === ""){
-      answers.customR = true;
+      answers.customScheduler = true;
       answers = {
         ...answers,
         ...(await this.prompt([
@@ -106,26 +106,12 @@ module.exports = class extends Generator {
           type: "list",
           name:"connection",
           message: "Choose an existing connection or create a new one.",
-          default: "",
+          default: "create a new connection",
         },
       ]))}
-    if(answers.schedulerRole === ""){
-      answers.customC = true;
-      answers = {
-        ...answers,
-        ...(await this.prompt([
-          {
-            type: "input",
-            name: "customConnection",
-            message: "What is your connection name?",
-          }]))
-      }
-    }
+    if(answers.schedulerRole === "create a new connection"){
+      answers.customConnection = true;
 
-    if (answers.connection === "" && answers.customConnection === "") {
-      this.log(yosay(chalk.red("Please give your connection a name next time!")));
-      process.exit(1);
-      return;
     }
 
     answers = {...answers,...(await this.prompt([
@@ -153,6 +139,17 @@ module.exports = class extends Generator {
     this.answers = answers;
   }
   writing() {
-
+    const {
+      destinationRole,
+      customDestination,
+      customDestinationRole,
+      schedulerRole,
+      customScheduler,
+      customSchedulerRole,
+      connection,
+      customConnection,
+      route,
+      method,
+    } = this.answers;
   }
 }
