@@ -2,7 +2,9 @@ const Generator = require("yeoman-generator");
 const {requirePackages} = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
-const { IAMClient} = require("@aws-sdk/client-iam");
+const path = require("path");
+const { IAMClient } = require("@aws-sdk/client-iam");
+const getEventbridgeScheduleTemplate = require("./templates/eventbridge-schedule");
 
 const HttpMethods = {
   GET: "get",
@@ -29,6 +31,78 @@ const parseFromText = (text) => {
       return p;
     });
   return params;
+};
+
+const getEndpointFolder = (method, endpointRoutePath) => {
+  return `${method}-${endpointRoutePath}`;
+};
+
+const getEndpointRoutePath = (params) => {
+  const models = params.filter((p) => p[0] !== "{");
+  const variables = params
+    .filter((p) => p[0] === "{")
+    .map((p) => p.replace("{", "").replace("}", ""));
+  return `${models.join("-")}${variables.length ? "-by-" : ""}${variables.join(
+    "-and-"
+  )}`;
+};
+
+const getFunctionName = (method, params) => {
+  const models = params
+    .filter((p) => p[0] !== "{")
+    .map((p) =>
+      p
+        .split("-")
+        .map((p) => capitalize(p))
+        .join("")
+    );
+  const variables = params
+    .filter((p) => p[0] === "{")
+    .map((p) =>
+      p
+        .replace("{", "")
+        .replace("}", "")
+        .split("-")
+        .map((p) => capitalize(p))
+        .join("")
+    );
+  return `${method}${models.join("")}${
+    variables.length ? "By" : ""
+  }${variables.join("And")}`;
+};
+
+const getAjaxPath = (params) => {
+  const urlParams = params
+    .filter((p) => p[0] === "{")
+    .map((p) =>
+      p
+        .replace("{", "")
+        .replace("}", "")
+        .split("-")
+        .map((p2, index) => (index ? capitalize(p2) : p2))
+        .join("")
+    );
+  if (urlParams.length) {
+    return [
+      `\`/${params
+        .map((p) => {
+          if (p[0] === "{") {
+            return `\${params.${p
+              .replace("{", "")
+              .replace("}", "")
+              .split("-")
+              .map((p2, index) => (index ? capitalize(p2) : p2))
+              .join("")}}`;
+          }
+
+          return p;
+        })
+        .join("/")}\``,
+      urlParams,
+    ];
+  }
+
+  return [`"/${params.join("/")}"`];
 };
 
 
@@ -189,5 +263,26 @@ module.exports = class extends Generator {
       route,
       method,
     } = this.answers;
+
+    const params = parseFromText(route);
+    const endpointRoutePath = getEndpointRoutePath(params);
+    const eventbridgeScheduleFolder = getEndpointFolder(method, endpointRoutePath);
+    const apiName = getFunctionName(method, params);
+    const relativeToRootPath = `./tasks/${eventbridgeScheduleFolder}`;
+    const [routePath, urlParams] = getAjaxPath(params);
+
+
+    this.fs.write(
+      this.destinationPath(path.join(relativeToRootPath, "/index.ts")),
+      getEventbridgeScheduleTemplate(
+        capitalize(apiName),
+        urlParams,
+        "aspetta",
+        destinationRole,
+        customDestination,
+        schedulerRole,
+        customScheduler,
+        connection,
+        customConnection))
   }
 }
