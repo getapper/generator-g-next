@@ -41,10 +41,13 @@ const exec = async () => {
     },
     region: process.env.REGION_AWS_BACKEND,
   };
+
+  // Create a new IamClient instance
   const iamClient = new IAMClient(AWSConfig);
   ${
   customDestination
     ? `
+    // Create a new API destination role
     const APIDestinationRoleParams: CreateRoleCommandInput = {
     AssumeRolePolicyDocument: "{
      "Version": "2012-10-17",
@@ -62,30 +65,15 @@ const exec = async () => {
     const APIDestinationRoleResponse = await iamClient.createRole(APIDestinationRoleParams);
     `
     : `
+    // Return the information of the chosen API destination role
     const APIDestinationRoleParams: GetRoleCommandInput = {RoleName:${destinationRole}}
     const APIDestinationRoleResponse = await iamClient.getRole(APIDestinationRoleParams);`
 }
 
-    // Questo qua sopra o lo otteniamo dai parametri passati (se utente a scelto destinationRole preesistente) o ne creiamo uno nuovo
-    // dandogli il nome inserito dall'utente
-  /*
-   Any role with following policy
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Effect": "Allow",
-         "Principal": {
-           "Service": "events.amazonaws.com"
-          },
-         "Action": "sts:AssumeRole"
-       }
-     ]
-   }
-   * */
    ${
   customScheduler
     ? `
+    // Create a new scheduler role
     const schedulerRoleParams: CreateRoleCommandInput = {
     AssumeRolePolicyDocument: "{
      "Version": "2012-10-17",
@@ -102,43 +90,26 @@ const exec = async () => {
     RoleName: "genyg-${projectName}-scheduler-role"}
     const SchedulerRoleResponse = await iamClient.createRole(schedulerRoleParams);
     `
-    : `const schedulerRoleParams: GetRoleCommandInput = {RoleName:${schedulerRole}}
-    const SchedulerRoleResponse = await iamClient.getRole(schedulerRoleParams);`
+    : `
+    // Return the information of the chosen scheduler role
+    const schedulerRoleParams: GetRoleCommandInput = {RoleName:${schedulerRole}}
+    const schedulerRoleResponse = await iamClient.getRole(schedulerRoleParams);`
 }
 
-
-    // Questo qua sopra o lo otteniamo dai parametri passati (se utente a scelto schedulerRole preesistente) o ne creiamo uno nuovo
-    // dandogli il nome inserito dall'utente
-  /*
-  Any role with following policy
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Effect": "Allow",
-         "Principal": {
-           "Service": "scheduler.amazonaws.com"
-          },
-         "Action": "sts:AssumeRole"
-       }
-     ]
-   }
-  * */
-
-  // Crea una nuova istanza di EventBridge e Scheduler
+  // Create a new EventBridge and Scheduler instance
   const eventBridge = new EventBridge(AWSConfig);
   const scheduler = new Scheduler(AWSConfig);
 
   ${
   customConnection
     ? `
-    // Creaa una connessione che invierà le richieste autenticate
+    // Create a connection which will send the authenticate requests
     const createConnectionParams: CreateConnectionRequest = {
     AuthorizationType: "API_KEY",
     AuthParameters: {
       ApiKeyAuthParameters: {
         ApiKeyName: "genyg-${projectName}-API-Connection-Key",
-        ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF",
+        ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF",  // you can create a randomize one
       },
     },
     Name: "genyg-${projectName}-API-Connection",
@@ -147,11 +118,13 @@ const exec = async () => {
   const connectionResponse = await eventBridge.createConnection(
     createConnectionParams);
     `
-    : `const describeConnectionParams: DescribeConnectionCommandInput = {${connection}};
-       const connectionResponse = await eventBridge.describeConnection(describeConnectionParams)`
+    : `
+    // Take the information of the chosen connection
+    const describeConnectionParams: DescribeConnectionCommandInput = {${connection}};
+    const connectionResponse = await eventBridge.describeConnection(describeConnectionParams)`
 }
 
-  // Crea l'endpoint e specifica quale connessione utilizzare
+  // Create the endpoint and specify which connection use
   const createApiDestinationParams: CreateApiDestinationCommandInput = {
     ConnectionArn: connectionResponse.ConnectionArn,
     HttpMethod: ${urlParams},
@@ -165,7 +138,7 @@ const exec = async () => {
     createApiDestinationParams
   );
 
-  // Crea regola (un listener) che verrà attivato quando viene inviato un evento con source: Novacoop-POST-storesUpdate
+  // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${urlParams}-${apiNameCapital} will be sent
   const putRuleParams: PutRuleCommandInput = {
     Name: "genyg-${projectName}-trigger-${urlParams}-${apiNameCapital}",
     EventPattern: JSON.stringify({
@@ -175,8 +148,8 @@ const exec = async () => {
 
   const putRuleResponse = await eventBridge.putRule(putRuleParams);
 
-  // Crea un target che verrà invocato quando viene attivata la regola di prima
-  // Il march tra regola e target avviene tramite nome della regola
+  // Create a  target which will be invoked when the above rule is activated
+  // The march between rule and target takes place through the rule's name
   const putTargetParams: PutTargetsCommandInput = {
     Rule: putRuleParams.Name,
     Targets: [
@@ -190,18 +163,18 @@ const exec = async () => {
 
   const putTargetResponse = await eventBridge.putTargets(putTargetParams);
 
-  // Crea un nuovo schedule che verrà attivato ogni minuto
-  // Al momento dell'attivazione verrà inviato un evento sul bus di default con source: Novacoop-POST-storesUpdate
-  // Lo status iniziale è disabilitato e i dettagli sono vuoti
+  // Create a new schedule which will be activated every minute
+  // At the activation moment a default bus whit source: genyg-${projectName}-${urlParams}-${apiNameCapital} will be sent
+  // The initial status is disabled and details are empty
   const createScheduleParams: CreateScheduleCommandInput = {
     Name: "genyg-${projectName}-schedule-${urlParams}-${apiNameCapital}",
     ScheduleExpression: "rate(1 minute)",
     State: RuleState.DISABLED,
     Target: {
-      RoleArn: SchedulerRoleResponse.Arn,
+      RoleArn: schedulerRoleResponse.Arn,
       Arn: "arn:aws:events:eu-west-1:718483217265:event-bus/default", //cambia questo ARN!!!
       EventBridgeParameters: {
-        Source: "Novacoop-POST-storesUpdate",
+        Source: "genyg-${projectName}-${urlParams}-${apiNameCapital}",
         DetailType: JSON.stringify({}),
       },
     },
