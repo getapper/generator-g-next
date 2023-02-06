@@ -5,6 +5,7 @@ let pjson = require('/package.json');
 const chalk = require("chalk");
 const path = require("path");
 const { IAMClient } = require("@aws-sdk/client-iam");
+const { EventBridge } = require("@aws-sdk/client-eventbridge");
 const getEventbridgeScheduleTemplate = require("./templates/eventbridge-schedule");
 
 const HttpMethods = {
@@ -119,9 +120,11 @@ module.exports = class extends Generator {
       region: process.env.REGION_AWS_BACKEND,
     };
     const iamClient = new IAMClient(AWSConfig);
-    const roles= await iamClient.listRoles({});
+    const eventBridge = new EventBridge(AWSConfig);
+    const roles = await iamClient.listRoles({});
     let scheduleRoles = ["create a new schedule role"];
     let ApiDestinationRoles = ["create a new destination role"];
+    let connectionList = ["create a new connection"];
     roles.map(member=>{if(member.AssumeRolePolicyDocument === "{\n" +
       "     \"Version\": \"2012-10-17\",\n" +
       "     \"Statement\": [\n" +
@@ -150,6 +153,9 @@ module.exports = class extends Generator {
       "   }"){
       scheduleRoles.push(member.RoleName);
     }}})
+
+    const connectionsResponse = await eventBridge.listConnections({});
+    connectionsResponse.Connections.map(connections=>{connectionList.push(connections.Name)});
 
     // Have Yeoman greet the user.
     this.log(
@@ -189,6 +195,7 @@ module.exports = class extends Generator {
         {
           type: "list",
           name:"connection",
+          choices: connectionList,
           message: "Choose an existing connection or create a new one.",
           default: "create a new connection",
         },
