@@ -15,6 +15,7 @@ require("custom-env");
 import {
   EventBridge,
   CreateConnectionRequest,
+  DescribeConnectionCommandInput,
   CreateApiDestinationCommandInput,
   PutRuleCommandInput,
   PutTargetsCommandInput,
@@ -143,21 +144,16 @@ const exec = async () => {
     Name: "genyg-${projectName}-API-Connection",
   };
 
-  const createConnectionResponse = await eventBridge.createConnection(
+  const connectionResponse = await eventBridge.createConnection(
     createConnectionParams);
     `
-    : "// qua pigliamo l'ARN della connessione preesistente"
+    : `const describeConnectionParams: DescribeConnectionCommandInput = {${connection}};
+       const connectionResponse = await eventBridge.describeConnection(describeConnectionParams)`
 }
-
-
-
-
-
-
 
   // Crea l'endpoint e specifica quale connessione utilizzare
   const createApiDestinationParams: CreateApiDestinationCommandInput = {
-    ConnectionArn: createConnectionResponse.ConnectionArn,
+    ConnectionArn: connectionResponse.ConnectionArn,
     HttpMethod: ${urlParams},
     InvocationEndpoint:
       "insert the https:// endpoint here",
