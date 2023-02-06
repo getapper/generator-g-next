@@ -109,7 +109,7 @@ const exec = async () => {
     AuthParameters: {
       ApiKeyAuthParameters: {
         ApiKeyName: "genyg-${projectName}-API-Connection-Key",
-        ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF",  // you can create a randomize one
+        ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF",  // you can randomize its value
       },
     },
     Name: "genyg-${projectName}-API-Connection",
