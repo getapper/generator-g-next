@@ -14,14 +14,14 @@ export const useFormChips = (name: string) => {
         array.splice(index, 1);
         setValue(array);
       }),
-    [items],
+    [items, setValue],
   );
 
   const handleItemAdded = useCallback(() => {
     if (text.trim() !== "" && !items.includes(text)) {
       setValue([...(Array.isArray(items) ? items : []), text]);
     }
-  }, [text]);
+  }, [text, setValue, items]);
 
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

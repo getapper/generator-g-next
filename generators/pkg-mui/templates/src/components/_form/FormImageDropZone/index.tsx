@@ -8,10 +8,17 @@ export type FormImageDropZoneProps = {
   helperText: string;
   preview?: boolean;
   accept?: string;
+  dragAndDropText?: string;
 };
 
 export const FormImageDropZone = memo(
-  ({ name, helperText, accept, preview = true }: FormImageDropZoneProps) => {
+  ({
+    name,
+    helperText,
+    accept,
+    preview = true,
+    dragAndDropText = "Drag 'n' drop an image or click to select",
+  }: FormImageDropZoneProps) => {
     const {
       value,
       error,
@@ -48,7 +55,7 @@ export const FormImageDropZone = memo(
         >
           <Box component={"div"}>
             <input {...getInputProps()} />
-            <p>Drag 'n' drop an image or click to select</p>
+            <p>{dragAndDropText}</p>
           </Box>
         </Box>
         {dragAndDropError && (

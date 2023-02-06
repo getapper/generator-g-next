@@ -29,10 +29,9 @@ const useFormField = <T,>({ name }: useFormFieldProps) => {
     [name, _setValue, isSubmitted, trigger],
   );
 
-  const error: string | null = useMemo(
-    () => JsUtility.accessObjectByDotSeparatedKeys(errors, name)?.message,
-    [JsUtility.accessObjectByDotSeparatedKeys(errors, name), errors, name],
-  );
+  const errorObj = JsUtility.accessObjectByDotSeparatedKeys(errors, name);
+
+  const error: string | null = useMemo(() => errorObj?.message, [errorObj]);
 
   return {
     value,

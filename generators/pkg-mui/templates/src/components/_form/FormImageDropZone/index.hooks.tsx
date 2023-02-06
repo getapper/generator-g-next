@@ -47,7 +47,7 @@ export const useFormImageDropZone = (name: string, accept?: string) => {
   const handleRemove = useCallback(() => {
     fileRef.current = null;
     setValue(null);
-  }, []);
+  }, [setValue]);
 
   return {
     value,
