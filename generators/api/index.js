@@ -180,7 +180,7 @@ module.exports = class extends Generator {
     for (let i = 0; i < pagesApiFolders.length; i++) {
       const folder = pagesApiFolders[i];
       currentRoute += folder + "/";
-      const relativeToPagesFolder = `./pages/api/${currentRoute}/`;
+      const relativeToPagesFolder = `./src/pages/api/${currentRoute}/`;
       if (
         !(
           fs.existsSync(relativeToPagesFolder) &&
@@ -199,24 +199,30 @@ module.exports = class extends Generator {
 
     // Endpoints folder
     this.fs.write(
-      this.destinationPath(`./endpoints/${endpointFolderName}/interfaces.ts`),
+      this.destinationPath(
+        `./src/endpoints/${endpointFolderName}/interfaces.ts`
+      ),
       getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload)
     );
     this.fs.write(
-      this.destinationPath(`./endpoints/${endpointFolderName}/validations.ts`),
+      this.destinationPath(
+        `./src/endpoints/${endpointFolderName}/validations.ts`
+      ),
       getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
     );
     this.fs.write(
-      this.destinationPath(`./endpoints/${endpointFolderName}/handler.ts`),
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
       getEndpointHandlersTemplate(capitalize(apiName))
     );
     this.fs.write(
-      this.destinationPath(`./endpoints/${endpointFolderName}/index.test.ts`),
+      this.destinationPath(
+        `./src/endpoints/${endpointFolderName}/index.test.ts`
+      ),
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
     this.fs.copy(
       this.templatePath("./endpoint/index.ts"),
-      this.destinationPath(`./endpoints/${endpointFolderName}/index.ts`)
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
     );
   }
 };

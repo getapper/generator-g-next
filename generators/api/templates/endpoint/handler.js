@@ -2,7 +2,7 @@ module.exports = (apiNameCapital) => `import {
   ErrorResponse,
   ResponseHandler,
   StatusCodes,
-} from "lib/response-handler";
+} from "@/lib/response-handler";
 import { NextApiResponse } from "next";
 import { ${apiNameCapital}Api } from "./interfaces";
 

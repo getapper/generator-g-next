@@ -40,19 +40,19 @@ module.exports = class extends Generator {
         test: "npm run tsc-backend && jest --runInBand",
       },
       devDependencies: {
-        "@types/jest": "27.5.2",
+        "@types/jest": "29.4.0",
         "custom-env": "2.0.1",
         "env-cmd": "10.1.0",
         eslint: "8.22.0",
         "eslint-config-prettier": "8.5.0",
         husky: "4.2.5",
-        jest: "27.5.1",
+        jest: "29.4.1",
         "lint-staged": "10.2.11",
         "node-mocks-http": "1.11.0",
         prettier: "2.7.1",
-        rimraf: "3.0.2",
-        ttypescript: "1.5.13",
-        "typescript-transform-paths": "3.3.1",
+        "ts-jest": "29.0.5",
+        "ts-node": "10.9.1",
+        "ts-transform-paths": "3.0.0",
       },
       dependencies: {
         yup: "0.32.9",
@@ -61,16 +61,6 @@ module.exports = class extends Generator {
         hooks: {
           "pre-commit": "lint-staged",
         },
-      },
-      jest: {
-        testTimeout: 10000,
-        rootDir: "dist",
-        moduleNameMapper: {
-          "models/(.*)": "<rootDir>/models/$1",
-          "endpoints/(.*)": "<rootDir>/endpoints/$1",
-          "tasks/(.*)": "<rootDir>/tasks/$1",
-        },
-        setupFiles: ["<rootDir>/lib/test-utils/setup-tests"],
       },
     });
 

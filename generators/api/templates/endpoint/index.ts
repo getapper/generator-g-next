@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { ResponseHandler } from "lib/response-handler";
+import { ResponseHandler } from "@/lib/response-handler";
 import validations from "./validations";
 import handler from "./handler";
 
