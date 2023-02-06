@@ -57,7 +57,7 @@ const exec = async () => {
        }
      ]
    }"
-    RoleName: "genyg-${projectName}-API-Destination-Role"}
+    RoleName: "genyg-${projectName}-API-destination-role"}
     const APIDestinationRoleResponse = await iamClient.createRole(APIDestinationRoleParams);
     `
     : `
@@ -98,7 +98,7 @@ const exec = async () => {
        }
      ]
    }"
-    RoleName: "genyg-${projectName}-Scheduler-Role"}
+    RoleName: "genyg-${projectName}-scheduler-role"}
     const SchedulerRoleResponse = await iamClient.createRole(schedulerRoleParams);
     `
     : `const schedulerRoleParams: GetRoleCommandInput = {RoleName:${schedulerRole}}
