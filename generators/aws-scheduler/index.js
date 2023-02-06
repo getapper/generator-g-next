@@ -1,6 +1,7 @@
 const Generator = require("yeoman-generator");
 const {requirePackages} = require("../../common");
 const yosay = require("yosay");
+let pjson = require('/package.json');
 const chalk = require("chalk");
 const path = require("path");
 const { IAMClient } = require("@aws-sdk/client-iam");
@@ -239,14 +240,14 @@ module.exports = class extends Generator {
     const apiName = getFunctionName(method, params);
     const relativeToRootPath = `./tasks/${eventbridgeScheduleFolder}`;
     const [routePath, urlParams] = getAjaxPath(params);
-
+    const projectName = pjson.name;
 
     this.fs.write(
       this.destinationPath(path.join(relativeToRootPath, "/index.ts")),
       getEventbridgeScheduleTemplate(
         capitalize(apiName),
         urlParams,
-        "aspetta",
+        projectName,
         destinationRole,
         customDestination,
         schedulerRole,
