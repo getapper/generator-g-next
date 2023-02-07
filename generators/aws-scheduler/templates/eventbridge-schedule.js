@@ -129,7 +129,7 @@ const exec = async () => {
     ConnectionArn: connectionResponse.ConnectionArn,
     HttpMethod: ${urlParams},
     InvocationEndpoint:
-      "insert the https:// endpoint here",
+      "insert the https: // endpoint here", //what is that??
     Name: "genyg-${projectName}-${urlParams}-${apiNameCapital}",
     InvocationRateLimitPerSecond: 100,
   };
@@ -172,7 +172,7 @@ const exec = async () => {
     State: RuleState.DISABLED,
     Target: {
       RoleArn: schedulerRoleResponse.Arn,
-      Arn: "arn:aws:events:eu-west-1:718483217265:event-bus/default", //cambia questo ARN!!!
+      Arn: createApiDestinationResponse.ApiDestinationArn,
       EventBridgeParameters: {
         Source: "genyg-${projectName}-${urlParams}-${apiNameCapital}",
         DetailType: JSON.stringify({}),
