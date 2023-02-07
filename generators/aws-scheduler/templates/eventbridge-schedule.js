@@ -129,7 +129,7 @@ const exec = async () => {
     ConnectionArn: connectionResponse.ConnectionArn,
     HttpMethod: ${urlParams},
     InvocationEndpoint:
-      "insert the https: // endpoint here", //what is that??
+      "https://", // insert your endpoint here
     Name: "genyg-${projectName}-${urlParams}-${apiNameCapital}",
     InvocationRateLimitPerSecond: 100,
   };
