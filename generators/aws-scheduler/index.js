@@ -6,7 +6,7 @@ const chalk = require("chalk");
 const path = require("path");
 const { IAMClient } = require("@aws-sdk/client-iam");
 const { EventBridge } = require("@aws-sdk/client-eventbridge");
-const getEventbridgeScheduleTemplate = require("./templates/eventbridge-schedule");
+const getEventbridgeScheduleTemplate = require("./templates");
 
 const HttpMethods = {
   GET: "get",
