@@ -27,13 +27,14 @@ module.exports = class extends Generator {
     // Config checks
     requirePackages(this, ["core"]);
     const configFile = this.readDestinationJSON("package.json"); //DEVE stare qua dentro sennò da errore, però scritto così funziona bene
+    const boh = this.readDestinationJSON(".genyg.ignore.json"); //lui funziona :) XD :) XD
     this.log(
       yosay(
         `Welcome to ${chalk.red(
           "Getapper NextJS Yeoman Generator (GeNYG)"
         )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler! ${
           configFile.name
-        }`
+        } ${boh.accessKeyId}`
       )
     );
     return 0;
