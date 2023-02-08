@@ -112,6 +112,22 @@ module.exports = class extends Generator {
   async prompting() {
     // Config checks
     requirePackages(this, ["core"]);
+    // check if aws packages are installed
+    const pkgs = ["@aws-sdk/client-iam","@aws-sdk/client-eventbridge"]
+    for (let pkg of pkgs) {
+      if (!pjson.devDependencies[pkg]) {
+        this.log(
+          yosay(
+            chalk.red(
+              `You need ${pkg} package installed in order to run this command. Run npm i ${pkg} to fix this.`
+            )
+          )
+        );
+        process.exit(0);
+      return;}
+    }
+
+    // Create a new EventBridge and Scheduler instance
     const AWSConfig = {
       credentials: {
         accessKeyId: process.env.ACCESS_KEY_ID_AWS_BACKEND,
