@@ -63,7 +63,7 @@ module.exports = class extends Generator {
   writing() {
     const { modelName, location } = this.answers;
 
-    const relativeToModelsPath = `./models/${location}/${modelName}`;
+    const relativeToModelsPath = `./src/models/${location}/${modelName}`;
 
     // Index.tsx model file
     this.fs.copyTpl(

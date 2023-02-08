@@ -22,25 +22,37 @@ module.exports = class extends Generator {
       )
     );
 
-    const answers = await this.prompt([
-      {
-        type: "list",
-        name: "spaFolderName",
-        message: "In which SPA you want to create a slice?",
-        choices: getSpas(this),
-      },
-      {
-        type: "input",
-        name: "sliceName",
-        message: "What is your slice name?",
-      },
-      {
-        type: "confirm",
-        name: "useSagas",
-        message: "Would you like to create a saga file?",
-        default: true,
-      },
-    ]);
+    let answers = {};
+    const spas = getSpas(this);
+    if (spas.length > 1) {
+      answers = await this.prompt([
+        {
+          type: "list",
+          name: "spaFolderName",
+          message: "In which SPA you want to create a scene?",
+          choices: getSpas(this),
+        },
+      ]);
+    } else {
+      answers.spaFolderName = spas[0];
+    }
+
+    answers = {
+      ...answers,
+      ...(await this.prompt([
+        {
+          type: "input",
+          name: "sliceName",
+          message: "What is your slice name?",
+        },
+        {
+          type: "confirm",
+          name: "useSagas",
+          message: "Would you like to create a saga file?",
+          default: true,
+        },
+      ])),
+    };
 
     if (answers.sliceName === "") {
       this.log(yosay(chalk.red("Please give your slice a name next time!")));
@@ -54,7 +66,7 @@ module.exports = class extends Generator {
   writing() {
     const { useSagas, sliceName, spaFolderName } = this.answers;
     const pCsliceName = pascalCase(sliceName);
-    const reduxStorePath = `./spas/${spaFolderName}/redux-store`;
+    const reduxStorePath = `./src/spas/${spaFolderName}/redux-store`;
 
     /**
      * Slice/index.tsx file
@@ -63,7 +75,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath("index.ejs"),
       this.destinationPath(
-        `./spas/${spaFolderName}/redux-store/slices/${sliceName}/index.ts`
+        `./src/spas/${spaFolderName}/redux-store/slices/${sliceName}/index.ts`
       ),
       {
         sliceName,

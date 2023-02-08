@@ -1,21 +1,7 @@
-import { Action } from "redux";
-
-export enum AlertTypes {
-  Success = "success",
-  Info = "info",
-  Error = "error",
-  Warning = "warning",
-}
+import { AlertColor } from "@mui/material";
 
 export interface FeedbackState {
   open: boolean;
-  type: AlertTypes;
+  type: AlertColor;
   message: string;
-}
-
-export interface SetFeedbackAction extends Action {
-  payload: {
-    type?: AlertTypes;
-    message?: string;
-  };
 }

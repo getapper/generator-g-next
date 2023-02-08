@@ -71,6 +71,12 @@ MONGODB_NAME=*`
       `MONGODB_URI=mongodb://localhost:27017
 MONGODB_NAME=*-test`
     );
+    extendEnv(
+      this,
+      "template",
+      `MONGODB_URI=mongodb://localhost:27017
+MONGODB_NAME=*-test`
+    );
 
     // Copy MongoDB lib files
     this.fs.copy(this.templatePath(), this.destinationRoot());

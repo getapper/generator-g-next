@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
-import { AppSnackbar } from "components/AppSnackbar";
+import { AppSnackbar } from "@/components/AppSnackbar";
 import useAppHooks from "./index.hooks";
 
 const App: React.FC = () => {

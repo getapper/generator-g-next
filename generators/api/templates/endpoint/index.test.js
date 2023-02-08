@@ -2,8 +2,8 @@ module.exports = (
   endpointFolderName,
   apiName,
   apiNameCapital
-) => `import { ${apiNameCapital}Api } from "endpoints/${endpointFolderName}/interfaces";
-import { StatusCodes, TestHandler } from "lib/response-handler";
+) => `import { ${apiNameCapital}Api } from "@/endpoints/${endpointFolderName}/interfaces";
+import { StatusCodes, TestHandler } from "@/lib/response-handler";
 
 const ${apiName}Path = "${endpointFolderName}";
 

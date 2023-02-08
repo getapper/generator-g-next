@@ -2,7 +2,7 @@ module.exports = (
   apiNameCapital,
   urlParams,
   hasPayload
-) => `import { YupShapeByInterface } from "lib/response-handler";
+) => `import { YupShapeByInterface } from "@/lib/response-handler";
 import * as yup from "yup";
 import { ${apiNameCapital}Api } from "./interfaces";
 

@@ -42,7 +42,7 @@ module.exports = class extends Generator {
         type: "directory",
         name: "pagePath",
         message: "Select where to create the page that will contain the SPA",
-        basePath: "./pages",
+        basePath: "./src/pages",
       },
       {
         type: "input",
@@ -77,7 +77,7 @@ module.exports = class extends Generator {
 
     // Page files
     const basename = `/${pagePath ? pagePath + "/" : ""}${folderName}`;
-    const relativeToRootPath = `./pages${basename}`;
+    const relativeToRootPath = `./src/pages${basename}`;
 
     // Index.tsx page file
     this.fs.copyTpl(
@@ -91,7 +91,7 @@ module.exports = class extends Generator {
     );
 
     // SPA files
-    const relativeToSpaFolder = `./spas/${spaFolderName}/`;
+    const relativeToSpaFolder = `./src/spas/${spaFolderName}/`;
 
     copyEjsTemplateFolder(
       this,

@@ -1,18 +1,28 @@
 import React, { memo } from "react";
 import { FormProvider } from "react-hook-form";
 import { use<%= formName %> } from "./index.hooks";
+import { Button, Stack } from "@mui/material";
 
 type <%= formName %>Props = {}
 
 export const <%= formName %> = memo(({}: <%= formName %>Props) => {
   const {
     formData,
-    onSubmit,
+    triggerSubmit,
+    submitDisabled,
   } = use<%= formName %>();
 
   return (
     <FormProvider {...formData}>
-      <form onSubmit={onSubmit}></form>
+      <form onSubmit={triggerSubmit}>
+        <Stack
+          spacing={3}
+        >
+          <Button variant="contained" type="submit" disabled={submitDisabled}>
+            Salva
+          </Button>
+        </Stack>
+      </form>
     </FormProvider>
   );
 });

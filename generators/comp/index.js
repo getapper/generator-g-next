@@ -33,7 +33,7 @@ module.exports = class extends Generator {
         type: "directory",
         name: "componentPath",
         message: "Select where to create the component:",
-        basePath: "./components",
+        basePath: "./src/components",
       },
       {
         type: "input",
@@ -61,7 +61,7 @@ module.exports = class extends Generator {
       componentPath ? componentPath + "/" : ""
     }${componentName}`;
 
-    const relativeToRootPath = `./components/${relativeToComponentsPath}`;
+    const relativeToRootPath = `./src/components/${relativeToComponentsPath}`;
 
     // Index.tsx component file
     this.fs.copyTpl(
