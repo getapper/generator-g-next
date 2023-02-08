@@ -20,6 +20,9 @@
   },
   "homepage": "https://github.com/getapper/generator-g-next#readme",
   "dependencies": {
+    "@aws-sdk/client-eventbridge": "^3.259.0",
+    "@aws-sdk/client-iam": "^3.259.0",
+    "@aws-sdk/client-scheduler": "^3.259.0",
     "chalk": "2.1.0",
     "inquirer-directory": "2.2.0",
     "kebab-case": "1.0.1",
@@ -29,9 +32,7 @@
     "yosay": "2.0.2"
   },
   "devDependencies": {
-    "@aws-sdk/client-eventbridge": "^3.259.0",
-    "@aws-sdk/client-iam": "^3.259.0",
-    "@aws-sdk/client-scheduler": "^3.259.0",
+
     "prettier": "2.5.1"
   }
 }
