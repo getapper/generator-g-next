@@ -61,7 +61,7 @@ module.exports = class extends Generator {
 
     this.packageJson.merge({
       scripts: {
-        [`TASK:${taskName}`]: `npm run tsc-backend && node dist/tasks/${taskFolder}`,
+        [`TASK:${taskName}`]: `ts-node --project tsconfig-ts-node.json -r tsconfig-paths/register src/tasks/${taskFolder}/exec`,
       },
     });
   }

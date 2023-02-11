@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { enTranslations } from "translations/en/common";
-import { itTranslations } from "translations/it/common";
+import { enTranslations } from "../../translations/en/common";
+import { itTranslations } from "../../translations/it/common";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 

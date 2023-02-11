@@ -9,7 +9,7 @@ const { getGenygConfigFile, requirePackages } = require("../../common");
 module.exports = class extends Generator {
   async prompting() {
     // Config checks
-    requirePackages(this, ["core"]);
+    requirePackages(this, ["mui"]);
 
     this.log(
       yosay(

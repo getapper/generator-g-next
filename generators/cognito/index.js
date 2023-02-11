@@ -37,8 +37,8 @@ module.exports = class extends Generator {
 
   writing() {
     const { spaFolderName } = this.answers;
-    const relativeToSpaFolder = `./spas/${spaFolderName}`;
-    const reduxStorePath = `./spas/${spaFolderName}/redux-store`;
+    const relativeToSpaFolder = `./src/spas/${spaFolderName}`;
+    const reduxStorePath = `./src/spas/${spaFolderName}/redux-store`;
     const sliceName = "cognito";
 
     copyEjsTemplateFolder(this, this.templatePath("."), relativeToSpaFolder, {

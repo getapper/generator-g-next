@@ -1,7 +1,11 @@
 {
+  "extends": "ts-node/node14/tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+  },
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDirs": [".", "./dist"],
     "rootDir": ".",
     "outDir": "dist",
     "paths": {
@@ -18,15 +22,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      { "transform": "typescript-transform-paths", "useRootDirs": true },
-      {
-        "transform": "typescript-transform-paths",
-        "useRootDirs": true,
-        "afterDeclarations": true
-      }
-    ]
+    "incremental": true
   },
   "include": [
     "src/lib/**/*.ts",
