@@ -27,7 +27,7 @@ module.exports = class extends Generator {
   async prompting() {
     // Config checks
     requirePackages(this, ["core"]);
-    const configFile = this.readDestinationJSON("package.json"); //DEVE stare qua dentro sennò da errore, però scritto così funziona bene
+
     const credentialAccess = this.readDestinationJSON(".genyg.ignore.json"); //lui funziona :) XD :) XD
 
     // Create a new EventBridge and Scheduler instance
@@ -45,6 +45,7 @@ module.exports = class extends Generator {
     const scheduler = new Scheduler(AWSConfig);
 
     // The following arrays will be the user's choices given by yeoman
+    //    RIMUOVI GLI ELEMENTI INUTILI MESSI SOLO COME TEST!!!
     let scheduleRoles = [
       "create a new schedule role",
       "sche role 1",
@@ -57,13 +58,13 @@ module.exports = class extends Generator {
     ];
     let connectionList = ["create a new connection", "conn 1", "conn 2"];
 
+    // MANCANTI: listRoles, listConnection, inserimento negli array connessioni e ruoli (questi ultimi secondo criterio filtro)
+
     this.log(
       yosay(
         `Welcome to ${chalk.red(
           "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler! ${
-          configFile.name
-        } ${AWSConfig.region}${AWSConfig.credentials.secretAccessKey}`
+        )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler!`
       )
     );
     let answers = await this.prompt([
@@ -118,5 +119,20 @@ module.exports = class extends Generator {
     }
 
     return 0;
+  }
+  writing() {
+    const {
+      destinationRole,
+      customDestination,
+      schedulerRole,
+      customScheduler,
+      connection,
+      customConnection,
+      route,
+      method,
+    } = this.answers;
+
+    const configFile = this.readDestinationJSON("package.json"); //visto che mi serve nel writing e non nel prompting lo metto qui...andrà bene?
+    const projectName = configFile.name;
   }
 };
