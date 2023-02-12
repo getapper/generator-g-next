@@ -44,6 +44,15 @@ module.exports = class extends Generator {
     const eventBridge = new EventBridge(AWSConfig);
     const scheduler = new Scheduler(AWSConfig);
 
+    // The following arrays will be the user's choices given by yeoman
+    let scheduleRoles = ["create a new schedule role"];
+    let ApiDestinationRoles = [
+      "create a new destination role",
+      "fafyafstf",
+      "rdrdrdr",
+    ];
+    let connectionList = ["create a new connection"];
+
     this.log(
       yosay(
         `Welcome to ${chalk.red(
@@ -51,6 +60,37 @@ module.exports = class extends Generator {
         )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler! ${
           configFile.name
         } ${AWSConfig.region}${AWSConfig.credentials.secretAccessKey}`
+      )
+    );
+    let answers = await this.prompt([
+      {
+        type: "list",
+        name: "destinationRole",
+        message: "Choose an existing destination role or create a new one.",
+        choices: ApiDestinationRoles,
+        default: "create a new destination role",
+      },
+    ]);
+    if (answers.destinationRole === "create a new destination role") {
+      answers.customDestination = true;
+      answers = {
+        ...answers,
+        ...(await this.prompt([
+          {
+            type: "input",
+            name: "customDestinationRole",
+            message: "Choose an existing destination role or create a new one.",
+          },
+        ])),
+      };
+    }
+    this.log(
+      yosay(
+        `Your choices is ${
+          answers.customDestination
+            ? `${answers.customDestinationRole}`
+            : `${answers.destinationRole}`
+        }`
       )
     );
     return 0;
