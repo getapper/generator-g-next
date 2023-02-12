@@ -88,6 +88,18 @@ module.exports = class extends Generator {
         message: "Choose an existing connection or create a new one.",
         default: "create a new connection",
       },
+      {
+        type: "input",
+        name: "route",
+        message: "What is your scheduler API route path?",
+      },
+      {
+        type: "list",
+        name: "method",
+        message: "What is your scheduler API http method?",
+        choices: Object.values(HttpMethods),
+        default: "get",
+      },
     ]);
 
     if (answers.destinationRole === "create a new destination role") {
@@ -98,6 +110,11 @@ module.exports = class extends Generator {
     }
     if (answers.connection === "create a new connection") {
       answers.customConnection = true;
+    }
+    if (answers.route === "") {
+      this.log(yosay(chalk.red("Please give your page a name next time!")));
+      process.exit(1);
+      return;
     }
 
     return 0;
