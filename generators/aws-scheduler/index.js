@@ -45,13 +45,17 @@ module.exports = class extends Generator {
     const scheduler = new Scheduler(AWSConfig);
 
     // The following arrays will be the user's choices given by yeoman
-    let scheduleRoles = ["create a new schedule role"];
+    let scheduleRoles = [
+      "create a new schedule role",
+      "sche role 1",
+      "sche role 2",
+    ];
     let ApiDestinationRoles = [
       "create a new destination role",
-      "fafyafstf",
-      "rdrdrdr",
+      "des role 1",
+      "des role 2",
     ];
-    let connectionList = ["create a new connection"];
+    let connectionList = ["create a new connection", "conn 1", "conn 2"];
 
     this.log(
       yosay(
@@ -70,29 +74,32 @@ module.exports = class extends Generator {
         choices: ApiDestinationRoles,
         default: "create a new destination role",
       },
+      {
+        type: "list",
+        name: "schedulerRole",
+        message: "Choose an existing scheduler role or create a new one.",
+        choices: scheduleRoles,
+        default: "create a new schedule role",
+      },
+      {
+        type: "list",
+        name: "connection",
+        choices: connectionList,
+        message: "Choose an existing connection or create a new one.",
+        default: "create a new connection",
+      },
     ]);
+
     if (answers.destinationRole === "create a new destination role") {
       answers.customDestination = true;
-      answers = {
-        ...answers,
-        ...(await this.prompt([
-          {
-            type: "input",
-            name: "customDestinationRole",
-            message: "Choose an existing destination role or create a new one.",
-          },
-        ])),
-      };
     }
-    this.log(
-      yosay(
-        `Your choices is ${
-          answers.customDestination
-            ? `${answers.customDestinationRole}`
-            : `${answers.destinationRole}`
-        }`
-      )
-    );
+    if (answers.schedulerRole === "create a new schedule role") {
+      answers.customScheduler = true;
+    }
+    if (answers.connection === "create a new connection") {
+      answers.customConnection = true;
+    }
+
     return 0;
   }
 };
