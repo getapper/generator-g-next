@@ -1,11 +1,12 @@
 const Generator = require("yeoman-generator");
 const { requirePackages } = require("../../common");
 const yosay = require("yosay");
-// let pjson = require("/package.json"); scritto così ci da errore
+// let pjson = require("/package.json"); scritto così ci da errore quindi lo possiamo rimuovere
 const chalk = require("chalk");
 const path = require("path");
 const { IAMClient } = require("@aws-sdk/client-iam"); // NON da errore
 const { EventBridge } = require("@aws-sdk/client-eventbridge"); // NON da errore
+const { Scheduler } = require("@aws-sdk/client-scheduler");
 // const getEventbridgeScheduleTemplate = require("./templates"); questo template non ci serve e pertanto va rimosso
 // il suo contenuto verrà trasferito nel writing del nostro generatore
 const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler"); //l'importazione avviene correttamente
@@ -27,14 +28,29 @@ module.exports = class extends Generator {
     // Config checks
     requirePackages(this, ["core"]);
     const configFile = this.readDestinationJSON("package.json"); //DEVE stare qua dentro sennò da errore, però scritto così funziona bene
-    const boh = this.readDestinationJSON(".genyg.ignore.json"); //lui funziona :) XD :) XD
+    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json"); //lui funziona :) XD :) XD
+
+    // Create a new EventBridge and Scheduler instance
+    const AWSConfig = {
+      credentials: {
+        accessKeyId: credentialAccess.accessKeyId,
+        secretAccessKey: credentialAccess.secretAccessKey,
+      },
+      region: credentialAccess.region,
+    };
+
+    // Create a new EventBridge, IAM and Scheduler instance
+    const iamClient = new IAMClient(AWSConfig);
+    const eventBridge = new EventBridge(AWSConfig);
+    const scheduler = new Scheduler(AWSConfig);
+
     this.log(
       yosay(
         `Welcome to ${chalk.red(
           "Getapper NextJS Yeoman Generator (GeNYG)"
         )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler! ${
           configFile.name
-        } ${boh.accessKeyId}`
+        } ${AWSConfig.region}${AWSConfig.credentials.secretAccessKey}`
       )
     );
     return 0;
