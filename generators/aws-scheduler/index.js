@@ -14,6 +14,7 @@ const getEndpointInterfacesTemplate = require("../../generators/api/templates/en
 const getEndpointValidationsTemplate = require("../../generators/api/templates/endpoint/validations");
 const getEndpointTestsTemplate = require("../../generators/api/templates/endpoint/index.test");
 const getEndpointPageTemplate = require("../../generators/api/templates/page");
+const fs = require("fs");
 
 const HttpMethods = {
   GET: "get",
@@ -21,6 +22,112 @@ const HttpMethods = {
   DELETE: "delete",
   PUT: "put",
   PATCH: "patch",
+};
+
+const camelCaseToDash = (s) =>
+  s.replace(/([a-zA-Z])(?=[A-Z])/g, "$1-").toLowerCase();
+
+const capitalize = (s) => `${s[0].toUpperCase()}${s.slice(1)}`;
+
+const parseFromText = (text) => {
+  const params = text
+    .split("/")
+    .filter((p) => p !== "")
+    .map((p) => {
+      if (p[0] === "{") {
+        return "{" + camelCaseToDash(p.replace("{", "").replace("}", "")) + "}";
+      }
+
+      return p;
+    });
+  return params;
+};
+
+const getFunctionName = (method, params) => {
+  const models = params
+    .filter((p) => p[0] !== "{")
+    .map((p) =>
+      p
+        .split("-")
+        .map((p) => capitalize(p))
+        .join("")
+    );
+  const variables = params
+    .filter((p) => p[0] === "{")
+    .map((p) =>
+      p
+        .replace("{", "")
+        .replace("}", "")
+        .split("-")
+        .map((p) => capitalize(p))
+        .join("")
+    );
+  return `${method}${models.join("")}${
+    variables.length ? "By" : ""
+  }${variables.join("And")}`;
+};
+
+const getEndpointRoutePath = (params) => {
+  const models = params.filter((p) => p[0] !== "{");
+  const variables = params
+    .filter((p) => p[0] === "{")
+    .map((p) => p.replace("{", "").replace("}", ""));
+  return `${models.join("-")}${variables.length ? "-by-" : ""}${variables.join(
+    "-and-"
+  )}`;
+};
+
+const getPagesApiFolders = (params) => {
+  return params.map((p) =>
+    p[0] === "{"
+      ? "[" +
+        p
+          .replace("{", "")
+          .replace("}", "")
+          .split("-")
+          .map((p2, index) => (index ? capitalize(p2) : p2))
+          .join("") +
+        "]"
+      : p
+  );
+};
+
+const getEndpointFolder = (method, endpointRoutePath) => {
+  return `${method}-${endpointRoutePath}`;
+};
+
+const getAjaxPath = (params) => {
+  const urlParams = params
+    .filter((p) => p[0] === "{")
+    .map((p) =>
+      p
+        .replace("{", "")
+        .replace("}", "")
+        .split("-")
+        .map((p2, index) => (index ? capitalize(p2) : p2))
+        .join("")
+    );
+  if (urlParams.length) {
+    return [
+      `\`/${params
+        .map((p) => {
+          if (p[0] === "{") {
+            return `\${params.${p
+              .replace("{", "")
+              .replace("}", "")
+              .split("-")
+              .map((p2, index) => (index ? capitalize(p2) : p2))
+              .join("")}}`;
+          }
+
+          return p;
+        })
+        .join("/")}\``,
+      urlParams,
+    ];
+  }
+
+  return [`"/${params.join("/")}"`];
 };
 
 module.exports = class extends Generator {
@@ -134,5 +241,38 @@ module.exports = class extends Generator {
 
     const configFile = this.readDestinationJSON("package.json"); //visto che mi serve nel writing e non nel prompting lo metto qui...andrà bene?
     const projectName = configFile.name;
+
+    // same as api generator
+    const params = parseFromText(route);
+    const endpointRoutePath = getEndpointRoutePath(params);
+    const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
+    const apiName = getFunctionName(method, params);
+    const [routePath, urlParams] = getAjaxPath(params);
+    const pagesApiFolders = getPagesApiFolders(params);
+    const hasPayload = [
+      HttpMethods.PATCH,
+      HttpMethods.POST,
+      HttpMethods.PUT,
+    ].includes(method);
+    let currentRoute = "";
+    for (let i = 0; i < pagesApiFolders.length; i++) {
+      const folder = pagesApiFolders[i];
+      currentRoute += folder + "/";
+      const relativeToPagesFolder = `./src/pages/api/${currentRoute}/`;
+      if (
+        !(
+          fs.existsSync(relativeToPagesFolder) &&
+          fs.lstatSync(relativeToPagesFolder).isDirectory()
+        )
+      ) {
+        fs.mkdirSync(relativeToPagesFolder);
+      }
+      if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
+        this.fs.write(
+          this.destinationPath(`${relativeToPagesFolder}index.ts`),
+          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
+        );
+      }
+    }
   }
 };
