@@ -299,9 +299,9 @@ module.exports = class extends Generator {
       ),
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
-    /*this.fs.copy(
-      this.templatePath("./endpoint/index.ts"),
+    this.fs.copy(
+      this.templatePath("../../api/templates/endpoint/index.ts"),
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
-    );*/
+    );
   }
 };
