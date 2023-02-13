@@ -225,7 +225,7 @@ module.exports = class extends Generator {
       return;
     }
 
-    return 0;
+    this.answers = answers;
   }
   writing() {
     const {
@@ -254,6 +254,7 @@ module.exports = class extends Generator {
       HttpMethods.POST,
       HttpMethods.PUT,
     ].includes(method);
+
     let currentRoute = "";
     for (let i = 0; i < pagesApiFolders.length; i++) {
       const folder = pagesApiFolders[i];
@@ -274,5 +275,33 @@ module.exports = class extends Generator {
         );
       }
     }
+
+    // Endpoints folder
+    this.fs.write(
+      this.destinationPath(
+        `./src/endpoints/${endpointFolderName}/interfaces.ts`
+      ),
+      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload)
+    );
+    this.fs.write(
+      this.destinationPath(
+        `./src/endpoints/${endpointFolderName}/validations.ts`
+      ),
+      getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
+    );
+    this.fs.write(
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
+      getEndpointHandlersTemplate(capitalize(apiName))
+    );
+    this.fs.write(
+      this.destinationPath(
+        `./src/endpoints/${endpointFolderName}/index.test.ts`
+      ),
+      getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
+    );
+    /*this.fs.copy(
+      this.templatePath("./endpoint/index.ts"),
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
+    );*/
   }
 };
