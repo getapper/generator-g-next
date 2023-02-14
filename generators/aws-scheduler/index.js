@@ -4,7 +4,7 @@ const yosay = require("yosay");
 // let pjson = require("/package.json"); scritto così ci da errore quindi lo possiamo rimuovere
 const chalk = require("chalk");
 const path = require("path");
-const { IAMClient } = require("@aws-sdk/client-iam"); // NON da errore
+const { IAMClient, ListRolesCommand } = require("@aws-sdk/client-iam"); // NON da errore
 const { EventBridge } = require("@aws-sdk/client-eventbridge"); // NON da errore
 const { Scheduler } = require("@aws-sdk/client-scheduler");
 // const getEventbridgeScheduleTemplate = require("./templates"); questo template non ci serve e pertanto va rimosso
@@ -152,18 +152,9 @@ module.exports = class extends Generator {
     const scheduler = new Scheduler(AWSConfig);
 
     // The following arrays will be the user's choices given by yeoman
-    //    RIMUOVI GLI ELEMENTI INUTILI MESSI SOLO COME TEST!!!
-    let scheduleRoles = [
-      "create a new schedule role",
-      "sche role 1",
-      "sche role 2",
-    ];
-    let ApiDestinationRoles = [
-      "create a new destination role",
-      "des role 1",
-      "des role 2",
-    ];
-    let connectionList = ["create a new connection", "conn 1", "conn 2"];
+    let scheduleRoles = ["create a new schedule role"];
+    let ApiDestinationRoles = ["create a new destination role"];
+    let connectionList = ["create a new connection"];
 
     // MANCANTI: listRoles, listConnection, inserimento negli array connessioni e ruoli (questi ultimi secondo criterio filtro)
 
@@ -225,9 +216,23 @@ module.exports = class extends Generator {
       return;
     }
 
+    const roles = await iamClient.send(new ListRolesCommand({})); //ORA FUNZIONA :-)
+    // questo qua sotto è solo un test, va poi eliminato
+    this.log(
+      yosay(
+        `Ciao ${
+          roles ? `${roles.Roles.map((r) => r.RoleName)}` : `Non c'è niente`
+        }`
+      )
+    );
+    /*const connectionsResponse = await eventBridge.listConnections({});
+    this.log(
+      yosay(`Ciao ${connectionsResponse.Connections.map((c) => c.Name)}`)
+    );
     this.answers = answers;
+    return 0;*/
   }
-  writing() {
+  /*writing() {
     const {
       destinationRole,
       customDestination,
@@ -303,5 +308,5 @@ module.exports = class extends Generator {
       this.templatePath("../../api/templates/endpoint/index.ts"),
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
     );
-  }
+  }*/
 };
