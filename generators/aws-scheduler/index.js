@@ -352,7 +352,7 @@ module.exports = class extends Generator {
     const params = parseFromText(test3);*/ // test per vedere se venga creato role: superato
 
     let destinationRoleResponse = {};
-    if (customScheduler) {
+    if (customDestination) {
       // Create a new API destination role
       const destinationRoleParams = {
         AssumeRolePolicyDocument: destinationRolePolicy,
