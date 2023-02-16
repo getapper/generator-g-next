@@ -305,7 +305,7 @@ module.exports = class extends Generator {
     const test1 = route+roles.Roles[0].RoleName;
     const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
 
-    /*let connectionResponse = {};
+    let connectionResponse = {};
     if (customConnection) {
       // Create a connection which will send the authenticate requests
       const createConnectionParams = {
@@ -321,12 +321,13 @@ module.exports = class extends Generator {
 
       connectionResponse = await eventBridge.createConnection(
         createConnectionParams
-      ); //funziona!!!
+      );
     } else {
+      // return the information of the chosen connection
       connectionResponse = await eventBridge.describeConnection({
         Name: connection,
       });
-    }*/
+    }
     /*const test2 = connectionResponse.ConnectionState;
     const params = parseFromText(test2);*/
 
@@ -347,11 +348,31 @@ module.exports = class extends Generator {
         new GetRoleCommand(schedulerRoleParams)
       );
     }
-    const test3 = schedulerRoleResponse.RoleName;
-    const params = parseFromText(test3);
+    /*const test3 = schedulerRoleResponse.RoleName;
+    const params = parseFromText(test3);*/ // test per vedere se venga creato role: superato
+
+    let destinationRoleResponse = {};
+    if (customScheduler) {
+      // Create a new API destination role
+      const destinationRoleParams = {
+        AssumeRolePolicyDocument: destinationRolePolicy,
+        RoleName: `genyg-${projectName}-API-destination-role`,
+      };
+      destinationRoleResponse = await iamClient.send(
+        new CreateRoleCommand(destinationRoleParams)
+      );
+    } else {
+      // Return the information of the chosen API destination role
+      const destinationRoleParams = { RoleName: destinationRole };
+      destinationRoleResponse = await iamClient.send(
+        new GetRoleCommand(destinationRoleParams)
+      );
+    }
+    /*const test4 = destinationRoleResponse.RoleName;
+    const params = parseFromText(test4);*/ // test per vedere se venga creato role: superato
 
     // same as api generator
-    //const params = parseFromText(route);
+    const params = parseFromText(route);
     const endpointRoutePath = getEndpointRoutePath(params);
     const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
     const apiName = getFunctionName(method, params);
