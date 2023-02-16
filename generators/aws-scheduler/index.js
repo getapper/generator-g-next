@@ -135,9 +135,8 @@ module.exports = class extends Generator {
     // Config checks
     requirePackages(this, ["core"]);
 
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
-
     // Create a new EventBridge and Scheduler instance
+    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
       credentials: {
         accessKeyId: credentialAccess.accessKeyId,
@@ -146,10 +145,9 @@ module.exports = class extends Generator {
       region: credentialAccess.region,
     };
 
-    // Create a new EventBridge, IAM and Scheduler instance
+    // Create a new EventBridge and IAM instance
     const iamClient = new IAMClient(AWSConfig);
     const eventBridge = new EventBridge(AWSConfig);
-    const scheduler = new Scheduler(AWSConfig);
 
     // The following arrays will be the user's choices given by yeoman
     let scheduleRoles = ["create a new schedule role"];
@@ -242,11 +240,9 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
-
     this.answers = answers;
-    return 0;
   }
-  /*writing() {
+  async writing() {
     const {
       destinationRole,
       customDestination,
@@ -258,7 +254,21 @@ module.exports = class extends Generator {
       method,
     } = this.answers;
 
-    const configFile = this.readDestinationJSON("package.json"); //visto che mi serve nel writing e non nel prompting lo metto qui...andrà bene?
+    // Create a new EventBridge and Scheduler instance
+    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const AWSConfig = {
+      credentials: {
+        accessKeyId: credentialAccess.accessKeyId,
+        secretAccessKey: credentialAccess.secretAccessKey,
+      },
+      region: credentialAccess.region,
+    };
+
+    // Create a new EventBridge, IAM and Scheduler instance
+    const iamClient = new IAMClient(AWSConfig);
+    const eventBridge = new EventBridge(AWSConfig);
+    const scheduler = new Scheduler(AWSConfig);
+    const configFile = this.readDestinationJSON("package.json");
     const projectName = configFile.name;
 
     // same as api generator
@@ -322,5 +332,5 @@ module.exports = class extends Generator {
       this.templatePath("../../api/templates/endpoint/index.ts"),
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
     );
-  }*/
+  }
 };
