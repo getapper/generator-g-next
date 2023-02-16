@@ -4,7 +4,10 @@ const yosay = require("yosay");
 const chalk = require("chalk");
 const path = require("path");
 const { IAMClient, ListRolesCommand } = require("@aws-sdk/client-iam"); // NON da errore
-const { EventBridge } = require("@aws-sdk/client-eventbridge");
+const {
+  EventBridge,
+  ListConnectionsCommand,
+} = require("@aws-sdk/client-eventbridge");
 const { Scheduler } = require("@aws-sdk/client-scheduler");
 const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler");
 const getEndpointInterfacesTemplate = require("../../generators/api/templates/endpoint/interfaces");
@@ -192,7 +195,11 @@ module.exports = class extends Generator {
     });
 
     // we put the connections in the connectionList array
-    const connectionsResponse = await eventBridge.listConnections({}); //sembra funzionare, non da errori
+    const connectionsResponse = await eventBridge.listConnections({}); //LA CONNESSIONE CREATA DA CONSOLE NON VIENE RESTITUITA!!!
+    //const connectionsResponse = await eventBridge.send(new ListConnectionsCommand({})); // si comporta come sopra
+    /*this.log(
+      yosay(` ${connectionsResponse.Connections.map((c) => c.Name)}`)
+    );*/ //test per verificare che connessioni vengano restituite
     connectionsResponse.Connections.map((c) => {
       connectionList.push(c.Name);
     });
@@ -297,6 +304,30 @@ module.exports = class extends Generator {
     const test1 = route+roles.Roles[0].RoleName;
     const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
 
+    let connectionResponse = {};
+    if (customConnection) {
+      // Create a connection which will send the authenticate requests
+      const createConnectionParams = {
+        AuthorizationType: "API_KEY",
+        AuthParameters: {
+          ApiKeyAuthParameters: {
+            ApiKeyName: `genyg-${projectName}-API-Connection-Key`,
+            ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF", // you can randomize its value
+          },
+        },
+        Name: `genyg-${projectName}-API-Connection`,
+      };
+
+      connectionResponse = await eventBridge.createConnection(
+        createConnectionParams
+      ); //funziona!!!
+    } else {
+      connectionResponse = await eventBridge.describeConnection({
+        Name: connection,
+      });
+    }
+    /*const test2 = connectionResponse.ConnectionState;
+    const params = parseFromText(test2);*/
     // same as api generator
     const params = parseFromText(route);
     const endpointRoutePath = getEndpointRoutePath(params);
