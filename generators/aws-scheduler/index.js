@@ -1,19 +1,12 @@
 const Generator = require("yeoman-generator");
 const { requirePackages } = require("../../common");
 const yosay = require("yosay");
-// let pjson = require("/package.json"); scritto così ci da errore quindi lo possiamo rimuovere
 const chalk = require("chalk");
 const path = require("path");
-const {
-  IAMClient,
-  ListRolesCommand,
-  GetPolicyCommand,
-} = require("@aws-sdk/client-iam"); // NON da errore
-const { EventBridge } = require("@aws-sdk/client-eventbridge"); // NON da errore
+const { IAMClient, ListRolesCommand } = require("@aws-sdk/client-iam"); // NON da errore
+const { EventBridge } = require("@aws-sdk/client-eventbridge");
 const { Scheduler } = require("@aws-sdk/client-scheduler");
-// const getEventbridgeScheduleTemplate = require("./templates"); questo template non ci serve e pertanto va rimosso
-// il suo contenuto verrà trasferito nel writing del nostro generatore
-const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler"); //l'importazione avviene correttamente
+const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler");
 const getEndpointInterfacesTemplate = require("../../generators/api/templates/endpoint/interfaces");
 const getEndpointValidationsTemplate = require("../../generators/api/templates/endpoint/validations");
 const getEndpointTestsTemplate = require("../../generators/api/templates/endpoint/index.test");
@@ -142,7 +135,7 @@ module.exports = class extends Generator {
     // Config checks
     requirePackages(this, ["core"]);
 
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json"); //lui funziona :) XD :) XD
+    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
 
     // Create a new EventBridge and Scheduler instance
     const AWSConfig = {
@@ -163,7 +156,7 @@ module.exports = class extends Generator {
     let ApiDestinationRoles = ["create a new destination role"];
     let connectionList = ["create a new connection"];
 
-    // we need to decode the PolicyDocument of each role
+    // we need to decode the PolicyDocument of each role, we put the valid roles in the corresponding array
     const roles = await iamClient.send(new ListRolesCommand({}));
     roles.Roles.map((role) => {
       if (
@@ -184,10 +177,13 @@ module.exports = class extends Generator {
       }
     });
 
+    // we put the connections in the connectionList array
     const connectionsResponse = await eventBridge.listConnections({}); //sembra funzionare
     connectionsResponse.Connections.map((c) => {
       connectionList.push(c.Name);
     });
+
+    // Have Yeoman greet the user.
     this.log(
       yosay(
         `Welcome to ${chalk.red(
@@ -195,6 +191,7 @@ module.exports = class extends Generator {
         )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler!`
       )
     );
+
     let answers = await this.prompt([
       {
         type: "list",
