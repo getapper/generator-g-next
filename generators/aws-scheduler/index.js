@@ -13,6 +13,7 @@ const getEndpointTestsTemplate = require("../../generators/api/templates/endpoin
 const getEndpointPageTemplate = require("../../generators/api/templates/page");
 const fs = require("fs");
 
+// scritte in questo formato perché sennò succedevano cose strane nel stringify
 const schedulerRolePolicy = `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"scheduler.amazonaws.com"},"Action":"sts:AssumeRole"}]}`;
 const destinationRolePolicy = `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Action":"sts:AssumeRole"}]}`;
 
@@ -148,14 +149,29 @@ module.exports = class extends Generator {
     // Create a new EventBridge and IAM instance
     const iamClient = new IAMClient(AWSConfig);
     const eventBridge = new EventBridge(AWSConfig);
+    //const scheduler = new Scheduler(AWSConfig);
 
     // The following arrays will be the user's choices given by yeoman
     let scheduleRoles = ["create a new schedule role"];
     let ApiDestinationRoles = ["create a new destination role"];
     let connectionList = ["create a new connection"];
 
+    const roles = await iamClient.send(new ListRolesCommand({})); // senza usare il send risultava undefined
+    /*this.log(yosay(`${roles.Roles.map((role) =>role.RoleName)}`))*/ // test per verificare che venga restituita da iamClient lista ruoli: superto
+    /*roles.Roles.map((role) => {scheduleRoles.push(
+      JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
+    );*/ //test per verificare che in generale ruoli vengano inseriti dentro array: superato
+    /*const roles = await iamClient.send(new ListRolesCommand({MaxItems:1}));
+    this.log(
+      yosay(
+        `${roles.Roles.map((role) =>
+          JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
+        )}`
+      )
+    );
+    this.log(yosay(`${JSON.stringify(schedulerRolePolicy)}`));*/ // test per verificare che il formato delle policy dopo la stringify sia lo stesso: superato
+
     // we need to decode the PolicyDocument of each role, we put the valid roles in the corresponding array
-    const roles = await iamClient.send(new ListRolesCommand({}));
     roles.Roles.map((role) => {
       if (
         JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
@@ -176,7 +192,7 @@ module.exports = class extends Generator {
     });
 
     // we put the connections in the connectionList array
-    const connectionsResponse = await eventBridge.listConnections({}); //sembra funzionare
+    const connectionsResponse = await eventBridge.listConnections({}); //sembra funzionare, non da errori
     connectionsResponse.Connections.map((c) => {
       connectionList.push(c.Name);
     });
@@ -240,6 +256,9 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
+    /*this.iamClient = iamClient;
+    this.scheduler = scheduler;
+    this.eventBridge = eventBridge;*/ //provato a esportare così: test fallito
     this.answers = answers;
   }
   async writing() {
@@ -253,6 +272,10 @@ module.exports = class extends Generator {
       route,
       method,
     } = this.answers;
+    /*const {iamClient} = this.iamClient;
+    const {scheduler} = this.scheduler;
+    const {eventBridge} = this.eventBridge;
+     */ // test per vedere se sia possibile importazione di questi valori dal prompting al writing: fallito
 
     // Create a new EventBridge and Scheduler instance
     const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
@@ -270,6 +293,9 @@ module.exports = class extends Generator {
     const scheduler = new Scheduler(AWSConfig);
     const configFile = this.readDestinationJSON("package.json");
     const projectName = configFile.name;
+    /*const roles = await iamClient.send(new ListRolesCommand({}));
+    const test1 = route+roles.Roles[0].RoleName;
+    const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
 
     // same as api generator
     const params = parseFromText(route);
@@ -305,6 +331,7 @@ module.exports = class extends Generator {
       }
     }
 
+    //sono stati testati con successo
     // Endpoints folder
     this.fs.write(
       this.destinationPath(
