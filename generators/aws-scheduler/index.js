@@ -3,7 +3,12 @@ const { requirePackages } = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
 const path = require("path");
-const { IAMClient, ListRolesCommand } = require("@aws-sdk/client-iam"); // NON da errore
+const {
+  IAMClient,
+  ListRolesCommand,
+  CreateRoleCommand,
+  GetRoleCommand,
+} = require("@aws-sdk/client-iam");
 const {
   EventBridge,
   ListConnectionsCommand,
@@ -180,17 +185,13 @@ module.exports = class extends Generator {
         JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
         JSON.stringify(schedulerRolePolicy)
       ) {
-        scheduleRoles.push(
-          JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
-        );
+        scheduleRoles.push(role.RoleName);
       }
       if (
         JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
         JSON.stringify(destinationRolePolicy)
       ) {
-        ApiDestinationRoles.push(
-          JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
-        );
+        ApiDestinationRoles.push(role.RoleName);
       }
     });
 
@@ -304,7 +305,7 @@ module.exports = class extends Generator {
     const test1 = route+roles.Roles[0].RoleName;
     const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
 
-    let connectionResponse = {};
+    /*let connectionResponse = {};
     if (customConnection) {
       // Create a connection which will send the authenticate requests
       const createConnectionParams = {
@@ -325,11 +326,32 @@ module.exports = class extends Generator {
       connectionResponse = await eventBridge.describeConnection({
         Name: connection,
       });
-    }
+    }*/
     /*const test2 = connectionResponse.ConnectionState;
     const params = parseFromText(test2);*/
+
+    let schedulerRoleResponse = {};
+    if (customScheduler) {
+      // Create a new scheduler role
+      const schedulerRoleParams = {
+        AssumeRolePolicyDocument: schedulerRolePolicy,
+        RoleName: `genyg-${projectName}-scheduler-role`,
+      };
+      schedulerRoleResponse = await iamClient.send(
+        new CreateRoleCommand(schedulerRoleParams)
+      );
+    } else {
+      // Return the information of the chosen scheduler role
+      const schedulerRoleParams = { RoleName: schedulerRole };
+      schedulerRoleResponse = await iamClient.send(
+        new GetRoleCommand(schedulerRoleParams)
+      );
+    }
+    const test3 = schedulerRoleResponse.RoleName;
+    const params = parseFromText(test3);
+
     // same as api generator
-    const params = parseFromText(route);
+    //const params = parseFromText(route);
     const endpointRoutePath = getEndpointRoutePath(params);
     const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
     const apiName = getFunctionName(method, params);
