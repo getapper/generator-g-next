@@ -4,7 +4,11 @@ const yosay = require("yosay");
 // let pjson = require("/package.json"); scritto così ci da errore quindi lo possiamo rimuovere
 const chalk = require("chalk");
 const path = require("path");
-const { IAMClient, ListRolesCommand } = require("@aws-sdk/client-iam"); // NON da errore
+const {
+  IAMClient,
+  ListRolesCommand,
+  GetPolicyCommand,
+} = require("@aws-sdk/client-iam"); // NON da errore
 const { EventBridge } = require("@aws-sdk/client-eventbridge"); // NON da errore
 const { Scheduler } = require("@aws-sdk/client-scheduler");
 // const getEventbridgeScheduleTemplate = require("./templates"); questo template non ci serve e pertanto va rimosso
@@ -15,6 +19,9 @@ const getEndpointValidationsTemplate = require("../../generators/api/templates/e
 const getEndpointTestsTemplate = require("../../generators/api/templates/endpoint/index.test");
 const getEndpointPageTemplate = require("../../generators/api/templates/page");
 const fs = require("fs");
+
+const schedulerRolePolicy = `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"scheduler.amazonaws.com"},"Action":"sts:AssumeRole"}]}`;
+const destinationRolePolicy = `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Action":"sts:AssumeRole"}]}`;
 
 const HttpMethods = {
   GET: "get",
@@ -156,8 +163,31 @@ module.exports = class extends Generator {
     let ApiDestinationRoles = ["create a new destination role"];
     let connectionList = ["create a new connection"];
 
-    // MANCANTI: listRoles, listConnection, inserimento negli array connessioni e ruoli (questi ultimi secondo criterio filtro)
+    // we need to decode the PolicyDocument of each role
+    const roles = await iamClient.send(new ListRolesCommand({}));
+    roles.Roles.map((role) => {
+      if (
+        JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
+        JSON.stringify(schedulerRolePolicy)
+      ) {
+        scheduleRoles.push(
+          JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
+        );
+      }
+      if (
+        JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
+        JSON.stringify(destinationRolePolicy)
+      ) {
+        ApiDestinationRoles.push(
+          JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
+        );
+      }
+    });
 
+    const connectionsResponse = await eventBridge.listConnections({}); //sembra funzionare
+    connectionsResponse.Connections.map((c) => {
+      connectionList.push(c.Name);
+    });
     this.log(
       yosay(
         `Welcome to ${chalk.red(
@@ -216,21 +246,8 @@ module.exports = class extends Generator {
       return;
     }
 
-    const roles = await iamClient.send(new ListRolesCommand({})); //ORA FUNZIONA :-)
-    // questo qua sotto è solo un test, va poi eliminato
-    this.log(
-      yosay(
-        `Ciao ${
-          roles ? `${roles.Roles.map((r) => r.RoleName)}` : `Non c'è niente`
-        }`
-      )
-    );
-    /*const connectionsResponse = await eventBridge.listConnections({});
-    this.log(
-      yosay(`Ciao ${connectionsResponse.Connections.map((c) => c.Name)}`)
-    );
     this.answers = answers;
-    return 0;*/
+    return 0;
   }
   /*writing() {
     const {
