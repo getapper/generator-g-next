@@ -428,6 +428,21 @@ module.exports = class extends Generator {
 
     const putRuleResponse = await eventBridge.putRule(putRuleParams);
 
+    // Create a  target which will be invoked when the above rule is activated
+    // The march between rule and target takes place through the rule's name
+    const putTargetParams = {
+      Rule: putRuleParams.Name,
+      Targets: [
+        {
+          Id: `genyg-${projectName}-${urlParams}-${params}-target`,
+          Arn: createApiDestinationResponse.ApiDestinationArn,
+          RoleArn: destinationRoleResponse.Arn,
+        },
+      ],
+    };
+
+    const putTargetResponse = await eventBridge.putTargets(putTargetParams);
+
     //sono stati testati con successo
     // Endpoints folder
     this.fs.write(
