@@ -285,6 +285,40 @@ module.exports = class extends Generator {
     const {eventBridge} = this.eventBridge;
      */ // test per vedere se sia possibile importazione di questi valori dal prompting al writing: fallito
 
+    // same as api generator
+    const params = parseFromText(route);
+    const endpointRoutePath = getEndpointRoutePath(params);
+    const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
+    const apiName = getFunctionName(method, params);
+    const [routePath, urlParams] = getAjaxPath(params);
+    const pagesApiFolders = getPagesApiFolders(params);
+    const hasPayload = [
+      HttpMethods.PATCH,
+      HttpMethods.POST,
+      HttpMethods.PUT,
+    ].includes(method);
+
+    let currentRoute = "";
+    for (let i = 0; i < pagesApiFolders.length; i++) {
+      const folder = pagesApiFolders[i];
+      currentRoute += folder + "/";
+      const relativeToPagesFolder = `./src/pages/api/${currentRoute}/`;
+      if (
+        !(
+          fs.existsSync(relativeToPagesFolder) &&
+          fs.lstatSync(relativeToPagesFolder).isDirectory()
+        )
+      ) {
+        fs.mkdirSync(relativeToPagesFolder);
+      }
+      if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
+        this.fs.write(
+          this.destinationPath(`${relativeToPagesFolder}index.ts`),
+          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
+        );
+      }
+    }
+
     // Create a new EventBridge and Scheduler instance
     const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
@@ -304,32 +338,6 @@ module.exports = class extends Generator {
     /*const roles = await iamClient.send(new ListRolesCommand({}));
     const test1 = route+roles.Roles[0].RoleName;
     const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
-
-    let connectionResponse = {};
-    if (customConnection) {
-      // Create a connection which will send the authenticate requests
-      const createConnectionParams = {
-        AuthorizationType: "API_KEY",
-        AuthParameters: {
-          ApiKeyAuthParameters: {
-            ApiKeyName: `genyg-${projectName}-API-Connection-Key`,
-            ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF", // you can randomize its value
-          },
-        },
-        Name: `genyg-${projectName}-API-Connection`,
-      };
-
-      connectionResponse = await eventBridge.createConnection(
-        createConnectionParams
-      );
-    } else {
-      // return the information of the chosen connection
-      connectionResponse = await eventBridge.describeConnection({
-        Name: connection,
-      });
-    }
-    /*const test2 = connectionResponse.ConnectionState;
-    const params = parseFromText(test2);*/
 
     let schedulerRoleResponse = {};
     if (customScheduler) {
@@ -371,39 +379,44 @@ module.exports = class extends Generator {
     /*const test4 = destinationRoleResponse.RoleName;
     const params = parseFromText(test4);*/ // test per vedere se venga creato role: superato
 
-    // same as api generator
-    const params = parseFromText(route);
-    const endpointRoutePath = getEndpointRoutePath(params);
-    const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
-    const apiName = getFunctionName(method, params);
-    const [routePath, urlParams] = getAjaxPath(params);
-    const pagesApiFolders = getPagesApiFolders(params);
-    const hasPayload = [
-      HttpMethods.PATCH,
-      HttpMethods.POST,
-      HttpMethods.PUT,
-    ].includes(method);
+    let connectionResponse = {};
+    if (customConnection) {
+      // Create a connection which will send the authenticate requests
+      const createConnectionParams = {
+        AuthorizationType: "API_KEY",
+        AuthParameters: {
+          ApiKeyAuthParameters: {
+            ApiKeyName: `genyg-${projectName}-API-Connection-Key`,
+            ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF", // you can randomize its value
+          },
+        },
+        Name: `genyg-${projectName}-API-Connection`,
+      };
 
-    let currentRoute = "";
-    for (let i = 0; i < pagesApiFolders.length; i++) {
-      const folder = pagesApiFolders[i];
-      currentRoute += folder + "/";
-      const relativeToPagesFolder = `./src/pages/api/${currentRoute}/`;
-      if (
-        !(
-          fs.existsSync(relativeToPagesFolder) &&
-          fs.lstatSync(relativeToPagesFolder).isDirectory()
-        )
-      ) {
-        fs.mkdirSync(relativeToPagesFolder);
-      }
-      if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
-        this.fs.write(
-          this.destinationPath(`${relativeToPagesFolder}index.ts`),
-          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
-        );
-      }
+      connectionResponse = await eventBridge.createConnection(
+        createConnectionParams
+      );
+    } else {
+      // return the information of the chosen connection
+      connectionResponse = await eventBridge.describeConnection({
+        Name: connection,
+      });
     }
+    /*const test2 = connectionResponse.ConnectionState;
+    const params = parseFromText(test2);*/
+
+    // Create the endpoint and specify which connection use
+    const createApiDestinationParams = {
+      ConnectionArn: connectionResponse.ConnectionArn,
+      HttpMethod: urlParams,
+      InvocationEndpoint: "https://", // insert your endpoint here
+      Name: `genyg-${projectName}-${urlParams}-${params}`, // qua vogliamo params perché ci interessa solo il nome della route, l'url ce l'abbiamo già
+      InvocationRateLimitPerSecond: 100,
+    };
+
+    const createApiDestinationResponse = await eventBridge.createApiDestination(
+      createApiDestinationParams
+    );
 
     //sono stati testati con successo
     // Endpoints folder
