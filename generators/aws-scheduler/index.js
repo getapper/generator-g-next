@@ -418,6 +418,16 @@ module.exports = class extends Generator {
       createApiDestinationParams
     );
 
+    // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${urlParams}-${apiNameCapital} will be sent
+    const putRuleParams = {
+      Name: `genyg-${projectName}-trigger-${urlParams}-${params}`,
+      EventPattern: JSON.stringify({
+        source: [`genyg-${projectName}-${urlParams}-${params}`],
+      }),
+    };
+
+    const putRuleResponse = await eventBridge.putRule(putRuleParams);
+
     //sono stati testati con successo
     // Endpoints folder
     this.fs.write(
