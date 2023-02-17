@@ -443,6 +443,30 @@ module.exports = class extends Generator {
 
     const putTargetResponse = await eventBridge.putTargets(putTargetParams);
 
+    // Create a new schedule which will be activated every minute
+    // At the activation moment a default bus whit source: genyg-${projectName}-${urlParams}-${apiNameCapital} will be sent
+    // The initial status is disabled and details are empty
+    const createScheduleParams = {
+      Name: `genyg-${projectName}-schedule-${urlParams}-${params}`,
+      ScheduleExpression: "rate(1 minute)",
+      State: "DISABLED",
+      Target: {
+        RoleArn: schedulerRoleResponse.Arn,
+        Arn: createApiDestinationResponse.ApiDestinationArn,
+        EventBridgeParameters: {
+          Source: `genyg-${projectName}-${urlParams}-${params}`,
+          DetailType: JSON.stringify({}),
+        },
+      },
+      FlexibleTimeWindow: {
+        Mode: "OFF",
+      },
+    };
+
+    const createScheduleResponse = await scheduler.createSchedule(
+      createScheduleParams
+    );
+
     //sono stati testati con successo
     // Endpoints folder
     this.fs.write(
