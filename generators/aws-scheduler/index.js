@@ -163,6 +163,7 @@ module.exports = class extends Generator {
     let scheduleRoles = ["create a new schedule role"];
     let ApiDestinationRoles = ["create a new destination role"];
     let connectionList = ["create a new connection"];
+    let eventBusesList = ["create a new event bus"];
 
     const roles = await iamClient.send(new ListRolesCommand({})); // senza usare il send risultava undefined
     /*this.log(yosay(`${roles.Roles.map((role) =>role.RoleName)}`))*/ // test per verificare che venga restituita da iamClient lista ruoli: superto
@@ -196,13 +197,19 @@ module.exports = class extends Generator {
     });
 
     // we put the connections in the connectionList array
-    const connectionsResponse = await eventBridge.listConnections({}); //LA CONNESSIONE CREATA DA CONSOLE NON VIENE RESTITUITA!!!
+    const connectionsResponse = await eventBridge.listConnections({});
     //const connectionsResponse = await eventBridge.send(new ListConnectionsCommand({})); // si comporta come sopra
     /*this.log(
       yosay(` ${connectionsResponse.Connections.map((c) => c.Name)}`)
     );*/ //test per verificare che connessioni vengano restituite
     connectionsResponse.Connections.map((c) => {
       connectionList.push(c.Name);
+    });
+
+    // we put the event buses in the eventBusesList array
+    const listEventBusesResponse = await eventBridge.listEventBuses({});
+    listEventBusesResponse.EventBuses.map((eventBus) => {
+      eventBusesList.push(eventBus.Name);
     });
 
     // Have Yeoman greet the user.
@@ -237,6 +244,13 @@ module.exports = class extends Generator {
         default: "create a new connection",
       },
       {
+        type: "list",
+        name: "eventBus",
+        choices: eventBusesList,
+        message: "Choose an existing event bus or create a new one.",
+        default: "create a new event bus",
+      },
+      {
         type: "input",
         name: "route",
         message: "What is your scheduler API route path?",
@@ -258,6 +272,9 @@ module.exports = class extends Generator {
     }
     if (answers.connection === "create a new connection") {
       answers.customConnection = true;
+    }
+    if (answers.eventBus === "create a new event bus") {
+      answers.customEventBus = true;
     }
     if (answers.route === "") {
       this.log(yosay(chalk.red("Please give your page a name next time!")));
