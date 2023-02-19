@@ -408,9 +408,10 @@ module.exports = class extends Generator {
     // Create the endpoint and specify which connection use
     const createApiDestinationParams = {
       ConnectionArn: connectionResponse.ConnectionArn,
-      HttpMethod: urlParams,
-      InvocationEndpoint: "https://", // insert your endpoint here
-      Name: `genyg-${projectName}-${urlParams}-${params}`, // qua vogliamo params perché ci interessa solo il nome della route, l'url ce l'abbiamo già
+      HttpMethod: method.toUpperCase(), // avevo provato urlParams, ma non va bene, così invece funziona
+      InvocationEndpoint:
+        "https://webhook.site/b0c01b78-1c89-4ea1-a62e-b51301a9425b", // insert your endpoint here // the webhook site is a test
+      Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`, // qua vogliamo params perché ci interessa solo il nome della route, l'url ce l'abbiamo già
       InvocationRateLimitPerSecond: 100,
     };
 
@@ -418,11 +419,11 @@ module.exports = class extends Generator {
       createApiDestinationParams
     );
 
-    // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${urlParams}-${apiNameCapital} will be sent
+    // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
     const putRuleParams = {
-      Name: `genyg-${projectName}-trigger-${urlParams}-${params}`,
+      Name: `genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`,
       EventPattern: JSON.stringify({
-        source: [`genyg-${projectName}-${urlParams}-${params}`],
+        source: [`genyg-${projectName}-${method.toUpperCase()}-${params}`],
       }),
     };
 
@@ -434,9 +435,9 @@ module.exports = class extends Generator {
       Rule: putRuleParams.Name,
       Targets: [
         {
-          Id: `genyg-${projectName}-${urlParams}-${params}-target`,
+          Id: `genyg-${projectName}-${method.toUpperCase()}-${params}-target`,
           Arn: createApiDestinationResponse.ApiDestinationArn,
-          RoleArn: destinationRoleResponse.Arn,
+          RoleArn: destinationRoleResponse.Role.Arn,
         },
       ],
     };
@@ -444,17 +445,17 @@ module.exports = class extends Generator {
     const putTargetResponse = await eventBridge.putTargets(putTargetParams);
 
     // Create a new schedule which will be activated every minute
-    // At the activation moment a default bus whit source: genyg-${projectName}-${urlParams}-${apiNameCapital} will be sent
+    // At the activation moment a default bus whit source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
     // The initial status is disabled and details are empty
     const createScheduleParams = {
-      Name: `genyg-${projectName}-schedule-${urlParams}-${params}`,
+      Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
       ScheduleExpression: "rate(1 minute)",
       State: "DISABLED",
       Target: {
-        RoleArn: schedulerRoleResponse.Arn,
-        Arn: createApiDestinationResponse.ApiDestinationArn,
+        RoleArn: schedulerRoleResponse.Role.Arn,
+        Arn: createApiDestinationResponse.ApiDestinationArn, //lui per qualche strano motivo sembra dare problemi
         EventBridgeParameters: {
-          Source: `genyg-${projectName}-${urlParams}-${params}`,
+          Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
           DetailType: JSON.stringify({}),
         },
       },
