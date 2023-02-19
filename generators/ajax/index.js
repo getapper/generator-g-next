@@ -173,7 +173,7 @@ module.exports = class extends Generator {
     const apiNamePC = pascalCase(apiName);
     const apiActionRoute = getAjaxActionRoute(method, params);
     const [routePath, urlParams] = getAjaxPath(params);
-    const reduxStorePath = `./spas/${spaFolderName}/redux-store`;
+    const reduxStorePath = `./src/spas/${spaFolderName}/redux-store`;
 
     let content = getTemplate(
       apiNamePC,
