@@ -7,6 +7,6 @@
     "translations": false,
     "mongodb": false,
     "cognito": false,
-    "cookie": false
+    "cookieAuth": false
   }
 }

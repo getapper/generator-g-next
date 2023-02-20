@@ -7,14 +7,13 @@ const {
   getGenygConfigFile,
   requirePackages,
   extendConfigFile,
-
 } = require("../../common");
 const getSessionTemplate = require("./templates");
 
 module.exports = class extends Generator {
   async prompting() {
     // Config checks
-    requirePackages(this, ["cookie"]);
+    requirePackages(this, ["cookieAuth"]);
 
     // Have Yeoman greet the user.
     this.log(
@@ -28,13 +27,9 @@ module.exports = class extends Generator {
     const answers = await this.prompt([
       {
         type: "input",
-        name: "projectName",
-        message: "please enter the name of the project:\n",
-      },
-      {
-        type: "input",
         name: "roleName",
-        message: "what role do you want to add?(you can add several roles at once separated by \",\" e.g.: admin,user)\n",
+        message:
+          'what role do you want to add?(you can add several roles at once separated by "," e.g.: admin,user)\n',
       },
     ]);
 
@@ -44,37 +39,39 @@ module.exports = class extends Generator {
       return;
     }
 
-    answers.roleName = answers.roleName.split(",").map(role => {return pascalCase(role.trim())});
+    answers.roleName = answers.roleName.split(",").map((role) => {
+      return pascalCase(role.trim());
+    });
     this.answers = answers;
   }
 
   writing() {
-    const {roleName, projectName} = this.answers;
+    const { roleName } = this.answers;
     const configfile = getGenygConfigFile(this);
-    const roles = configfile.cookies;
+    const roles = configfile.cookieRoles;
     roles.push(...roleName);
 
-    extendConfigFile(this,{
-      cookies: {roles},
+    extendConfigFile(this, {
+      cookieRoles: roles,
     });
 
     //Index.ts model file
-    roleName.forEach((role) =>{
+    roleName.forEach((role) => {
       this.fs.copyTpl(
         this.templatePath("index.ejs"),
-        this.destinationPath(`./models/server/${role}/index.ts`),
+        this.destinationPath(`./src/models/server/${role}/index.ts`),
         {
-          role
+          role,
         }
-      )}
-    );
+      );
+    });
 
     //Index.tsx session file
     this.fs.write(
-      this.destinationPath("./lib/session/index.tsx"),
+      this.destinationPath("./src/lib/session/index.tsx"),
       getSessionTemplate({
         roles,
-        projectName,
+        projectName: require(this.destinationPath("./package.json")).name,
       })
     );
   }

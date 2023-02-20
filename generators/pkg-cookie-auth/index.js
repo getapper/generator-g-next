@@ -1,7 +1,11 @@
-var Generator = require('yeoman-generator');
+var Generator = require("yeoman-generator");
 const yosay = require("yosay");
 const chalk = require("chalk");
-const {requirePackages, getGenygConfigFile, extendConfigFile} = require("../../common");
+const {
+  requirePackages,
+  getGenygConfigFile,
+  extendConfigFile,
+} = require("../../common");
 
 module.exports = class extends Generator {
   async prompting() {
@@ -34,7 +38,7 @@ module.exports = class extends Generator {
   writing() {
     // Config checks
     const configFile = getGenygConfigFile(this);
-    if (configFile.packages.cookie) {
+    if (configFile.packages.cookieAuth) {
       this.log(
         yosay(
           chalk.red(
@@ -54,9 +58,9 @@ module.exports = class extends Generator {
 
     extendConfigFile(this, {
       packages: {
-        cookie: true,
+        cookieAuth: true,
       },
-      cookies: [],
+      cookieRoles: [],
     });
   }
 };
