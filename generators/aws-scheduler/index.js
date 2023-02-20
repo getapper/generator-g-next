@@ -294,6 +294,8 @@ module.exports = class extends Generator {
       customScheduler,
       connection,
       customConnection,
+      eventBus,
+      customEventBus,
       route,
       method,
     } = this.answers;
@@ -436,12 +438,27 @@ module.exports = class extends Generator {
       createApiDestinationParams
     );
 
+    // se creo un eventbus nuovo mi segnala errore se lo allego alla schedule perché vuole i bus di default
+    let eventBusResponse = {};
+    let createEventBusParams = {};
+    if (customEventBus) {
+      createEventBusParams = {
+        Name: `genyg-${projectName}-${method.toUpperCase()}-${params}-event-bus`,
+      };
+      eventBusResponse = await eventBridge.createEventBus(createEventBusParams);
+    } else {
+      eventBusResponse = await eventBridge.describeEventBus({ Name: eventBus });
+    }
+
     // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
     const putRuleParams = {
       Name: `genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`,
       EventPattern: JSON.stringify({
         source: [`genyg-${projectName}-${method.toUpperCase()}-${params}`],
       }),
+      EventBusName: customEventBus
+        ? createEventBusParams.Name
+        : eventBusResponse.Name,
     };
 
     const putRuleResponse = await eventBridge.putRule(putRuleParams);
@@ -470,7 +487,7 @@ module.exports = class extends Generator {
       State: "DISABLED",
       Target: {
         RoleArn: schedulerRoleResponse.Role.Arn,
-        Arn: createApiDestinationResponse.ApiDestinationArn, //lui per qualche strano motivo sembra dare problemi
+        Arn: eventBusResponse.Arn,
         EventBridgeParameters: {
           Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
           DetailType: JSON.stringify({}),
