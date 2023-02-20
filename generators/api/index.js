@@ -7,7 +7,7 @@ const getEndpointInterfacesTemplate = require("./templates/endpoint/interfaces")
 const getEndpointValidationsTemplate = require("./templates/endpoint/validations");
 const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
 const getEndpointPageTemplate = require("./templates/page");
-const { requirePackages } = require("../../common");
+const { getGenygConfigFile, requirePackages } = require("../../common");
 const fs = require("fs");
 
 const HttpMethods = {
@@ -153,6 +153,30 @@ module.exports = class extends Generator {
       },
     ]);
 
+    //cookie auth
+    const configfile = getGenygConfigFile(this);
+    this.cookieProtected.protected = false;
+    if (configfile.packages.cookie && configfile.cookies.length !== 0){
+      this.cookieProtected = await this.prompt([
+        {
+          type: "confirm",
+          name: "protected",
+          message: "do you want to use cookie authentication?",
+          default: false,
+        }
+      ]);
+      if(cookieProtected.protected) {
+        this.cookieRole = await this.prompt(
+          {
+            type: "list",
+            name: "role",
+            message: "select a role from the list",
+            choices: configfile.cookies,
+          },
+        )
+      }
+    }
+
     if (answers.route === "") {
       this.log(yosay(chalk.red("Please give your page a name next time!")));
       process.exit(1);
@@ -214,9 +238,20 @@ module.exports = class extends Generator {
       this.destinationPath(`./endpoints/${endpointFolderName}/index.test.ts`),
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
-    this.fs.copy(
-      this.templatePath("./endpoint/index.ts"),
-      this.destinationPath(`./endpoints/${endpointFolderName}/index.ts`)
-    );
+    if(this.cookieProtected.protected){
+      const role = this.cookieRole.role;
+      this.fs.copyTpl(
+        this.templatePath("./templates/endpoint/cookieProtected/index.ejs"),
+        this.destinationPath(`./endpoints/${endpointFolderName}/index.ts`),
+        {
+          role,
+        }
+      )
+    }else{
+      this.fs.copy(
+        this.templatePath("./endpoint/index.ts"),
+        this.destinationPath(`./endpoints/${endpointFolderName}/index.ts`)
+      );
+    }
   }
 };
