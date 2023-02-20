@@ -2,7 +2,7 @@ module.exports = (
   apiNameCapital,
   urlParams,
   hasPayload
-) => `import { ErrorResponse, RequestI } from "lib/response-handler";
+) => `import { ErrorResponse, RequestI } from "@/lib/response-handler";
 
 export namespace ${apiNameCapital}Api {
   export type QueryStringParameters = {${

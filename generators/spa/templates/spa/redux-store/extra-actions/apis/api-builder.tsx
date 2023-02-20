@@ -34,7 +34,6 @@ export interface ApiRequestPayloadType<T> {
   prepareParams?: T;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const apiRequestPayloadBuilder: <T>(
   ApiRequestPayloadBuilderParams,
   ApiRequestPayloadBuilderOptions,

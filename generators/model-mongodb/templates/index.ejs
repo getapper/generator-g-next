@@ -1,5 +1,5 @@
 import { Filter, ObjectId, WithId } from "mongodb";
-import mongoDao from "lib/mongodb/mongo-dao";
+import mongoDao from "@/lib/mongodb/mongo-dao";
 
 export type I<%= modelName %> = {
   _id?: ObjectId;
@@ -79,6 +79,7 @@ export class <%= modelName %>
       limit = 10,
       skip = 0,
       sort = [],
+      projection = null,
     }: {
       limit?: number;
       skip?: number;
@@ -86,10 +87,12 @@ export class <%= modelName %>
         by: keyof I<%= modelName %>;
         asc: boolean;
       }[];
+      projection?: Document;
     } = {
       limit: 10,
       skip: 0,
       sort: [],
+      projection: null,
     }
   ): Promise<<%= modelName %>[]> {
     const i<%= modelNamePluralized %> =
@@ -104,6 +107,7 @@ export class <%= modelName %>
                 sort.map((pair) => [pair.by, pair.asc ? 1 : -1])
               )
             : undefined,
+          projection,
         }
       );
     return i<%= modelNamePluralized %>.map(

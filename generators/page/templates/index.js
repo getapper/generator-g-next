@@ -7,7 +7,7 @@ module.exports = ({
   multipleParameters,
   paramName,
 }) => `import React, { memo } from "react";
-import { AppHead } from "components/AppHead";${
+import { AppHead } from "@/components/AppHead";${
   useGetStaticProps
     ? `
 import { GetStaticPropsResult, GetStaticPropsContext } from "next";`

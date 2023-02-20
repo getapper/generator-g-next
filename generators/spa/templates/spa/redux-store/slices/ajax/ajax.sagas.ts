@@ -1,9 +1,9 @@
 import { takeEvery, fork, take, put, delay, race } from "redux-saga/effects";
 import { Action } from "redux";
 import axios, { CancelTokenSource, AxiosError } from "axios";
-import { ApiRequestAction } from "spas/<%= spaFolderName %>/redux-store/extra-actions/apis/api-builder";
-import { apiBaseUrl } from "spas/<%= spaFolderName %>/config";
-import { actions } from "spas/<%= spaFolderName %>/redux-store/slices";
+import { ApiRequestAction } from "@/spas/<%= spaFolderName %>/redux-store/extra-actions/apis/api-builder";
+import { apiBaseUrl } from "@/spas/<%= spaFolderName %>/config";
+import { actions } from "@/spas/<%= spaFolderName %>/redux-store/slices";
 
 function* ajaxTask(
   requestAction: ApiRequestAction<any>,

@@ -45,7 +45,7 @@ const copyEjsTemplateFolder = (genyg, srcFolder, destFolder, params) => {
 };
 
 const getSpas = (genyg) => {
-  return fs.readdirSync(genyg.destinationPath("./spas"));
+  return fs.readdirSync(genyg.destinationPath("./src/spas"));
 };
 
 const extendEnv = (genyg, envName, newContent) => {
@@ -61,6 +61,8 @@ const extendEnv = (genyg, envName, newContent) => {
 ${newContent}`
   );
 };
+
+const checkGenygVersion = (genyg) => {};
 
 module.exports = {
   getGenygConfigFile,

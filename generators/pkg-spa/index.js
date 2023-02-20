@@ -62,6 +62,9 @@ module.exports = class extends Generator {
       },
     });
 
+    // Copy MUI form components
+    this.fs.copy(this.templatePath(), this.destinationRoot());
+
     extendConfigFile(this, {
       packages: {
         spa: true,

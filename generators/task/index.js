@@ -5,7 +5,7 @@ const yosay = require("yosay");
 const kebabCase = require("kebab-case");
 const { pascalCase } = require("pascal-case");
 const path = require("path");
-const { requirePackages } = require("../../common");
+const { requirePackages, copyEjsTemplateFolder } = require("../../common");
 
 module.exports = class extends Generator {
   initializing() {
@@ -49,18 +49,19 @@ module.exports = class extends Generator {
   writing() {
     const { taskName } = this.answers;
     const taskFolder = kebabCase(taskName).slice(1);
+    const taskFunctionName =
+      taskName.slice(0, 1).toLowerCase() + taskName.slice(1);
 
-    const relativeToRootPath = `./tasks/${taskFolder}`;
+    const relativeToRootPath = `./src/tasks/${taskFolder}`;
 
-    // Index.ts task file
-    this.fs.copyTpl(
-      this.templatePath("index.ejs"),
-      this.destinationPath(path.join(relativeToRootPath, "/index.ts"))
-    );
+    copyEjsTemplateFolder(this, this.templatePath("./"), relativeToRootPath, {
+      taskFunctionName,
+      taskFolder,
+    });
 
     this.packageJson.merge({
       scripts: {
-        [`TASK:${taskName}`]: `npm run tsc-backend && node dist/tasks/${taskFolder}`,
+        [`TASK:${taskName}`]: `ts-node --project tsconfig-ts-node.json -r tsconfig-paths/register src/tasks/${taskFolder}/exec`,
       },
     });
   }

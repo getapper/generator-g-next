@@ -1,19 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AjaxState } from "./ajax.interfaces";
 import * as selectors from "./ajax.selectors";
 import * as sagas from "./ajax.sagas";
-
-export interface SetApiLoadingAction {
-  payload: {
-    api: string;
-    isLoading: boolean;
-  };
-}
-
-interface AjaxState {
-  isLoading: {
-    [key: string]: boolean;
-  };
-}
 
 export const ajaxStore = createSlice({
   name: "ajax",
@@ -21,7 +9,15 @@ export const ajaxStore = createSlice({
     isLoading: {},
   } as AjaxState,
   reducers: {
-    setApiLoading: (state, { payload }: SetApiLoadingAction) => {
+    setApiLoading: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{
+        api: string;
+        isLoading: boolean;
+      }>,
+    ) => {
       state.isLoading[payload.api] = payload.isLoading;
     },
   },

@@ -2,8 +2,6 @@
 const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
-const fs = require("fs");
-const path = require("path");
 const {
   getGenygConfigFile,
   extendConfigFile,
@@ -91,7 +89,7 @@ RLN_COGNITO_AUTH_USER_REGION=***`
       console.log(err);
     }
     try {
-      this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+      this.fs.copy(this.templatePath(".*"), this.destinationPath());
     } catch (err) {
       console.log(err);
     }
