@@ -155,9 +155,8 @@ module.exports = class extends Generator {
 
     //cookie auth
     const configfile = getGenygConfigFile(this);
-    this.cookieProtected.protected = false;
-    if (configfile.packages.cookie && configfile.cookies.length !== 0){
-      this.cookieProtected = await this.prompt([
+    if (configfile.packages.cookieAuth && configfile.cookieRoles.length !== 0) {
+      const cookieProtected = await this.prompt([
         {
           type: "confirm",
           name: "protected",
@@ -165,16 +164,17 @@ module.exports = class extends Generator {
           default: false,
         }
       ]);
-      if(cookieProtected.protected) {
+      if (cookieProtected.protected) {
         this.cookieRole = await this.prompt(
           {
             type: "list",
             name: "role",
             message: "select a role from the list",
-            choices: configfile.cookies,
+            choices: configfile.cookieRoles,
           },
-        )
+        );
       }
+      this.cookieProtected = cookieProtected;
     }
 
     if (answers.route === "") {
@@ -187,6 +187,7 @@ module.exports = class extends Generator {
   }
 
   writing() {
+    const configfile = getGenygConfigFile(this);
     const { method, route } = this.answers;
     const params = parseFromText(route);
     const endpointRoutePath = getEndpointRoutePath(params);
@@ -244,10 +245,11 @@ module.exports = class extends Generator {
       ),
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
-    if(this.cookieProtected.protected){
+
+    if (configfile.packages.cookieAuth && configfile.cookieRoles.length !== 0 && this.cookieProtected.protected){
       const role = this.cookieRole.role;
       this.fs.copyTpl(
-        this.templatePath("./templates/endpoint/cookieProtected/index.ejs"),
+        this.templatePath("./endpoint/cookieProtected/index.ejs"),
         this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
         {
           role,

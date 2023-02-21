@@ -40,7 +40,7 @@ module.exports = class extends Generator {
     }
 
     answers.roleName = answers.roleName.split(",").map((role) => {
-      return pascalCase(role.trim());
+      return pascalCase(String(role.trim()));
     });
     this.answers = answers;
   }
@@ -49,21 +49,23 @@ module.exports = class extends Generator {
     const { roleName } = this.answers;
     const configfile = getGenygConfigFile(this);
     const roles = configfile.cookieRoles;
-    roles.push(...roleName);
-
-    extendConfigFile(this, {
-      cookieRoles: roles,
-    });
 
     //Index.ts model file
     roleName.forEach((role) => {
-      this.fs.copyTpl(
-        this.templatePath("index.ejs"),
-        this.destinationPath(`./src/models/server/${role}/index.ts`),
-        {
-          role,
-        }
-      );
+      if (!roles.includes(role)) {
+        roles.push(role);
+        this.fs.copyTpl(
+          this.templatePath("index.ejs"),
+          this.destinationPath(`./src/models/server/${role}/index.ts`),
+          {
+            role,
+          }
+        );
+      }
+    });
+
+    extendConfigFile(this, {
+      cookieRoles: roles,
     });
 
     //Index.tsx session file
@@ -71,7 +73,7 @@ module.exports = class extends Generator {
       this.destinationPath("./src/lib/session/index.tsx"),
       getSessionTemplate({
         roles,
-        projectName: require(this.destinationPath("./package.json")).name,
+        projectName: require(this.destinationPath("./package-lock.json")).name,
       })
     );
   }
