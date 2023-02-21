@@ -40,7 +40,7 @@ module.exports = class extends Generator {
     }
 
     answers.roleName = answers.roleName.split(",").map((role) => {
-      return pascalCase(String(role.trim()));
+      return pascalCase(role.trim());
     });
     this.answers = answers;
   }
