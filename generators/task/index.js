@@ -4,8 +4,11 @@ const chalk = require("chalk");
 const yosay = require("yosay");
 const kebabCase = require("kebab-case");
 const { pascalCase } = require("pascal-case");
-const path = require("path");
-const { requirePackages, copyEjsTemplateFolder } = require("../../common");
+const {
+  requirePackages,
+  copyEjsTemplateFolder,
+  checkPackageInstalled,
+} = require("../../common");
 
 module.exports = class extends Generator {
   initializing() {
@@ -57,6 +60,7 @@ module.exports = class extends Generator {
     copyEjsTemplateFolder(this, this.templatePath("./"), relativeToRootPath, {
       taskFunctionName,
       taskFolder,
+      isMongoInstalled: checkPackageInstalled(this, "mongodb"),
     });
 
     this.packageJson.merge({
