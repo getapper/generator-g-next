@@ -154,27 +154,30 @@ module.exports = class extends Generator {
     ]);
 
     //cookie auth
-    const configfile = getGenygConfigFile(this);
-    if (configfile.packages.cookieAuth && configfile.cookieRoles.length !== 0) {
-      const cookieProtected = await this.prompt([
-        {
-          type: "confirm",
-          name: "protected",
-          message: "do you want to use cookie authentication?",
-          default: false,
-        }
-      ]);
-      if (cookieProtected.protected) {
-        this.cookieRole = await this.prompt(
+    const config = getGenygConfigFile(this);
+    if (config.packages.cookieAuth && config.cookieRoles.length !== 0) {
+      Object.assign(
+        answers,
+        await this.prompt([
           {
-            type: "list",
-            name: "role",
-            message: "select a role from the list",
-            choices: configfile.cookieRoles,
+            type: "confirm",
+            name: "useCookieAuth",
+            message: "Do you want to use cookie authentication?",
+            default: false,
           },
+        ])
+      );
+      if (answers.useCookieAuth) {
+        Object.assign(
+          answers,
+          await this.prompt({
+            type: "list",
+            name: "cookieRole",
+            message: "Select a role from the list",
+            choices: config.cookieRoles,
+          })
         );
       }
-      this.cookieProtected = cookieProtected;
     }
 
     if (answers.route === "") {
@@ -187,8 +190,7 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    const configfile = getGenygConfigFile(this);
-    const { method, route } = this.answers;
+    const { method, route, useCookieAuth, cookieRole } = this.answers;
     const params = parseFromText(route);
     const endpointRoutePath = getEndpointRoutePath(params);
     const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
@@ -246,20 +248,13 @@ module.exports = class extends Generator {
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
 
-    if (configfile.packages.cookieAuth && configfile.cookieRoles.length !== 0 && this.cookieProtected.protected){
-      const role = this.cookieRole.role;
-      this.fs.copyTpl(
-        this.templatePath("./endpoint/cookieProtected/index.ejs"),
-        this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
-        {
-          role,
-        }
-      )
-    }else{
-      this.fs.copy(
-        this.templatePath("./endpoint/index.ts"),
-        this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
-      );
-    }
+    this.fs.copyTpl(
+      this.templatePath("./endpoint/index.ejs"),
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
+      {
+        useCookieAuth,
+        cookieRole,
+      }
+    );
   }
 };
