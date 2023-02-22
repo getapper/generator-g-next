@@ -56,7 +56,7 @@ module.exports = class extends Generator {
         roles.push(role);
         this.fs.copyTpl(
           this.templatePath("index.ejs"),
-          this.destinationPath(`./src/models/server/${role}/index.ts`),
+          this.destinationPath(`./src/models/server/${role}Session/index.ts`),
           {
             role,
           }
