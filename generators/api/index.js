@@ -239,7 +239,7 @@ module.exports = class extends Generator {
     );
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
-      getEndpointHandlersTemplate(capitalize(apiName))
+      getEndpointHandlersTemplate(capitalize(apiName), useCookieAuth, cookieRole)
     );
     this.fs.write(
       this.destinationPath(

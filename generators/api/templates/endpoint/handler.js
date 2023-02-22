@@ -1,4 +1,4 @@
-module.exports = (apiNameCapital) => `import {
+module.exports = (apiNameCapital, useCookieAuth, role) => `import {
   ErrorResponse,
   ResponseHandler,
   StatusCodes,
@@ -9,9 +9,9 @@ import { ${apiNameCapital}Api } from "./interfaces";
 export default async function handler(
   req: ${apiNameCapital}Api.Request,
   res: NextApiResponse<${apiNameCapital}Api.EndpointResponse>
-) {
+${useCookieAuth ? '  originalReq: NextApiRequest,\n' : ''}) {
   try {
-    const { validationResult } = req;
+    const { validationResult${useCookieAuth ? ', queryStringParameters' : ''} } = req;
 
     if (!validationResult.isValid) {
       return ResponseHandler.json<ErrorResponse>(
@@ -20,6 +20,14 @@ export default async function handler(
         StatusCodes.BadRequest
       );
     }
+
+    ${useCookieAuth ? `if(!originalReq.session.${role.toLowerCase()}){
+      return ResponseHandler.json<ErrorResponse>(
+        res,
+        {},
+        StatusCodes.Unauthorized,
+      );
+    }` : ``}
 
     return ResponseHandler.json<${apiNameCapital}Api.SuccessResponse>(res, {});
   } catch (e) {
