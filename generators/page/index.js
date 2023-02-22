@@ -5,7 +5,7 @@ const yosay = require("yosay");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
-const { requirePackages } = require("../../common");
+const { requirePackages, getGenygConfigFile} = require("../../common");
 const getPageTemplate = require("./templates");
 
 module.exports = class extends Generator {
@@ -60,6 +60,35 @@ module.exports = class extends Generator {
       },
     ]);
 
+    //cookie auth
+    const config = getGenygConfigFile(this);
+    if (config.packages.cookieAuth &&
+      config.cookieRoles.length !== 0 &&
+      answers.renderingStrategy === "Server-side Rendering Props (SSR)") {
+      Object.assign(
+        answers,
+        await this.prompt([
+          {
+            type: "confirm",
+            name: "useCookieAuth",
+            message: "Do you want to use cookie authentication?",
+            default: false,
+          },
+        ])
+      );
+      if (answers.useCookieAuth) {
+        Object.assign(
+          answers,
+          await this.prompt({
+            type: "list",
+            name: "cookieRole",
+            message: "Select a role from the list",
+            choices: config.cookieRoles,
+          })
+        );
+      }
+    }
+
     if (answers.pageName[0] === "[") {
       answers.dynamic = true;
       answers.multipleParameters = answers.pageName[1] === "[";
@@ -86,6 +115,8 @@ module.exports = class extends Generator {
       componentName,
       renderingStrategy,
       multipleParameters,
+      useCookieAuth,
+      cookieRole,
     } = this.answers;
     const folderName = dynamic
       ? pageName
@@ -109,6 +140,8 @@ module.exports = class extends Generator {
           renderingStrategy === "Static Generation Props (SSG)",
         userGetServerSideProps:
           renderingStrategy === "Server-side Rendering Props (SSR)",
+        useCookieAuth,
+        cookieRole,
         dynamic,
         multipleParameters,
         paramName: multipleParameters
