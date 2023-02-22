@@ -10,7 +10,7 @@ import { <%= taskFunctionName %> } from "@/tasks/<%= taskFolder %>";
   } catch (error) {
     console.error(error);
   } finally {
-    <% if (isMongoInstalled) { %>// mongoDao.mongoClient?.close();
+    <% if (isMongoInstalled) { %>// await mongoDao.mongoClient?.close();
     <% } %>process.exit(0);
   }
 })();
