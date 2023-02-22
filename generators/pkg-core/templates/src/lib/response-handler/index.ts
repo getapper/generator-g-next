@@ -1,7 +1,4 @@
-import {
-  StatusCodes,
-  ValidationResult,
-} from "src/lib/response-handler/interfaces";
+import { StatusCodes, ValidationResult } from "./interfaces";
 import { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 import { createMocks, RequestMethod } from "node-mocks-http";
@@ -119,13 +116,13 @@ class TestHandler {
 
 export { ResponseHandler, TestHandler };
 
-export * from "src/lib/response-handler/interfaces";
+export * from "./interfaces";
 
 export const nextApiEndpointHandler =
   (route: string) => async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const endpoint = await import(
-        `endpoints/${req.method.toLowerCase()}-${route}`
+        `@/endpoints/${req.method.toLowerCase()}-${route}`
       );
       if (endpoint.default) {
         return endpoint.default(req, res);
