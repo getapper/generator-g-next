@@ -1,14 +1,14 @@
-module.exports = (apiNameCapital, useCookieAuth, role) => `import {
+module.exports = (apiNameCapital, useCookieAuth, cookieRoleCamelCase) => `import {
   ErrorResponse,
   ResponseHandler,
   StatusCodes,
 } from "@/lib/response-handler";
-import { NextApiResponse } from "next";
+import { NextApiResponse${useCookieAuth ? ", NextApiRequest" : ""} } from "next";
 import { ${apiNameCapital}Api } from "./interfaces";
 
 export default async function handler(
   req: ${apiNameCapital}Api.Request,
-  res: NextApiResponse<${apiNameCapital}Api.EndpointResponse>
+  res: NextApiResponse<${apiNameCapital}Api.EndpointResponse>,
 ${useCookieAuth ? '  originalReq: NextApiRequest,\n' : ''}) {
   try {
     const { validationResult${useCookieAuth ? ', queryStringParameters' : ''} } = req;
@@ -21,7 +21,7 @@ ${useCookieAuth ? '  originalReq: NextApiRequest,\n' : ''}) {
       );
     }
 
-    ${useCookieAuth ? `if(!originalReq.session.${role.toLowerCase()}){
+    ${useCookieAuth ? `if(!originalReq.session.${cookieRoleCamelCase}){
       return ResponseHandler.json<ErrorResponse>(
         res,
         {},

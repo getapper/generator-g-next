@@ -9,6 +9,8 @@ const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
 const getEndpointPageTemplate = require("./templates/page");
 const { getGenygConfigFile, requirePackages } = require("../../common");
 const fs = require("fs");
+const { camelCase } = require("camel-case");
+const { pascalCase } = require("pascal-case");
 
 const HttpMethods = {
   GET: "get",
@@ -44,7 +46,7 @@ const getFunctionName = (method, params) => {
       p
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   const variables = params
     .filter((p) => p[0] === "{")
@@ -54,7 +56,7 @@ const getFunctionName = (method, params) => {
         .replace("}", "")
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   return `${method}${models.join("")}${
     variables.length ? "By" : ""
@@ -67,7 +69,7 @@ const getEndpointRoutePath = (params) => {
     .filter((p) => p[0] === "{")
     .map((p) => p.replace("{", "").replace("}", ""));
   return `${models.join("-")}${variables.length ? "-by-" : ""}${variables.join(
-    "-and-"
+    "-and-",
   )}`;
 };
 
@@ -82,7 +84,7 @@ const getPagesApiFolders = (params) => {
           .map((p2, index) => (index ? capitalize(p2) : p2))
           .join("") +
         "]"
-      : p
+      : p,
   );
 };
 
@@ -99,7 +101,7 @@ const getAjaxPath = (params) => {
         .replace("}", "")
         .split("-")
         .map((p2, index) => (index ? capitalize(p2) : p2))
-        .join("")
+        .join(""),
     );
   if (urlParams.length) {
     return [
@@ -133,9 +135,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} API generator, follow the quick and easy configuration to create a new API!`
-      )
+          "Getapper NextJS Yeoman Generator (GeNYG)",
+        )} API generator, follow the quick and easy configuration to create a new API!`,
+      ),
     );
 
     const answers = await this.prompt([
@@ -165,7 +167,7 @@ module.exports = class extends Generator {
             message: "Do you want to use cookie authentication?",
             default: false,
           },
-        ])
+        ]),
       );
       if (answers.useCookieAuth) {
         Object.assign(
@@ -175,7 +177,7 @@ module.exports = class extends Generator {
             name: "cookieRole",
             message: "Select a role from the list",
             choices: config.cookieRoles,
-          })
+          }),
         );
       }
     }
@@ -219,7 +221,7 @@ module.exports = class extends Generator {
       if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
         this.fs.write(
           this.destinationPath(`${relativeToPagesFolder}index.ts`),
-          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
+          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1))),
         );
       }
     }
@@ -227,25 +229,37 @@ module.exports = class extends Generator {
     // Endpoints folder
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/interfaces.ts`
+        `./src/endpoints/${endpointFolderName}/interfaces.ts`,
       ),
-      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload)
+      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload),
     );
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/validations.ts`
+        `./src/endpoints/${endpointFolderName}/validations.ts`,
       ),
-      getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
+      getEndpointValidationsTemplate(
+        capitalize(apiName),
+        urlParams,
+        hasPayload,
+      ),
     );
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
-      getEndpointHandlersTemplate(capitalize(apiName), useCookieAuth, cookieRole)
+      getEndpointHandlersTemplate(
+        capitalize(apiName),
+        useCookieAuth,
+        camelCase(cookieRole),
+      ),
     );
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/index.test.ts`
+        `./src/endpoints/${endpointFolderName}/index.test.ts`,
       ),
-      getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
+      getEndpointTestsTemplate(
+        endpointFolderName,
+        apiName,
+        capitalize(apiName),
+      ),
     );
 
     this.fs.copyTpl(
@@ -253,8 +267,8 @@ module.exports = class extends Generator {
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
       {
         useCookieAuth,
-        cookieRole,
-      }
+        cookieRoleCamelCase: camelCase(cookieRole),
+      },
     );
   }
 };
