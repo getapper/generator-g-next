@@ -248,7 +248,7 @@ module.exports = class extends Generator {
       getEndpointHandlersTemplate(
         capitalize(apiName),
         useCookieAuth,
-        camelCase(cookieRole),
+        (useCookieAuth ? camelCase(cookieRole) : ""),
       ),
     );
     this.fs.write(
@@ -267,7 +267,7 @@ module.exports = class extends Generator {
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
       {
         useCookieAuth,
-        cookieRoleCamelCase: camelCase(cookieRole),
+        cookieRoleCamelCase: (useCookieAuth ? camelCase(cookieRole) : ""),
       },
     );
   }
