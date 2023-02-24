@@ -122,7 +122,7 @@ module.exports = class extends Generator {
       this.destinationPath("./src/lib/session/index.tsx"),
       generateLibSessionFile({
         cookieRoles,
-        projectName: require(this.destinationPath("./package-lock.json")).name,
+        projectName: require(this.destinationPath("./package.json")).name,
       }),
     );
   }
