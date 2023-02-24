@@ -7,6 +7,7 @@ const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 const { requirePackages, getGenygConfigFile} = require("../../common");
 const getPageTemplate = require("./templates");
+const {camelCase} = require("camel-case");
 
 module.exports = class extends Generator {
   initializing() {
@@ -141,7 +142,8 @@ module.exports = class extends Generator {
         userGetServerSideProps:
           renderingStrategy === "Server-side Rendering Props (SSR)",
         useCookieAuth,
-        cookieRole,
+        cookieRole:
+          camelCase(cookieRole),
         dynamic,
         multipleParameters,
         paramName: multipleParameters

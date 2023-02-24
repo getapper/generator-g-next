@@ -1,3 +1,4 @@
+const {camelCase} = require("camel-case");
 module.exports = ({
   componentName,
   useGetStaticPaths,
@@ -110,7 +111,7 @@ export ${useCookieAuth ? `const getServerSideProps = withIronSessionSsr(
     props: {},
   };
 }${useCookieAuth ? `,
-    ${cookieRole.toLowerCase()}SessionOptions
+    ${cookieRole}SessionOptions
 );`
       : ""
 }
