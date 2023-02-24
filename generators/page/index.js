@@ -143,7 +143,7 @@ module.exports = class extends Generator {
           renderingStrategy === "Server-side Rendering Props (SSR)",
         useCookieAuth,
         cookieRole:
-          camelCase(cookieRole),
+          pascalCase(cookieRole),
         dynamic,
         multipleParameters,
         paramName: multipleParameters
