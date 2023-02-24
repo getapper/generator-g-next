@@ -121,7 +121,8 @@ module.exports = class extends Generator {
     this.fs.write(
       this.destinationPath("./src/lib/session/index.tsx"),
       generateLibSessionFile({
-        cookieRoles,
+        cookieRoles:
+          camelCase(cookieRoles),
         projectName: require(this.destinationPath("./package-lock.json")).name,
       }),
     );
