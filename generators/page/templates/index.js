@@ -1,4 +1,3 @@
-const {camelCase} = require("camel-case");
 module.exports = ({
   componentName,
   useGetStaticPaths,
@@ -28,7 +27,8 @@ import { GetServerSidePropsResult, GetServerSidePropsContext } from "next";`
 }${
   useCookieAuth
   ? `
-import { withIronSessionSsr } from "iron-session/next";`
+import { withIronSessionSsr } from "iron-session/next";
+import { ${cookieRole}SessionOptions } from "src/lib/session";`
     : ""
 }
 
