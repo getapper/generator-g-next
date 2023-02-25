@@ -5,15 +5,15 @@ const yosay = require("yosay");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
-const { requirePackages, getGenygConfigFile} = require("../../common");
-const getPageTemplate = require("./templates");
-const {camelCase} = require("camel-case");
+const { requirePackages, getGenygConfigFile } = require("../../common");
+const { generatePage } = require("../../common/file-generators");
+const { camelCase } = require("camel-case");
 
 module.exports = class extends Generator {
   initializing() {
     this.env.adapter.promptModule.registerPrompt(
       "directory",
-      require("inquirer-directory")
+      require("inquirer-directory"),
     );
   }
 
@@ -25,9 +25,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} page generator, follow the quick and easy configuration to create a new page!`
-      )
+          "Getapper NextJS Yeoman Generator (GeNYG)",
+        )} page generator, follow the quick and easy configuration to create a new page!`,
+      ),
     );
 
     let answers = await this.prompt([
@@ -63,9 +63,11 @@ module.exports = class extends Generator {
 
     //cookie auth
     const config = getGenygConfigFile(this);
-    if (config.packages.cookieAuth &&
+    if (
+      config.packages.cookieAuth &&
       config.cookieRoles.length !== 0 &&
-      answers.renderingStrategy === "Server-side Rendering Props (SSR)") {
+      answers.renderingStrategy === "Server-side Rendering Props (SSR)"
+    ) {
       Object.assign(
         answers,
         await this.prompt([
@@ -75,7 +77,7 @@ module.exports = class extends Generator {
             message: "Do you want to use cookie authentication?",
             default: false,
           },
-        ])
+        ]),
       );
       if (answers.useCookieAuth) {
         Object.assign(
@@ -85,7 +87,7 @@ module.exports = class extends Generator {
             name: "cookieRole",
             message: "Select a role from the list",
             choices: config.cookieRoles,
-          })
+          }),
         );
       }
     }
@@ -120,7 +122,9 @@ module.exports = class extends Generator {
       cookieRole,
     } = this.answers;
     const folderName = dynamic
-      ? pageName
+      ? multipleParameters
+        ? pageName
+        : `[${camelCase(pageName.replace("[", "").replace("]", ""))}]`
       : pageName
           .split("-")
           .filter((s) => s !== "")
@@ -133,7 +137,7 @@ module.exports = class extends Generator {
     // Index.tsx page file
     this.fs.write(
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
-      getPageTemplate({
+      generatePage({
         componentName,
         useGetStaticPaths:
           dynamic && renderingStrategy !== "Server-side Rendering Props (SSR)",
@@ -142,14 +146,13 @@ module.exports = class extends Generator {
         userGetServerSideProps:
           renderingStrategy === "Server-side Rendering Props (SSR)",
         useCookieAuth,
-        cookieRole:
-          useCookieAuth ? camelCase(cookieRole) : "",
+        cookieRole: useCookieAuth ? camelCase(cookieRole) : "",
         dynamic,
         multipleParameters,
         paramName: multipleParameters
           ? pageName.replace("[[...", "").replace("]]", "")
-          : pageName.replace("[", "").replace("]", ""),
-      })
+          : camelCase(pageName.replace("[", "").replace("]", "")),
+      }),
     );
   }
 };

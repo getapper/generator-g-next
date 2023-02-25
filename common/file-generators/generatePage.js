@@ -26,9 +26,9 @@ import { GetServerSidePropsResult, GetServerSidePropsContext } from "next";`
     : ""
 }${
   useCookieAuth
-  ? `
+    ? `
 import { withIronSessionSsr } from "iron-session/next";
-import { ${cookieRole}SessionOptions } from "src/lib/session";`
+import { ${cookieRole}SessionOptions } from "@/lib/session";`
     : ""
 }
 
@@ -95,26 +95,37 @@ export async function getStaticProps({${
   userGetServerSideProps
     ? `
 
-export ${useCookieAuth ? `const getServerSideProps = withIronSessionSsr(
-  `:``}async function getServerSideProps({${
-        dynamic ? `
-      params: { ${paramName} },` : ""
-      }${useCookieAuth ? `
-      req: { session, cookies, headers},` : ""
+export ${
+        useCookieAuth
+          ? `const getServerSideProps = withIronSessionSsr(
+  `
+          : ``
+      }async function getServerSideProps({${
+        dynamic
+          ? `
+      params: { ${paramName} },`
+          : ""
+      }${
+        useCookieAuth
+          ? `
+      req: { session, cookies, headers},`
+          : ""
       }
     }: GetServerSidePropsContext<${
-        dynamic
-          ? `{ ${paramName}: string${multipleParameters ? "[]" : ""} }`
-          : "{}"
-      }>): Promise<GetServerSidePropsResult<${componentName}Props>> {
+      dynamic
+        ? `{ ${paramName}: string${multipleParameters ? "[]" : ""} }`
+        : "{}"
+    }>): Promise<GetServerSidePropsResult<${componentName}Props>> {
   return {
     props: {},
   };
-}${useCookieAuth ? `,
+}${
+        useCookieAuth
+          ? `,
     ${cookieRole}SessionOptions
 );`
-      : ""
-}
+          : ""
+      }
 
 `
     : ""
