@@ -94,12 +94,11 @@ class TestHandler {
     res: NextApiResponse;
     statusCode: StatusCodes;
   }> {
-    const { req, res }: { req: NextApiRequest; res: NextApiResponse } =
-      createMocks({
-        method: handlerPath.split("-")[0].toUpperCase() as RequestMethod,
-        query: params?.queryString,
-        body: params?.payload,
-      });
+    const { req, res }: { req: any; res: any } = createMocks({
+      method: handlerPath.split("-")[0].toUpperCase() as RequestMethod,
+      query: params?.queryString,
+      body: params?.payload,
+    });
     req.headers = {
       "Content-Type": "application/json",
       ...(params?.headers ?? {}),
