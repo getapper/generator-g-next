@@ -8,9 +8,16 @@ const {
   getGenygConfigFile,
   requirePackages,
   extendConfigFile,
+  extendEnv,
 } = require("../../common");
 const { camelCase } = require("camel-case");
 const { snakeCase } = require("snake-case");
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
 
 const generateLibSessionFile = ({
   cookieRoles,
@@ -110,6 +117,12 @@ module.exports = class extends Generator {
             cookieRole: pascalCase(cookieRole),
           },
         );
+        //extent env.template
+        extendEnv(
+          this,
+          "template",
+          `${snakeCase(cookieRole).toUpperCase()}_SECRET_COOKIE_PASSWORD=${getRandomInt(1e7,(1e8)-1)}${getRandomInt(1e7,(1e8)-1)}${getRandomInt(1e7,(1e8)-1)}${getRandomInt(1e7,(1e8)-1)}`
+        )
       }
     });
 
