@@ -121,7 +121,7 @@ module.exports = class extends Generator {
         extendEnv(
           this,
           "template",
-          `${snakeCase(cookieRole).toUpperCase()}_SECRET_COOKIE_PASSWORD=${getRandomInt(1e7,(1e8)-1)}${getRandomInt(1e7,(1e8)-1)}${getRandomInt(1e7,(1e8)-1)}${getRandomInt(1e7,(1e8)-1)}`
+          `${snakeCase(cookieRole).toUpperCase()}_SECRET_COOKIE_PASSWORD=12345678901234567890123456789012`
         )
       }
     });
