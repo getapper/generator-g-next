@@ -8,6 +8,7 @@ const {
   getGenygConfigFile,
   requirePackages,
   extendConfigFile,
+  extendEnv,
 } = require("../../common");
 const { camelCase } = require("camel-case");
 const { snakeCase } = require("snake-case");
@@ -110,6 +111,12 @@ module.exports = class extends Generator {
             cookieRole: pascalCase(cookieRole),
           },
         );
+        //extent env.template
+        extendEnv(
+          this,
+          "template",
+          `${snakeCase(cookieRole).toUpperCase()}_SECRET_COOKIE_PASSWORD=12345678901234567890123456789012`
+        )
       }
     });
 
