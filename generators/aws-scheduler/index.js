@@ -8,6 +8,8 @@ const {
   ListRolesCommand,
   CreateRoleCommand,
   GetRoleCommand,
+  AttachRolePolicyCommand,
+  PutRolePolicyCommand,
 } = require("@aws-sdk/client-iam");
 const {
   EventBridge,
@@ -395,6 +397,21 @@ module.exports = class extends Generator {
         new GetRoleCommand(destinationRoleParams)
       );
     }
+    /*await iamClient.send(
+      new PutRolePolicyCommand({
+        RoleName: `genyg-${projectName}-API-destination-role`,
+        PolicyDocument: `{"Version":"2012-10-17","Statement":{"Effect":"Allow","Action":["iam:AttachRolePolicy","iam:CreateRole","iam:PutRolePolicy"],"Resource":"*"}}`,
+        PolicyName: `Permissions-Policy-For-Genyg-${projectName}-API-Destination-Role`,
+      })
+    );*/
+
+    /*await iamClient.send(
+      new AttachRolePolicyCommand({
+        RoleName: `genyg-${projectName}-API-destination-role`,
+        PolicyArn:
+          "arn:aws:iam::aws:policy/aws-service-role/AmazonEventBridgeApiDestinationsServiceRolePolicy",
+      })
+    );*/ // questo mi dava errori
     /*const test4 = destinationRoleResponse.RoleName;
     const params = parseFromText(test4);*/ // test per vedere se venga creato role: superato
 
@@ -429,7 +446,7 @@ module.exports = class extends Generator {
       ConnectionArn: connectionResponse.ConnectionArn,
       HttpMethod: method.toUpperCase(), // avevo provato urlParams, ma non va bene, così invece funziona
       InvocationEndpoint:
-        "https://webhook.site/b0c01b78-1c89-4ea1-a62e-b51301a9425b", // insert your endpoint here // the webhook site is a test
+        "https://webhook.site/3f941233-8c73-4301-b7ad-66e05d9a6985", // l'endpoint che invocheremo credo debba seguire un formato del genere `https://${projectName}/api/${route}` // the webhook site is a test
       Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`, // qua vogliamo params perché ci interessa solo il nome della route, l'url ce l'abbiamo già
       InvocationRateLimitPerSecond: 100,
     };
@@ -477,6 +494,27 @@ module.exports = class extends Generator {
     };
 
     const putTargetResponse = await eventBridge.putTargets(putTargetParams);
+
+    // con questo sono riuscita a mettere la policy al destination role
+    await iamClient.send(
+      new PutRolePolicyCommand({
+        RoleName: `genyg-${projectName}-API-destination-role`,
+        PolicyDocument:
+          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:InvokeApiDestination"],"Resource":["' +
+          createApiDestinationResponse.ApiDestinationArn +
+          '"]}]}',
+        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Invoke_Api_Destination`,
+      })
+    );
+
+    /*await iamClient.send(
+      new PutRolePolicyCommand({
+        RoleName: `genyg-${projectName}-scheduler-role`,
+        PolicyDocument:
+          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["scheduler:*"],"Resource":["*"]}]}',
+        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Manage_Scheduler`,
+      })
+    );*/ // non ci è servito a risolvere il problema
 
     // Create a new schedule which will be activated every minute
     // At the activation moment a default bus whit source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
