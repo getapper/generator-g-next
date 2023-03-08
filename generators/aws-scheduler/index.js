@@ -19,9 +19,26 @@ const getEndpointTestsTemplate = require("../../generators/api/templates/endpoin
 const getEndpointPageTemplate = require("../../generators/api/templates/page");
 const fs = require("fs");
 
-// scritte in questo formato perché sennò succedevano cose strane nel stringify
-const schedulerRolePolicy = `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"scheduler.amazonaws.com"},"Action":"sts:AssumeRole"}]}`;
-const destinationRolePolicy = `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Action":"sts:AssumeRole"}]}`;
+const schedulerExecutionRoleDocument = {
+  Version: "2012-10-17",
+  Statement: [
+    {
+      Effect: "Allow",
+      Principal: { Service: "scheduler.amazonaws.com" },
+      Action: "sts:AssumeRole",
+    },
+  ],
+};
+const apiDestinationExecutionRoleDocument = {
+  Version: "2012-10-17",
+  Statement: [
+    {
+      Effect: "Allow",
+      Principal: { Service: "events.amazonaws.com" },
+      Action: "sts:AssumeRole",
+    },
+  ],
+};
 
 const HttpMethods = {
   GET: "get",
@@ -182,13 +199,13 @@ module.exports = class extends Generator {
     roles.Roles.map((role) => {
       if (
         JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
-        JSON.stringify(schedulerRolePolicy)
+        JSON.stringify(schedulerExecutionRoleDocument)
       ) {
         scheduleRoles.push(role.RoleName);
       }
       if (
         JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
-        JSON.stringify(destinationRolePolicy)
+        JSON.stringify(apiDestinationExecutionRoleDocument)
       ) {
         ApiDestinationRoles.push(role.RoleName);
       }
@@ -360,18 +377,18 @@ module.exports = class extends Generator {
     let schedulerRoleResponse = {};
     if (customScheduler) {
       // Create a new scheduler role
-      const schedulerRoleParams = {
-        AssumeRolePolicyDocument: schedulerRolePolicy,
-        RoleName: `genyg-${projectName}-scheduler-role`,
-      };
       schedulerRoleResponse = await iamClient.send(
-        new CreateRoleCommand(schedulerRoleParams)
+        new CreateRoleCommand({
+          AssumeRolePolicyDocument: JSON.stringify(
+            schedulerExecutionRoleDocument
+          ),
+          RoleName: `genyg-${projectName}-scheduler-role`,
+        })
       );
     } else {
       // Return the information of the chosen scheduler role
-      const schedulerRoleParams = { RoleName: schedulerRole };
       schedulerRoleResponse = await iamClient.send(
-        new GetRoleCommand(schedulerRoleParams)
+        new GetRoleCommand({ RoleName: schedulerRole })
       );
     }
     /*const test3 = schedulerRoleResponse.RoleName;
@@ -380,18 +397,18 @@ module.exports = class extends Generator {
     let destinationRoleResponse = {};
     if (customDestination) {
       // Create a new API destination role
-      const destinationRoleParams = {
-        AssumeRolePolicyDocument: destinationRolePolicy,
-        RoleName: `genyg-${projectName}-API-destination-role`,
-      };
       destinationRoleResponse = await iamClient.send(
-        new CreateRoleCommand(destinationRoleParams)
+        new CreateRoleCommand({
+          AssumeRolePolicyDocument: JSON.stringify(
+            apiDestinationExecutionRoleDocument
+          ),
+          RoleName: `genyg-${projectName}-API-destination-role`,
+        })
       );
     } else {
       // Return the information of the chosen API destination role
-      const destinationRoleParams = { RoleName: destinationRole };
       destinationRoleResponse = await iamClient.send(
-        new GetRoleCommand(destinationRoleParams)
+        new GetRoleCommand({ RoleName: destinationRole })
       );
     }
     /*await iamClient.send(
@@ -559,22 +576,26 @@ module.exports = class extends Generator {
     // At the activation moment a default bus whit source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
     // The initial status is disabled and details are empty
 
-    const createScheduleResponse = await scheduler.createSchedule({
-      Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
-      ScheduleExpression: "rate(1 minutes)",
-      State: "DISABLED",
-      Target: {
-        RoleArn: getRoleResponse.Role.Arn,
-        Arn: eventBusResponse.Arn,
-        EventBridgeParameters: {
-          Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
-          DetailType: JSON.stringify({}),
+    try {
+      const createScheduleResponse = await scheduler.createSchedule({
+        Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
+        ScheduleExpression: "rate(1 minutes)",
+        State: "DISABLED",
+        Target: {
+          RoleArn: getRoleResponse.Role.Arn,
+          Arn: eventBusResponse.Arn,
+          EventBridgeParameters: {
+            Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
+            DetailType: JSON.stringify({}),
+          },
         },
-      },
-      FlexibleTimeWindow: {
-        Mode: "OFF",
-      },
-    });
+        FlexibleTimeWindow: {
+          Mode: "OFF",
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     //sono stati testati con successo
     // Endpoints folder
