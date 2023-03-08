@@ -77,6 +77,7 @@ class ResponseHandler {
         headers: req.headers,
       },
       res,
+      req,
     );
   }
 }
