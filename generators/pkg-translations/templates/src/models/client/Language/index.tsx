@@ -1,6 +1,6 @@
-import itFlag from "assets/images/flags/it.svg";
-import enFlag from "assets/images/flags/gb.svg";
-import { Locales } from "models/common/Translation";
+import itFlag from "@/assets/images/flags/it.svg";
+import enFlag from "@/assets/images/flags/gb.svg";
+import { Locales } from "@/models/common/Translation";
 
 export interface ILanguage {
   value: Locales;

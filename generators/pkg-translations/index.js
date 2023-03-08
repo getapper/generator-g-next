@@ -14,11 +14,11 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
+          "Getapper NextJS Yeoman Generator (GeNYG)",
         )}. ${chalk.red(
-          "This command must be executed only once, and it will install i18n files and libraries dependencies."
-        )}`
-      )
+          "This command must be executed only once, and it will install i18n files and libraries dependencies.",
+        )}`,
+      ),
     );
 
     this.answers = await this.prompt([
@@ -41,9 +41,9 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "It looks like the GeNYG translations package was already installed!"
-          )
-        )
+            "It looks like the GeNYG translations package was already installed!",
+          ),
+        ),
       );
       process.exit(0);
     }
@@ -64,6 +64,6 @@ module.exports = class extends Generator {
     });
 
     // Copy project files
-    this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+    this.fs.copy(this.templatePath(), this.destinationRoot());
   }
 };

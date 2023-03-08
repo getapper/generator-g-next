@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { PopoverOrigin } from "@mui/material";
 import { useRouter } from "next/router";
-import { Locales } from "models/common/Translation";
+import { Locales } from "@/models/common/Translation";
 
 const useLanguageMenu = () => {
   const anchorRef = useRef();

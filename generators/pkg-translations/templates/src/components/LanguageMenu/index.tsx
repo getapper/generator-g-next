@@ -9,9 +9,9 @@ import {
   ListItemText,
   Menu,
 } from "@mui/material";
-import { Language } from "models/client";
+import { Language } from "@/models/client/Language";
 import Link from "next/link";
-import { Locales } from "models/common/Translation";
+import { Locales } from "@/models/common/Translation";
 
 type LanguageMenuProps = {
   basePath: string;
