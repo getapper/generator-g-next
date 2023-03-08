@@ -499,7 +499,7 @@ module.exports = class extends Generator {
     const putTargetResponse = await eventBridge.putTargets(putTargetParams);
 
     // con questo sono riuscita a mettere la policy al destination role
-    /*await iamClient.send(
+    await iamClient.send(
       new PutRolePolicyCommand({
         RoleName: `genyg-${projectName}-API-destination-role`,
         PolicyDocument:
@@ -509,7 +509,7 @@ module.exports = class extends Generator {
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Invoke_Api_Destination`,
       })
     );
-*/
+
     const schedulerRoleName = `genyg-${projectName}-scheduler-role`;
 
     await iamClient.send(
@@ -523,7 +523,7 @@ module.exports = class extends Generator {
       })
     );
 
-    const createPolicyResponse = await iamClient.send(
+    /*const createPolicyResponse = await iamClient.send(
       new CreatePolicyCommand({
         PolicyDocument:
           '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:PutEvents"],"Resource":["' +
@@ -538,7 +538,7 @@ module.exports = class extends Generator {
         PolicyArn: createPolicyResponse.Policy.Arn,
       })
     );
-
+*/
     const getRoleResponse = await iamClient.send(
       new GetRoleCommand({
         RoleName: schedulerRoleName,
