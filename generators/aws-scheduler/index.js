@@ -10,6 +10,7 @@ const {
   GetRoleCommand,
   AttachRolePolicyCommand,
   PutRolePolicyCommand,
+  CreatePolicyCommand,
 } = require("@aws-sdk/client-iam");
 const {
   EventBridge,
@@ -301,6 +302,27 @@ module.exports = class extends Generator {
       route,
       method,
     } = this.answers;
+
+    // Create a new EventBridge and Scheduler instance
+    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const AWSConfig = {
+      credentials: {
+        accessKeyId: credentialAccess.accessKeyId,
+        secretAccessKey: credentialAccess.secretAccessKey,
+      },
+      region: credentialAccess.region,
+    };
+
+    // Create a new EventBridge, IAM and Scheduler instance
+    const iamClient = new IAMClient(AWSConfig);
+    const eventBridge = new EventBridge(AWSConfig);
+    const scheduler = new Scheduler(AWSConfig);
+    const configFile = this.readDestinationJSON("package.json");
+    const projectName = configFile.name;
+    /*const roles = await iamClient.send(new ListRolesCommand({}));
+    const test1 = route+roles.Roles[0].RoleName;
+    const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
+
     /*const {iamClient} = this.iamClient;
     const {scheduler} = this.scheduler;
     const {eventBridge} = this.eventBridge;
@@ -339,26 +361,6 @@ module.exports = class extends Generator {
         );
       }
     }
-
-    // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
-    const AWSConfig = {
-      credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
-      },
-      region: credentialAccess.region,
-    };
-
-    // Create a new EventBridge, IAM and Scheduler instance
-    const iamClient = new IAMClient(AWSConfig);
-    const eventBridge = new EventBridge(AWSConfig);
-    const scheduler = new Scheduler(AWSConfig);
-    const configFile = this.readDestinationJSON("package.json");
-    const projectName = configFile.name;
-    /*const roles = await iamClient.send(new ListRolesCommand({}));
-    const test1 = route+roles.Roles[0].RoleName;
-    const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
 
     let schedulerRoleResponse = {};
     if (customScheduler) {
@@ -496,7 +498,7 @@ module.exports = class extends Generator {
     const putTargetResponse = await eventBridge.putTargets(putTargetParams);
 
     // con questo sono riuscita a mettere la policy al destination role
-    await iamClient.send(
+    /*await iamClient.send(
       new PutRolePolicyCommand({
         RoleName: `genyg-${projectName}-API-destination-role`,
         PolicyDocument:
@@ -506,25 +508,42 @@ module.exports = class extends Generator {
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Invoke_Api_Destination`,
       })
     );
-
-    /*await iamClient.send(
+*/
+    await iamClient.send(
       new PutRolePolicyCommand({
         RoleName: `genyg-${projectName}-scheduler-role`,
         PolicyDocument:
-          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["scheduler:*"],"Resource":["*"]}]}',
-        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Manage_Scheduler`,
+          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:PutEvents"],"Resource":["' +
+          eventBusResponse.Arn +
+          '"]}]}',
+        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Scheduler_Execution_Policy`,
       })
-    );*/ // non ci è servito a risolvere il problema
+    );
+
+    const createPolicyResponse = await iamClient.send(
+      new CreatePolicyCommand({
+        PolicyDocument:
+          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:PutEvents"],"Resource":["' +
+          eventBusResponse.Arn +
+          '"]}]}',
+        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Scheduler_Execution_PutEvents_Policy`,
+      })
+    );
+    await iamClient.send(
+      new AttachRolePolicyCommand({
+        RoleName: `genyg-${projectName}-scheduler-role`,
+        PolicyArn: createPolicyResponse.Policy.Arn,
+      })
+    );
 
     // Create a new schedule which will be activated every minute
     // At the activation moment a default bus whit source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
     // The initial status is disabled and details are empty
     const createScheduleParams = {
       Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
-      ScheduleExpression: "rate(1 minute)",
+      ScheduleExpression: "rate(1 minutes)",
       State: "DISABLED",
       Target: {
-        RoleArn: schedulerRoleResponse.Role.Arn,
         Arn: eventBusResponse.Arn,
         EventBridgeParameters: {
           Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
@@ -536,9 +555,23 @@ module.exports = class extends Generator {
       },
     };
 
-    const createScheduleResponse = await scheduler.createSchedule(
-      createScheduleParams
-    );
+    const createScheduleResponse = await scheduler.createSchedule({
+      Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
+      ScheduleExpression: "rate(1 minutes)",
+      State: "DISABLED",
+
+      Target: {
+        RoleArn: schedulerRoleResponse.Role.Arn,
+        Arn: eventBusResponse.Arn,
+        EventBridgeParameters: {
+          Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
+          DetailType: JSON.stringify({}),
+        },
+      },
+      FlexibleTimeWindow: {
+        Mode: "OFF",
+      },
+    });
 
     //sono stati testati con successo
     // Endpoints folder
