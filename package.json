@@ -32,7 +32,6 @@
     "yosay": "2.0.2"
   },
   "devDependencies": {
-
     "prettier": "2.5.1"
   }
 }

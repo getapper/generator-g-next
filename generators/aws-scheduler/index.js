@@ -15,6 +15,7 @@ const {
 const {
   EventBridge,
   ListConnectionsCommand,
+  CreateScheduleCommandInput,
 } = require("@aws-sdk/client-eventbridge");
 const { Scheduler } = require("@aws-sdk/client-scheduler");
 const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler");
@@ -509,9 +510,11 @@ module.exports = class extends Generator {
       })
     );
 */
+    const schedulerRoleName = `genyg-${projectName}-scheduler-role`;
+
     await iamClient.send(
       new PutRolePolicyCommand({
-        RoleName: `genyg-${projectName}-scheduler-role`,
+        RoleName: schedulerRoleName,
         PolicyDocument:
           '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:PutEvents"],"Resource":["' +
           eventBusResponse.Arn +
@@ -531,29 +534,20 @@ module.exports = class extends Generator {
     );
     await iamClient.send(
       new AttachRolePolicyCommand({
-        RoleName: `genyg-${projectName}-scheduler-role`,
+        RoleName: schedulerRoleName,
         PolicyArn: createPolicyResponse.Policy.Arn,
+      })
+    );
+
+    const getRoleResponse = await iamClient.send(
+      new GetRoleCommand({
+        RoleName: schedulerRoleName,
       })
     );
 
     // Create a new schedule which will be activated every minute
     // At the activation moment a default bus whit source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
     // The initial status is disabled and details are empty
-    const createScheduleParams = {
-      Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
-      ScheduleExpression: "rate(1 minutes)",
-      State: "DISABLED",
-      Target: {
-        Arn: eventBusResponse.Arn,
-        EventBridgeParameters: {
-          Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
-          DetailType: JSON.stringify({}),
-        },
-      },
-      FlexibleTimeWindow: {
-        Mode: "OFF",
-      },
-    };
 
     const createScheduleResponse = await scheduler.createSchedule({
       Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
@@ -561,7 +555,7 @@ module.exports = class extends Generator {
       State: "DISABLED",
 
       Target: {
-        RoleArn: schedulerRoleResponse.Role.Arn,
+        RoleArn: getRoleResponse.Role.Arn,
         Arn: eventBusResponse.Arn,
         EventBridgeParameters: {
           Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
