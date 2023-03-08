@@ -579,7 +579,7 @@ module.exports = class extends Generator {
     try {
       const createScheduleResponse = await scheduler.createSchedule({
         Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
-        ScheduleExpression: "rate(1 minutes)",
+        ScheduleExpression: "cron(1 * * * ? *)",
         State: "DISABLED",
         Target: {
           RoleArn: getRoleResponse.Role.Arn,
