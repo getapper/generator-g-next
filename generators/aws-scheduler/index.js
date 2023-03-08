@@ -2,21 +2,15 @@ const Generator = require("yeoman-generator");
 const { requirePackages } = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
-const path = require("path");
+
 const {
   IAMClient,
   ListRolesCommand,
   CreateRoleCommand,
   GetRoleCommand,
-  AttachRolePolicyCommand,
   PutRolePolicyCommand,
-  CreatePolicyCommand,
 } = require("@aws-sdk/client-iam");
-const {
-  EventBridge,
-  ListConnectionsCommand,
-  CreateScheduleCommandInput,
-} = require("@aws-sdk/client-eventbridge");
+const { EventBridge } = require("@aws-sdk/client-eventbridge");
 const { Scheduler } = require("@aws-sdk/client-scheduler");
 const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler");
 const getEndpointInterfacesTemplate = require("../../generators/api/templates/endpoint/interfaces");
@@ -498,27 +492,43 @@ module.exports = class extends Generator {
 
     const putTargetResponse = await eventBridge.putTargets(putTargetParams);
 
+    const apiDestinationPolicyDocument = {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: ["events:InvokeApiDestination"],
+          Resource: [createApiDestinationResponse.ApiDestinationArn],
+        },
+      ],
+    };
+
     // con questo sono riuscita a mettere la policy al destination role
     await iamClient.send(
       new PutRolePolicyCommand({
         RoleName: `genyg-${projectName}-API-destination-role`,
-        PolicyDocument:
-          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:InvokeApiDestination"],"Resource":["' +
-          createApiDestinationResponse.ApiDestinationArn +
-          '"]}]}',
+        PolicyDocument: JSON.stringify(apiDestinationPolicyDocument),
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Invoke_Api_Destination`,
       })
     );
 
     const schedulerRoleName = `genyg-${projectName}-scheduler-role`;
 
+    const schedulerPolicyDocument = {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: ["events:PutEvents"],
+          Resource: [eventBusResponse.Arn],
+        },
+      ],
+    };
+
     await iamClient.send(
       new PutRolePolicyCommand({
         RoleName: schedulerRoleName,
-        PolicyDocument:
-          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:PutEvents"],"Resource":["' +
-          eventBusResponse.Arn +
-          '"]}]}',
+        PolicyDocument: JSON.stringify(schedulerPolicyDocument),
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Scheduler_Execution_Policy`,
       })
     );
@@ -553,7 +563,6 @@ module.exports = class extends Generator {
       Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
       ScheduleExpression: "rate(1 minutes)",
       State: "DISABLED",
-
       Target: {
         RoleArn: getRoleResponse.Role.Arn,
         Arn: eventBusResponse.Arn,
