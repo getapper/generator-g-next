@@ -269,6 +269,11 @@ module.exports = class extends Generator {
         message: "What is your scheduler API route path?",
       },
       {
+        type: "input",
+        name: "invocationEndpoint",
+        message: "Insert the endpoint url you want to invoke.",
+      },
+      {
         type: "list",
         name: "method",
         message: "What is your scheduler API http method?",
@@ -291,7 +296,6 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
-
     this.answers = answers;
   }
   async writing() {
@@ -306,6 +310,7 @@ module.exports = class extends Generator {
       customEventBus,
       route,
       method,
+      invocationEndpoint,
     } = this.answers;
 
     // Create a new EventBridge and Scheduler instance
@@ -407,8 +412,7 @@ module.exports = class extends Generator {
     const createApiDestinationParams = {
       ConnectionArn: connectionResponse.ConnectionArn,
       HttpMethod: method.toUpperCase(),
-      InvocationEndpoint:
-        "https://webhook.site/3f941233-8c73-4301-b7ad-66e05d9a6985",
+      InvocationEndpoint: invocationEndpoint,
       Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
       InvocationRateLimitPerSecond: 100,
     };
