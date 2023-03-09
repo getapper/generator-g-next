@@ -12,11 +12,11 @@ const {
 } = require("@aws-sdk/client-iam");
 const { EventBridge } = require("@aws-sdk/client-eventbridge");
 const { Scheduler } = require("@aws-sdk/client-scheduler");
-const getEndpointHandlersTemplate = require("../../generators/api/templates/endpoint/handler");
-const getEndpointInterfacesTemplate = require("../../generators/api/templates/endpoint/interfaces");
-const getEndpointValidationsTemplate = require("../../generators/api/templates/endpoint/validations");
-const getEndpointTestsTemplate = require("../../generators/api/templates/endpoint/index.test");
-const getEndpointPageTemplate = require("../../generators/api/templates/page");
+const getEndpointHandlersTemplate = require("../api/templates/endpoint/handler");
+const getEndpointInterfacesTemplate = require("../api/templates/endpoint/interfaces");
+const getEndpointValidationsTemplate = require("../api/templates/endpoint/validations");
+const getEndpointTestsTemplate = require("../api/templates/endpoint/index.test");
+const getEndpointPageTemplate = require("../api/templates/page");
 const fs = require("fs");
 
 const schedulerExecutionRoleDocument = {
@@ -175,48 +175,47 @@ module.exports = class extends Generator {
     //const scheduler = new Scheduler(AWSConfig);
 
     // The following arrays will be the user's choices given by yeoman
-    let scheduleRoles = ["create a new schedule role"];
+    let scheduleRoles = [];
     let ApiDestinationRoles = ["create a new destination role"];
     let connectionList = ["create a new connection"];
     let eventBusesList = ["create a new event bus"];
 
-    const roles = await iamClient.send(new ListRolesCommand({})); // senza usare il send risultava undefined
-    /*this.log(yosay(`${roles.Roles.map((role) =>role.RoleName)}`))*/ // test per verificare che venga restituita da iamClient lista ruoli: superto
-    /*roles.Roles.map((role) => {scheduleRoles.push(
-      JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
-    );*/ //test per verificare che in generale ruoli vengano inseriti dentro array: superato
-    /*const roles = await iamClient.send(new ListRolesCommand({MaxItems:1}));
-    this.log(
-      yosay(
-        `${roles.Roles.map((role) =>
-          JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument))
-        )}`
-      )
-    );
-    this.log(yosay(`${JSON.stringify(schedulerRolePolicy)}`));*/ // test per verificare che il formato delle policy dopo la stringify sia lo stesso: superato
+    const roles = await iamClient.send(new ListRolesCommand({}));
 
     // we need to decode the PolicyDocument of each role, we put the valid roles in the corresponding array
     roles.Roles.map((role) => {
       if (
-        JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
-        JSON.stringify(schedulerExecutionRoleDocument)
+        decodeURIComponent(role.AssumeRolePolicyDocument).replace(
+          /\s/gm,
+          ""
+        ) === JSON.stringify(schedulerExecutionRoleDocument).replace(/\s/gm, "")
       ) {
         scheduleRoles.push(role.RoleName);
       }
       if (
-        JSON.stringify(decodeURIComponent(role.AssumeRolePolicyDocument)) ===
-        JSON.stringify(apiDestinationExecutionRoleDocument)
+        decodeURIComponent(role.AssumeRolePolicyDocument).replace(
+          /\s/gm,
+          ""
+        ) ===
+        JSON.stringify(apiDestinationExecutionRoleDocument).replace(/\s/gm, "")
       ) {
         ApiDestinationRoles.push(role.RoleName);
       }
     });
+    if (scheduleRoles.length === 0) {
+      this.log(
+        yosay(
+          chalk.red(
+            "Please create a scheduler role first using yo g-next:aws-scheduler-role command!"
+          )
+        )
+      );
+      process.exit(0);
+      return;
+    }
 
     // we put the connections in the connectionList array
     const connectionsResponse = await eventBridge.listConnections({});
-    //const connectionsResponse = await eventBridge.send(new ListConnectionsCommand({})); // si comporta come sopra
-    /*this.log(
-      yosay(` ${connectionsResponse.Connections.map((c) => c.Name)}`)
-    );*/ //test per verificare che connessioni vengano restituite
     connectionsResponse.Connections.map((c) => {
       connectionList.push(c.Name);
     });
@@ -247,9 +246,8 @@ module.exports = class extends Generator {
       {
         type: "list",
         name: "schedulerRole",
-        message: "Choose an existing scheduler role or create a new one.",
+        message: "Choose an existing scheduler role.",
         choices: scheduleRoles,
-        default: "create a new schedule role",
       },
       {
         type: "list",
@@ -282,9 +280,6 @@ module.exports = class extends Generator {
     if (answers.destinationRole === "create a new destination role") {
       answers.customDestination = true;
     }
-    if (answers.schedulerRole === "create a new schedule role") {
-      answers.customScheduler = true;
-    }
     if (answers.connection === "create a new connection") {
       answers.customConnection = true;
     }
@@ -296,9 +291,7 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
-    /*this.iamClient = iamClient;
-    this.scheduler = scheduler;
-    this.eventBridge = eventBridge;*/ //provato a esportare così: test fallito
+
     this.answers = answers;
   }
   async writing() {
@@ -331,14 +324,6 @@ module.exports = class extends Generator {
     const scheduler = new Scheduler(AWSConfig);
     const configFile = this.readDestinationJSON("package.json");
     const projectName = configFile.name;
-    /*const roles = await iamClient.send(new ListRolesCommand({}));
-    const test1 = route+roles.Roles[0].RoleName;
-    const params = parseFromText(test1);*/ // versione alternativa a params per testare se anche nel writing ListRolesCommand funzioni: superato
-
-    /*const {iamClient} = this.iamClient;
-    const {scheduler} = this.scheduler;
-    const {eventBridge} = this.eventBridge;
-     */ // test per vedere se sia possibile importazione di questi valori dal prompting al writing: fallito
 
     // same as api generator
     const params = parseFromText(route);
@@ -374,26 +359,6 @@ module.exports = class extends Generator {
       }
     }
 
-    let schedulerRoleResponse = {};
-    if (customScheduler) {
-      // Create a new scheduler role
-      schedulerRoleResponse = await iamClient.send(
-        new CreateRoleCommand({
-          AssumeRolePolicyDocument: JSON.stringify(
-            schedulerExecutionRoleDocument
-          ),
-          RoleName: `genyg-${projectName}-scheduler-role`,
-        })
-      );
-    } else {
-      // Return the information of the chosen scheduler role
-      schedulerRoleResponse = await iamClient.send(
-        new GetRoleCommand({ RoleName: schedulerRole })
-      );
-    }
-    /*const test3 = schedulerRoleResponse.RoleName;
-    const params = parseFromText(test3);*/ // test per vedere se venga creato role: superato
-
     let destinationRoleResponse = {};
     if (customDestination) {
       // Create a new API destination role
@@ -411,23 +376,6 @@ module.exports = class extends Generator {
         new GetRoleCommand({ RoleName: destinationRole })
       );
     }
-    /*await iamClient.send(
-      new PutRolePolicyCommand({
-        RoleName: `genyg-${projectName}-API-destination-role`,
-        PolicyDocument: `{"Version":"2012-10-17","Statement":{"Effect":"Allow","Action":["iam:AttachRolePolicy","iam:CreateRole","iam:PutRolePolicy"],"Resource":"*"}}`,
-        PolicyName: `Permissions-Policy-For-Genyg-${projectName}-API-Destination-Role`,
-      })
-    );*/
-
-    /*await iamClient.send(
-      new AttachRolePolicyCommand({
-        RoleName: `genyg-${projectName}-API-destination-role`,
-        PolicyArn:
-          "arn:aws:iam::aws:policy/aws-service-role/AmazonEventBridgeApiDestinationsServiceRolePolicy",
-      })
-    );*/ // questo mi dava errori
-    /*const test4 = destinationRoleResponse.RoleName;
-    const params = parseFromText(test4);*/ // test per vedere se venga creato role: superato
 
     let connectionResponse = {};
     if (customConnection) {
@@ -458,10 +406,10 @@ module.exports = class extends Generator {
     // Create the endpoint and specify which connection use
     const createApiDestinationParams = {
       ConnectionArn: connectionResponse.ConnectionArn,
-      HttpMethod: method.toUpperCase(), // avevo provato urlParams, ma non va bene, così invece funziona
+      HttpMethod: method.toUpperCase(),
       InvocationEndpoint:
-        "https://webhook.site/3f941233-8c73-4301-b7ad-66e05d9a6985", // l'endpoint che invocheremo credo debba seguire un formato del genere `https://${projectName}/api/${route}` // the webhook site is a test
-      Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`, // qua vogliamo params perché ci interessa solo il nome della route, l'url ce l'abbiamo già
+        "https://webhook.site/3f941233-8c73-4301-b7ad-66e05d9a6985",
+      Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
       InvocationRateLimitPerSecond: 100,
     };
 
@@ -469,7 +417,7 @@ module.exports = class extends Generator {
       createApiDestinationParams
     );
 
-    // se creo un eventbus nuovo mi segnala errore se lo allego alla schedule perché vuole i bus di default
+    // get the information of an existing event bus (best choice) ore create a new event bus
     let eventBusResponse = {};
     let createEventBusParams = {};
     if (customEventBus) {
@@ -520,7 +468,7 @@ module.exports = class extends Generator {
       ],
     };
 
-    // con questo sono riuscita a mettere la policy al destination role
+    // put the authorization policy to the destination role
     await iamClient.send(
       new PutRolePolicyCommand({
         RoleName: `genyg-${projectName}-API-destination-role`,
@@ -529,46 +477,9 @@ module.exports = class extends Generator {
       })
     );
 
-    const schedulerRoleName = `genyg-${projectName}-scheduler-role`;
-
-    const schedulerPolicyDocument = {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Action: ["events:PutEvents"],
-          Resource: [eventBusResponse.Arn],
-        },
-      ],
-    };
-
-    await iamClient.send(
-      new PutRolePolicyCommand({
-        RoleName: schedulerRoleName,
-        PolicyDocument: JSON.stringify(schedulerPolicyDocument),
-        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Scheduler_Execution_Policy`,
-      })
-    );
-
-    /*const createPolicyResponse = await iamClient.send(
-      new CreatePolicyCommand({
-        PolicyDocument:
-          '{"Version": "2012-10-17","Statement":[{"Effect": "Allow","Action":["events:PutEvents"],"Resource":["' +
-          eventBusResponse.Arn +
-          '"]}]}',
-        PolicyName: `genyg_${projectName}_Amazon_EventBridge_Scheduler_Execution_PutEvents_Policy`,
-      })
-    );
-    await iamClient.send(
-      new AttachRolePolicyCommand({
-        RoleName: schedulerRoleName,
-        PolicyArn: createPolicyResponse.Policy.Arn,
-      })
-    );
-*/
     const getRoleResponse = await iamClient.send(
       new GetRoleCommand({
-        RoleName: schedulerRoleName,
+        RoleName: schedulerRole,
       })
     );
 
@@ -579,7 +490,7 @@ module.exports = class extends Generator {
     try {
       const createScheduleResponse = await scheduler.createSchedule({
         Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
-        ScheduleExpression: "cron(1 * * * ? *)",
+        ScheduleExpression: "rate(1 minutes)",
         State: "DISABLED",
         Target: {
           RoleArn: getRoleResponse.Role.Arn,
@@ -597,7 +508,6 @@ module.exports = class extends Generator {
       console.log(error);
     }
 
-    //sono stati testati con successo
     // Endpoints folder
     this.fs.write(
       this.destinationPath(
