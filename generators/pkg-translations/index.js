@@ -16,7 +16,7 @@ module.exports = class extends Generator {
         `Hi! Welcome to the official ${chalk.blue(
           "Getapper NextJS Yeoman Generator (GeNYG)",
         )}. ${chalk.red(
-          "This command must be executed only once, and it will install i18n files and libraries dependencies.",
+          "This command must be executed only once, and it will install i18n files and libraries dependencies. Don't forget to add i18n configuration inside you next.config file (i18n: options.i18n), useInitializeTranslations() in your useAppHooks (if you are using SPAs), and to adjust the baseName of your SPAs routers.",
         )}`,
       ),
     );

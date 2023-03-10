@@ -44,7 +44,6 @@ class ResponseHandler {
     const validationResult: ValidationResult = {
       isValid: true,
     };
-
     if (validations.queryStringParameters) {
       try {
         queryStringParameters =
@@ -104,11 +103,9 @@ class TestHandler {
       "Content-Type": "application/json",
       ...(params?.headers ?? {}),
     };
-    const data = await ResponseHandler.handleRequest(
+    const data = await require(`../../endpoints/${handlerPath}/index`).default(
       req,
       res,
-      require(`../../endpoints/${handlerPath}/validations`).default,
-      require(`../../endpoints/${handlerPath}/handler`).default,
     );
     return { res, payload: data.payload, statusCode: data.statusCode };
   }
@@ -123,7 +120,7 @@ export const nextApiEndpointHandler =
     try {
       const endpoint = await import(
         `@/endpoints/${req.method.toLowerCase()}-${route}`
-      );
+        );
       if (endpoint.default) {
         return endpoint.default(req, res);
       } else {

@@ -115,8 +115,10 @@ module.exports = class extends Generator {
         extendEnv(
           this,
           "template",
-          `${snakeCase(cookieRole).toUpperCase()}_SECRET_COOKIE_PASSWORD=12345678901234567890123456789012`
-        )
+          `${snakeCase(
+            cookieRole,
+          ).toUpperCase()}_SECRET_COOKIE_PASSWORD=12345678901234567890123456789012`,
+        );
       }
     });
 
@@ -126,7 +128,7 @@ module.exports = class extends Generator {
 
     //Index.tsx session file
     this.fs.write(
-      this.destinationPath("./src/lib/session/index.tsx"),
+      this.destinationPath("./src/lib/session/index.ts"),
       generateLibSessionFile({
         cookieRoles,
         projectName: require(this.destinationPath("./package.json")).name,
