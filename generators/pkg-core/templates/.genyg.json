@@ -7,6 +7,7 @@
     "translations": false,
     "mongodb": false,
     "cognito": false,
-    "cookieAuth": false
+    "cookieAuth": false,
+    "cypress": false
   }
 }
