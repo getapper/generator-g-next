@@ -23,6 +23,7 @@
     "camel-case": "4.1.2",
     "chalk": "2.1.0",
     "inquirer-directory": "2.2.0",
+    "js-yaml": "4.1.0",
     "kebab-case": "1.0.1",
     "pascal-case": "3.1.2",
     "pluralize": "8.0.0",
@@ -31,6 +32,7 @@
     "yosay": "2.0.2"
   },
   "devDependencies": {
+    "merge-yaml": "1.1.0",
     "prettier": "2.5.1"
   }
 }

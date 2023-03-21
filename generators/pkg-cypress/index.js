@@ -2,6 +2,9 @@
 const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
+const fs = require("fs");
+const jsYaml = require("js-yaml");
+const mergeYaml = require("merge-yaml");
 const {
   getGenygConfigFile,
   extendConfigFile,
@@ -82,6 +85,13 @@ module.exports = class extends Generator {
         "cypress.config.ts",
       ]
     });
+
+
+    //Update Circleci config file
+    const finalYaml = mergeYaml([this.destinationPath(".circleci/config.yml"), this.templatePath("config.yml")]);
+
+    fs.writeFileSync(this.destinationPath(".circleci/config.yml"), jsYaml.dump(finalYaml));
+
 
   }
 };
