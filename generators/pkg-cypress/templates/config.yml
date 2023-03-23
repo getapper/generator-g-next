@@ -6,7 +6,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - checkout
       - restore_cache:
           keys:
             - v2-deps-{{ .Branch }}-{{ checksum "package-lock.json" }}
