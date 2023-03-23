@@ -66,6 +66,7 @@ module.exports = class extends Generator {
     });
 
     this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+    this.fs.copy(this.templatePath("."), this.destinationPath());
 
     extendConfigFile(this, {
       packages: {

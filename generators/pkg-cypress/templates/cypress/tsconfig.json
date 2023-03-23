@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "types": ["cypress", "node"]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "cypress.config.ts"
+  ],
+  "exclude": []
+}
