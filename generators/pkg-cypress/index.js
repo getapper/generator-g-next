@@ -4,12 +4,12 @@ const chalk = require("chalk");
 const yosay = require("yosay");
 const fs = require("fs");
 const jsYaml = require("js-yaml");
-const mergeYaml = require("merge-yaml");
 const {
   getGenygConfigFile,
   extendConfigFile,
   requirePackages,
 } = require("../../common");
+const {JSON_SCHEMA} = require("js-yaml");
 
 module.exports = class extends Generator {
   async prompting() {
@@ -89,10 +89,21 @@ module.exports = class extends Generator {
 
 
     //Update Circleci config file
-    const finalYaml = mergeYaml([this.destinationPath(".circleci/config.yml"), this.templatePath("config.yml")]);
+    const _extendCiConfigFile = (config) => {
+      const localCiConfigFile = this.fs.readJSON(this.templatePath("config.json"));
 
-    fs.writeFileSync(this.destinationPath(".circleci/config.yml"), jsYaml.dump(finalYaml));
+      config.jobs.deps = localCiConfigFile.jobs.deps;
+      config.jobs["e2e-tests"] = localCiConfigFile.jobs["e2e-tests"];
+      config.workflows["code-checks"]["jobs"].push(localCiConfigFile.workflows["code-checks"]["jobs"]);
 
+      fs.writeFileSync(this.destinationPath(".circleci/config.yml"), jsYaml.dump(config));
+    }
 
+    if(fs.existsSync(this.destinationPath(".circleci/config.yml"))){
+      const destCiConfigFile = jsYaml.load(fs.readFileSync(this.destinationPath(".circleci/config.yml")),
+        { schema: JSON_SCHEMA,  json: true});
+      _extendCiConfigFile(destCiConfigFile);
+
+    }
   }
 };
