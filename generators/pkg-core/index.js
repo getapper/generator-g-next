@@ -10,11 +10,11 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
+          "Getapper NextJS Yeoman Generator (GeNYG)",
         )}. ${chalk.red(
-          "This command SHOULD only be executed right after create-next-app install, not sooner, not later!"
-        )}\nAnd it will install Redux, Sagas, Persist, React-Router, MUI, and basic app templates.`
-      )
+          "This command SHOULD only be executed right after create-next-app install, not sooner, not later!",
+        )}\nAnd it will install Redux, Sagas, Persist, React-Router, MUI, and basic app templates.`,
+      ),
     );
 
     this.answers = await this.prompt([
@@ -36,7 +36,6 @@ module.exports = class extends Generator {
       scripts: {
         lint: "next lint",
         tsc: "tsc",
-        "tsc-backend": "rimraf dist && npx ttsc --p tsconfig-backend.json",
         test: "jest --runInBand",
       },
       devDependencies: {

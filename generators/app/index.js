@@ -13,6 +13,7 @@ module.exports = class extends Generator {
       "--import-alias",
       "@/*",
       "--no-experimental-app",
+      "--no-tailwind",
     ]);
   }
 };
