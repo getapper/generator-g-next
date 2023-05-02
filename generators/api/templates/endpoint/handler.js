@@ -13,14 +13,6 @@ ${useCookieAuth ? '  originalReq: NextApiRequest,\n' : ''}) {
   try {
     const { validationResult${useCookieAuth ? ', queryStringParameters' : ''} } = req;
 
-    if (!validationResult.isValid) {
-      return ResponseHandler.json<ErrorResponse>(
-        res,
-        { message: validationResult.message! },
-        StatusCodes.BadRequest
-      );
-    }
-
     ${useCookieAuth ? `if(!originalReq.session.${cookieRoleCamelCase}){
       return ResponseHandler.json<ErrorResponse>(
         res,
@@ -28,6 +20,14 @@ ${useCookieAuth ? '  originalReq: NextApiRequest,\n' : ''}) {
         StatusCodes.Unauthorized,
       );
     }` : ``}
+
+    if (!validationResult.isValid) {
+      return ResponseHandler.json<ErrorResponse>(
+        res,
+        { message: validationResult.message! },
+        StatusCodes.BadRequest
+      );
+    }
 
     return ResponseHandler.json<${apiNameCapital}Api.SuccessResponse>(res, {});
   } catch (e) {
