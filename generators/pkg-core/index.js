@@ -30,9 +30,12 @@ module.exports = class extends Generator {
     }
   }
 
-  writing() {
+  async writing() {
     // New dependencies
     this.packageJson.merge({
+      engines: {
+        node: ">=16.0.0 <17.0.0",
+      },
       scripts: {
         lint: "next lint",
         tsc: "tsc",
@@ -66,10 +69,11 @@ module.exports = class extends Generator {
     // Copy project files
     this.fs.copy(this.templatePath("."), this.destinationPath("."));
     this.fs.copy(this.templatePath(".*"), this.destinationRoot());
-  }
-
-  install() {
-    // this.spawnCommand("npm", ["uninstall", "eslint"]);
-    this.spawnCommand("npm", ["i", "eslint@8.22.0", "--save-dev", "--E"]);
+    await new Promise((resolve) => {
+      this.spawnCommand("npm", ["i", "eslint@8.22.0", "--save-dev", "--E"]).on(
+        "exit",
+        resolve,
+      );
+    });
   }
 };
