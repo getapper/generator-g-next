@@ -15,9 +15,19 @@ module.exports = class extends Generator {
       "--no-experimental-app",
       "--no-tailwind",
     ]).on("exit", () => {
-      this.spawnCommand("npm", ["i", "next@13.2.3", "-S", "-E"]);
-      this.spawnCommand("npm", ["i", "eslint-config-next@13.2.3", "-S", "-E"]);
-      this.spawnCommand("npm", ["i", "typescript@4.9.5", "-S", "-E"]);
+      this.spawnCommand("npm", ["i", "next@13.2.3", "-S", "-E"]).on(
+        "exit",
+        () => {
+          this.spawnCommand("npm", [
+            "i",
+            "eslint-config-next@13.2.3",
+            "-S",
+            "-E",
+          ]).on("exit", () => {
+            this.spawnCommand("npm", ["i", "typescript@4.9.5", "-S", "-E"]);
+          });
+        },
+      );
     });
   }
 };
