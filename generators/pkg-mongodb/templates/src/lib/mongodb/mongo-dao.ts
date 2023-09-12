@@ -1,4 +1,4 @@
-import mongoClientPromise from "lib/mongodb";
+import mongoClientPromise from "@/lib/mongodb";
 import {
   BulkWriteOptions,
   Db,

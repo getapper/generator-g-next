@@ -17,11 +17,11 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
+          "Getapper NextJS Yeoman Generator (GeNYG)",
         )}. ${chalk.red(
-          "This command must be executed only once, and it will install all MongoDB dependencies."
-        )}`
-      )
+          "This command must be executed only once, and it will install all MongoDB dependencies.",
+        )}`,
+      ),
     );
 
     this.answers = await this.prompt([
@@ -44,9 +44,9 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "It looks like the GeNYG MongoDB deps were already installed!"
-          )
-        )
+            "It looks like the GeNYG MongoDB deps were already installed!",
+          ),
+        ),
       );
       process.exit(0);
     }
@@ -62,27 +62,27 @@ module.exports = class extends Generator {
     extendEnv(
       this,
       "local",
-      `MONGODB_URI=mongodb://localhost:27017
-MONGODB_NAME=*`
+      `MONGODB_NAME=*
+MONGODB_URI=mongodb://127.0.0.1:27017/$MONGODB_NAME`,
     );
     extendEnv(
       this,
       "test",
-      `MONGODB_URI=mongodb://localhost:27017
-MONGODB_NAME=*-test`
+      `MONGODB_NAME=*-test
+MONGODB_URI=mongodb://127.0.0.1:27017/$MONGODB_NAME`,
     );
     extendEnv(
       this,
       "template",
-      `MONGODB_URI=mongodb://localhost:27017
-MONGODB_NAME=*-test`
+      `MONGODB_NAME=*
+MONGODB_URI=mongodb://127.0.0.1:27017/$MONGODB_NAME`,
     );
 
     // Copy MongoDB lib files
     this.fs.copy(this.templatePath(), this.destinationRoot());
 
     const nextConfigOptionsJson = require(this.destinationPath(
-      "next.config.options.json"
+      "next.config.options.json",
     ));
     this.fs.extendJSON(this.destinationPath("next.config.options.json"), {
       env: [

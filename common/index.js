@@ -62,6 +62,11 @@ ${newContent}`
   );
 };
 
+const checkPackageInstalled = (genyg, pkg) => {
+  const configFile = genyg.readDestinationJSON(".genyg.json");
+  return configFile.packages[pkg];
+};
+
 const checkGenygVersion = (genyg) => {};
 
 module.exports = {
@@ -71,4 +76,5 @@ module.exports = {
   copyEjsTemplateFolder,
   getSpas,
   extendEnv,
+  checkPackageInstalled,
 };

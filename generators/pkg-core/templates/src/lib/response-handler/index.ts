@@ -1,7 +1,4 @@
-import {
-  StatusCodes,
-  ValidationResult,
-} from "src/lib/response-handler/interfaces";
+import { StatusCodes, ValidationResult } from "./interfaces";
 import { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 import { createMocks, RequestMethod } from "node-mocks-http";
@@ -47,7 +44,6 @@ class ResponseHandler {
     const validationResult: ValidationResult = {
       isValid: true,
     };
-
     if (validations.queryStringParameters) {
       try {
         queryStringParameters =
@@ -80,6 +76,7 @@ class ResponseHandler {
         headers: req.headers,
       },
       res,
+      req,
     );
   }
 }
@@ -97,21 +94,18 @@ class TestHandler {
     res: NextApiResponse;
     statusCode: StatusCodes;
   }> {
-    const { req, res }: { req: NextApiRequest; res: NextApiResponse } =
-      createMocks({
-        method: handlerPath.split("-")[0].toUpperCase() as RequestMethod,
-        query: params?.queryString,
-        body: params?.payload,
-      });
+    const { req, res }: { req: any; res: any } = createMocks({
+      method: handlerPath.split("-")[0].toUpperCase() as RequestMethod,
+      query: params?.queryString,
+      body: params?.payload,
+    });
     req.headers = {
       "Content-Type": "application/json",
       ...(params?.headers ?? {}),
     };
-    const data = await ResponseHandler.handleRequest(
+    const data = await require(`../../endpoints/${handlerPath}/index`).default(
       req,
       res,
-      require(`../../endpoints/${handlerPath}/validations`).default,
-      require(`../../endpoints/${handlerPath}/handler`).default,
     );
     return { res, payload: data.payload, statusCode: data.statusCode };
   }
@@ -119,14 +113,14 @@ class TestHandler {
 
 export { ResponseHandler, TestHandler };
 
-export * from "src/lib/response-handler/interfaces";
+export * from "./interfaces";
 
 export const nextApiEndpointHandler =
   (route: string) => async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const endpoint = await import(
-        `endpoints/${req.method.toLowerCase()}-${route}`
-      );
+        `@/endpoints/${req.method.toLowerCase()}-${route}`
+        );
       if (endpoint.default) {
         return endpoint.default(req, res);
       } else {

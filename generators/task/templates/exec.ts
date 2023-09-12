@@ -1,7 +1,8 @@
 require("custom-env").env("local");
 require("custom-env");
 import { <%= taskFunctionName %> } from "@/tasks/<%= taskFolder %>";
-
+<% if (isMongoInstalled) { %>// import mongoDao from "@/lib/mongodb/mongo-dao";
+<% } %>
 (async () => {
   try {
     await <%= taskFunctionName %>();
@@ -9,7 +10,7 @@ import { <%= taskFunctionName %> } from "@/tasks/<%= taskFolder %>";
   } catch (error) {
     console.error(error);
   } finally {
-    // mongoDao.mongoClient?.close();
-    process.exit(0);
+    <% if (isMongoInstalled) { %>// await mongoDao.mongoClient?.close();
+    <% } %>process.exit(0);
   }
 })();

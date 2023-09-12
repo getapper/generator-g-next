@@ -5,14 +5,15 @@ const yosay = require("yosay");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
-const { requirePackages } = require("../../common");
-const getPageTemplate = require("./templates");
+const { requirePackages, getGenygConfigFile } = require("../../common");
+const { generatePage } = require("../../common/file-generators");
+const { camelCase } = require("camel-case");
 
 module.exports = class extends Generator {
   initializing() {
     this.env.adapter.promptModule.registerPrompt(
       "directory",
-      require("inquirer-directory")
+      require("inquirer-directory"),
     );
   }
 
@@ -24,9 +25,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} page generator, follow the quick and easy configuration to create a new page!`
-      )
+          "Getapper NextJS Yeoman Generator (GeNYG)",
+        )} page generator, follow the quick and easy configuration to create a new page!`,
+      ),
     );
 
     let answers = await this.prompt([
@@ -60,6 +61,37 @@ module.exports = class extends Generator {
       },
     ]);
 
+    //cookie auth
+    const config = getGenygConfigFile(this);
+    if (
+      config.packages.cookieAuth &&
+      config.cookieRoles.length !== 0 &&
+      answers.renderingStrategy === "Server-side Rendering Props (SSR)"
+    ) {
+      Object.assign(
+        answers,
+        await this.prompt([
+          {
+            type: "confirm",
+            name: "useCookieAuth",
+            message: "Do you want to use cookie authentication?",
+            default: false,
+          },
+        ]),
+      );
+      if (answers.useCookieAuth) {
+        Object.assign(
+          answers,
+          await this.prompt({
+            type: "list",
+            name: "cookieRole",
+            message: "Select a role from the list",
+            choices: config.cookieRoles,
+          }),
+        );
+      }
+    }
+
     if (answers.pageName[0] === "[") {
       answers.dynamic = true;
       answers.multipleParameters = answers.pageName[1] === "[";
@@ -86,9 +118,13 @@ module.exports = class extends Generator {
       componentName,
       renderingStrategy,
       multipleParameters,
+      useCookieAuth,
+      cookieRole,
     } = this.answers;
     const folderName = dynamic
-      ? pageName
+      ? multipleParameters
+        ? pageName
+        : `[${camelCase(pageName.replace("[", "").replace("]", ""))}]`
       : pageName
           .split("-")
           .filter((s) => s !== "")
@@ -101,7 +137,7 @@ module.exports = class extends Generator {
     // Index.tsx page file
     this.fs.write(
       this.destinationPath(path.join(relativeToRootPath, "/index.tsx")),
-      getPageTemplate({
+      generatePage({
         componentName,
         useGetStaticPaths:
           dynamic && renderingStrategy !== "Server-side Rendering Props (SSR)",
@@ -109,12 +145,14 @@ module.exports = class extends Generator {
           renderingStrategy === "Static Generation Props (SSG)",
         userGetServerSideProps:
           renderingStrategy === "Server-side Rendering Props (SSR)",
+        useCookieAuth,
+        cookieRole: useCookieAuth ? camelCase(cookieRole) : "",
         dynamic,
         multipleParameters,
         paramName: multipleParameters
           ? pageName.replace("[[...", "").replace("]]", "")
-          : pageName.replace("[", "").replace("]", ""),
-      })
+          : camelCase(pageName.replace("[", "").replace("]", "")),
+      }),
     );
   }
 };

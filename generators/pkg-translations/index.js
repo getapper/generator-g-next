@@ -9,16 +9,16 @@ const { getGenygConfigFile, requirePackages } = require("../../common");
 module.exports = class extends Generator {
   async prompting() {
     // Config checks
-    requirePackages(this, ["core"]);
+    requirePackages(this, ["mui"]);
 
     this.log(
       yosay(
         `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
+          "Getapper NextJS Yeoman Generator (GeNYG)",
         )}. ${chalk.red(
-          "This command must be executed only once, and it will install i18n files and libraries dependencies."
-        )}`
-      )
+          "This command must be executed only once, and it will install i18n files and libraries dependencies. Don't forget to add i18n configuration inside you next.config file (i18n: options.i18n), useInitializeTranslations() in your useAppHooks (if you are using SPAs), and to adjust the baseName of your SPAs routers.",
+        )}`,
+      ),
     );
 
     this.answers = await this.prompt([
@@ -41,9 +41,9 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "It looks like the GeNYG translations package was already installed!"
-          )
-        )
+            "It looks like the GeNYG translations package was already installed!",
+          ),
+        ),
       );
       process.exit(0);
     }
@@ -64,6 +64,6 @@ module.exports = class extends Generator {
     });
 
     // Copy project files
-    this.fs.copy(this.templatePath(".*"), this.destinationRoot());
+    this.fs.copy(this.templatePath(), this.destinationRoot());
   }
 };

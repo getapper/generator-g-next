@@ -10,11 +10,11 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
+          "Getapper NextJS Yeoman Generator (GeNYG)",
         )}. ${chalk.red(
-          "This command SHOULD only be executed right after create-next-app install, not sooner, not later!"
-        )}\nAnd it will install Redux, Sagas, Persist, React-Router, MUI, and basic app templates.`
-      )
+          "This command SHOULD only be executed right after create-next-app install, not sooner, not later!",
+        )}\nAnd it will install Redux, Sagas, Persist, React-Router, MUI, and basic app templates.`,
+      ),
     );
 
     this.answers = await this.prompt([
@@ -30,14 +30,16 @@ module.exports = class extends Generator {
     }
   }
 
-  writing() {
+  async writing() {
     // New dependencies
     this.packageJson.merge({
+      engines: {
+        node: ">=16.0.0 <17.0.0",
+      },
       scripts: {
         lint: "next lint",
         tsc: "tsc",
-        "tsc-backend": "rimraf dist && npx ttsc --p tsconfig-backend.json",
-        test: "npm run tsc-backend && jest --runInBand",
+        test: "jest --runInBand",
       },
       devDependencies: {
         "@types/jest": "29.4.0",
@@ -67,10 +69,11 @@ module.exports = class extends Generator {
     // Copy project files
     this.fs.copy(this.templatePath("."), this.destinationPath("."));
     this.fs.copy(this.templatePath(".*"), this.destinationRoot());
-  }
-
-  install() {
-    // this.spawnCommand("npm", ["uninstall", "eslint"]);
-    this.spawnCommand("npm", ["i", "eslint@8.22.0", "--save-dev", "--E"]);
+    await new Promise((resolve) => {
+      this.spawnCommand("npm", ["i", "eslint@8.22.0", "--save-dev", "--E"]).on(
+        "exit",
+        resolve,
+      );
+    });
   }
 };

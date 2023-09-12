@@ -38,7 +38,7 @@ const getFunctionName = (method, params) => {
       p
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   const variables = params
     .filter((p) => p[0] === "{")
@@ -48,7 +48,7 @@ const getFunctionName = (method, params) => {
         .replace("}", "")
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   return `${method}${models.join("")}${
     variables.length ? "By" : ""
@@ -96,7 +96,7 @@ const getAjaxPath = (params) => {
         .replace("}", "")
         .split("-")
         .map((p2, index) => (index ? capitalize(p2) : p2))
-        .join("")
+        .join(""),
     );
   if (urlParams.length) {
     return [
@@ -130,31 +130,43 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-next"
-        )} ajax generator, follow the quick and easy configuration to create a new ajax!`
-      )
+          "generator-g-next",
+        )} ajax generator, follow the quick and easy configuration to create a new ajax!`,
+      ),
     );
 
-    const answers = await this.prompt([
-      {
-        type: "list",
-        name: "spaFolderName",
-        message: "In which SPA you want to create a scene?",
-        choices: getSpas(this),
-      },
-      {
-        type: "input",
-        name: "route",
-        message: "What is your API route?",
-      },
-      {
-        type: "list",
-        name: "method",
-        message: "What is your API http method?",
-        choices: ["get", "post", "patch", "put", "delete"],
-        default: "get",
-      },
-    ]);
+    let answers = {};
+    const spas = getSpas(this);
+    if (spas.length > 1) {
+      answers = await this.prompt([
+        {
+          type: "list",
+          name: "spaFolderName",
+          message: "In which SPA you want to create an ajax?",
+          choices: getSpas(this),
+        },
+      ]);
+    } else {
+      answers.spaFolderName = spas[0];
+    }
+
+    answers = {
+      ...answers,
+      ...(await this.prompt([
+        {
+          type: "input",
+          name: "route",
+          message: "What is your API route?",
+        },
+        {
+          type: "list",
+          name: "method",
+          message: "What is your API http method?",
+          choices: ["get", "post", "patch", "put", "delete"],
+          default: "get",
+        },
+      ])),
+    };
 
     if (answers.route === "") {
       this.log(yosay(chalk.red("Please give your ajax a route next time!")));
@@ -173,21 +185,21 @@ module.exports = class extends Generator {
     const apiNamePC = pascalCase(apiName);
     const apiActionRoute = getAjaxActionRoute(method, params);
     const [routePath, urlParams] = getAjaxPath(params);
-    const reduxStorePath = `./spas/${spaFolderName}/redux-store`;
+    const reduxStorePath = `./src/spas/${spaFolderName}/redux-store`;
 
     let content = getTemplate(
       apiNamePC,
       apiActionRoute,
       routePath,
       method.toUpperCase(),
-      urlParams
+      urlParams,
     );
 
     this.fs.write(
       this.destinationPath(
-        `${reduxStorePath}/extra-actions/apis/${folderName}/index.tsx`
+        `${reduxStorePath}/extra-actions/apis/${folderName}/index.tsx`,
       ),
-      content
+      content,
     );
 
     content = `export {default as ${apiName}} from './${folderName}'\n`;
@@ -198,9 +210,9 @@ module.exports = class extends Generator {
         reduxStorePath,
         "extra-actions",
         "apis",
-        "index.tsx"
+        "index.tsx",
       ),
-      content
+      content,
     );
   }
 };
