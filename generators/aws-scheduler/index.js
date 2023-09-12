@@ -280,6 +280,18 @@ module.exports = class extends Generator {
         choices: Object.values(HttpMethods),
         default: "get",
       },
+      {
+        type: "input",
+        name: "invocationRate",
+        message: "What is your scheduler invocation rate? (1 minutes)",
+      },
+      {
+        type:"list",
+        name: "status",
+        message: "What is your scheduler status?",
+        choices: ["ENABLED","DISABLED"],
+        default: "DISABLED"
+      }
     ]);
 
     if (answers.destinationRole === "create a new destination role") {
@@ -311,6 +323,8 @@ module.exports = class extends Generator {
       route,
       method,
       invocationEndpoint,
+      invocationRate,
+      status
     } = this.answers;
 
     // Create a new EventBridge and Scheduler instance
@@ -342,6 +356,13 @@ module.exports = class extends Generator {
       HttpMethods.POST,
       HttpMethods.PUT,
     ].includes(method);
+    const [amount, timeUnit]=invocationRate.split(" ");
+    if(Number.isNaN(amount)){
+      throw new Error("rate amount must be a number!");
+    }
+    if(!(timeUnit==="minutes" || timeUnit==="hours" ||timeUnit==="days")){
+      throw new Error("time unit must be minutes, hours or days!");
+    }
 
     let currentRoute = "";
     for (let i = 0; i < pagesApiFolders.length; i++) {
@@ -492,10 +513,11 @@ module.exports = class extends Generator {
     // The initial status is disabled and details are empty
 
     try {
+      //aggiungere domande extra per rate e enabled
       const createScheduleResponse = await scheduler.createSchedule({
         Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
-        ScheduleExpression: "rate(1 minutes)",
-        State: "DISABLED",
+        ScheduleExpression: `rate(${amount} ${timeUnit})`,
+        State: status,
         Target: {
           RoleArn: getRoleResponse.Role.Arn,
           Arn: eventBusResponse.Arn,
