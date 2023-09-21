@@ -205,6 +205,7 @@ module.exports = class extends Generator {
       HttpMethods.PUT,
     ].includes(method);
 
+
     let currentRoute = "";
     for (let i = 0; i < pagesApiFolders.length; i++) {
       const folder = pagesApiFolders[i];

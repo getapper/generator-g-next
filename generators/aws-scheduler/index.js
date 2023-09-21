@@ -18,6 +18,7 @@ const getEndpointValidationsTemplate = require("../api/templates/endpoint/valida
 const getEndpointTestsTemplate = require("../api/templates/endpoint/index.test");
 const getEndpointPageTemplate = require("../api/templates/page");
 const fs = require("fs");
+const {camelCase} = require("camel-case");
 
 const schedulerExecutionRoleDocument = {
   Version: "2012-10-17",
@@ -549,7 +550,11 @@ module.exports = class extends Generator {
     );
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
-      getEndpointHandlersTemplate(capitalize(apiName))
+      getEndpointHandlersTemplate(
+        capitalize(apiName),
+        false,
+        "",
+      ),
     );
     this.fs.write(
       this.destinationPath(
@@ -558,8 +563,12 @@ module.exports = class extends Generator {
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
     this.fs.copy(
-      this.templatePath("../../api/templates/endpoint/index.ts"),
-      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
+      this.templatePath("./endpoint/index.ejs"),
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
+      {
+        useCookieAuth:false,
+        cookieRoleCamelCase:"",
+      },
     );
   }
 };
