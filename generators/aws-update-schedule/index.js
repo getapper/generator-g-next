@@ -3,23 +3,14 @@ const { requirePackages } = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
 
-const {
-  IAMClient,
-  ListRolesCommand,
-  CreateRoleCommand,
-  GetRoleCommand,
-  PutRolePolicyCommand,
-} = require("@aws-sdk/client-iam");
-const { EventBridge, ListEndpointsCommand, ListApiDestinationsCommand, EventBridgeClient, UpdateApiDestinationCommand} = require("@aws-sdk/client-eventbridge");
+const {ListApiDestinationsCommand, EventBridgeClient, UpdateApiDestinationCommand} = require("@aws-sdk/client-eventbridge");
 const { Scheduler, GetScheduleCommand, SchedulerClient, UpdateScheduleCommand} = require("@aws-sdk/client-scheduler");
-const fs = require("fs");
 
 module.exports = class extends Generator {
   async prompting() {
-    // Config checks
+
     requirePackages(this, ["core"]);
 
-    // Create a new EventBridge and Scheduler instance
     const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
       credentials: {
@@ -28,7 +19,6 @@ module.exports = class extends Generator {
       },
       region: credentialAccess.region,
     };
-    // Create a new EventBridge and IAM instance
     const scheduler = new Scheduler(AWSConfig);
     const input={};
     const configFile = this.readDestinationJSON("package.json");
@@ -39,7 +29,7 @@ module.exports = class extends Generator {
       }
       return false;
     });
-    // Have Yeoman greet the user.
+
     this.log(
       yosay(
         `Welcome to ${chalk.red(
@@ -124,7 +114,7 @@ module.exports = class extends Generator {
       schedule,
     } = this.answers;
 
-    // Create a new EventBridge and Scheduler instance
+
    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
       credentials: {
@@ -134,12 +124,8 @@ module.exports = class extends Generator {
       region: credentialAccess.region,
     };
 
-    // Create a new EventBridge, IAM and Scheduler instance
     const schedulerClient = new SchedulerClient(AWSConfig);
     const eventbridgeClient=new EventBridgeClient(AWSConfig);
-    const iamClient = new IAMClient(AWSConfig);
-    const eventBridge = new EventBridge(AWSConfig);
-    const scheduler = new Scheduler(AWSConfig);
 
     const scheduleToRetrieve={
       Name:schedule
@@ -153,9 +139,14 @@ module.exports = class extends Generator {
     responseSchedule.ScheduleExpression.replace("(" , " ")
       .replace(")"," ").split(" ").map((value, index)=> {if(index===1 || index===2){scheduleExpression.push(value)}});
     const [amount,timeUnit]=invocationRate?.split(" ") ?? [scheduleExpression[0],scheduleExpression[1]];
+
+    if(timeUnit!=="minutes" || timeUnit!=="hours" || timeUnit!=="days"){
+      this.log(yosay(chalk.red("Please insert a correct schedule expression!")))
+      process.exit(1);
+      return
+    }
     const endpointURL=invocationEndpoint ?? responseListApiDestination.InvocationEndpoint
 
-    //retrieve information about Endopint invocation
     try {
       if(editStatus==='YES' || editInvocationRate==='YES') {
         const updateScheduleInput = {
