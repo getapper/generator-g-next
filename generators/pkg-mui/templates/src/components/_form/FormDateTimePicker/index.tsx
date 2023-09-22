@@ -1,27 +1,41 @@
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import {
+  DateTimePicker,
+  DateTimePickerProps,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { TextField } from "@mui/material";
 import React, { memo } from "react";
 import { useFormDateTimePicker } from "./index.hooks";
+import { Moment } from "moment/moment";
+
+interface OmittedProps {
+  renderInput: any;
+  onChange: any;
+  value: any;
+}
 
 type FormDateTimePickerProps = {
   name: string;
   label?: string;
-};
+} & Omit<DateTimePickerProps<Moment>, keyof OmittedProps>;
 
 export const FormDateTimePicker = memo(
-  ({ name, label }: FormDateTimePickerProps) => {
-    const { value, setValue, error } = useFormDateTimePicker(name);
+  ({ name, label, ...others }: FormDateTimePickerProps) => {
+    const { fieldValue, setValue, error } = useFormDateTimePicker(name);
 
     return (
       <LocalizationProvider dateAdapter={AdapterMoment}>
         <DateTimePicker
+          {...others}
           label={label}
-          value={value}
+          value={fieldValue}
           onChange={setValue}
-          renderInput={(params) => (
-            <TextField {...params} error={!!error} helperText={error} />
-          )}
+          slotProps={{
+            textField: {
+              error: !!error,
+              helperText: error,
+            },
+          }}
         />
       </LocalizationProvider>
     );
