@@ -562,7 +562,7 @@ module.exports = class extends Generator {
       ),
       getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
     );
-    this.fs.copy(
+    this.fs.copyTpl(
       this.templatePath("./endpoint/index.ejs"),
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
       {
