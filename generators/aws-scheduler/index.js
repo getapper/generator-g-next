@@ -548,12 +548,12 @@ module.exports = class extends Generator {
       ),
       getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
     );
+
+    //test di creazione senza cookie auth
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
       getEndpointHandlersTemplate(
-        capitalize(apiName),
-        false,
-        "",
+        capitalize(apiName)
       ),
     );
     this.fs.write(
@@ -565,10 +565,6 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath("./endpoint/index.ejs"),
       this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
-      {
-        useCookieAuth:false,
-        cookieRoleCamelCase:"",
-      },
     );
   }
 };
