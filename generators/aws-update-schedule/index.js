@@ -1,5 +1,5 @@
 const Generator = require("yeoman-generator");
-const { requirePackages } = require("../../common");
+const { requirePackages, getSpas} = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
 
@@ -19,10 +19,9 @@ module.exports = class extends Generator {
       },
       region: credentialAccess.region,
     };
-    const scheduler = new Scheduler(AWSConfig);
-    const input={};
+    const schedulerClient = new Scheduler(AWSConfig);
     const configFile = this.readDestinationJSON("package.json");
-    const schedulesList=(await (scheduler.listSchedules(input))).Schedules.map((schedule)=>schedule.Name).filter((value)=>{
+    const schedulesList=(await (schedulerClient.listSchedules({}))).Schedules.map((schedule)=>schedule.Name).filter((value)=>{
       return value.indexOf('genyg-'+configFile.name) === 0;
     });
     if(schedulesList.length===0){
@@ -43,15 +42,21 @@ module.exports = class extends Generator {
       {
         type:"list",
         name: "schedule",
-        message: "Please select a schedule that ypu want to update",
+        message: "Please select a schedule that you want to update",
         choices: schedulesList,
       },]);
     answers.schedule=schedule.schedule;
+    const scheduleToRetrieve={
+      Name:answers.schedule
+    }
+    const scheduleCommand=new GetScheduleCommand(scheduleToRetrieve);
+    const responseSchedule =await schedulerClient.send(scheduleCommand);
+
       let editStatus=await this.prompt([
         {
         type: "list",
         name: "editStatus",
-        message: "Do you want to edit status?",
+        message: `Do you want to edit status? Currently this scheduler is ${responseSchedule.State}`,
         choices: ["YES" , "NO"],
         default: "YES"
       }]);
@@ -73,7 +78,7 @@ module.exports = class extends Generator {
         {
           type: "list",
           name: "editInvocationRate",
-          message: "Do you want to edit invocation rate?",
+          message: `Do you want to edit invocation rate? For this scheduler the selected invocation rate is  ${responseSchedule.ScheduleExpression}`,
           choices: ["YES" , "NO"],
           default: "YES"
         },
@@ -91,40 +96,16 @@ module.exports = class extends Generator {
       answers.invocationRate=invocationRate.invocationRate
     }
 
-    let editInvocationEndpoint=await this.prompt([
-      {
-        type: "list",
-        name: "editInvocationEndpoint",
-        message: "Do you want to edit endpoint?",
-        choices: ["YES" , "NO"],
-        default: "YES"
-      },
-    ])
-    answers.editInvocationEndpoint=editInvocationEndpoint.editInvocationEndpoint;
-    if(answers.editInvocationEndpoint==="YES"){
-      let invocationEndpoint=await this.prompt([
-        {
-          type: "input",
-          name: "invocationEndpoint",
-          message: "Insert the endpoint url you want to invoke.",
-        },
-      ])
-      answers.invocationEndpoint=invocationEndpoint.invocationEndpoint
-    }
     this.answers = answers;
   }
   async writing() {
     const {
-      invocationEndpoint,
-      editInvocationEndpoint,
       invocationRate,
       editInvocationRate,
       status,
       editStatus,
-      schedule,
+      schedule
     } = this.answers;
-
-
 
    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
@@ -136,7 +117,6 @@ module.exports = class extends Generator {
     };
 
     const schedulerClient = new SchedulerClient(AWSConfig);
-    const eventbridgeClient=new EventBridgeClient(AWSConfig);
 
     const scheduleToRetrieve={
     Name:schedule
@@ -149,13 +129,6 @@ module.exports = class extends Generator {
       return
     }
 
-    const listApiDestinationCommand=new ListApiDestinationsCommand({});
-    const responseListApiDestination=(await eventbridgeClient.send(listApiDestinationCommand)).ApiDestinations.filter((ad)=>ad.Name===responseSchedule.Name.replace("-schedule-","-"))[0];
-    if(!responseListApiDestination){
-      this.log(yosay(chalk.red("Api destination not found!")))
-      process.exit(1);
-      return
-    }
     const State= status ?? responseSchedule?.State;
     const scheduleExpression=[];
     responseSchedule.ScheduleExpression.replace("(" , " ")
@@ -178,13 +151,6 @@ module.exports = class extends Generator {
       process.exit(1);
       return
     }
-    const endpointURL=invocationEndpoint ?? responseListApiDestination.InvocationEndpoint
-
-    if(editInvocationEndpoint==="YES" && endpointURL===responseListApiDestination.InvocationEndpoint){
-      this.log(yosay(chalk.red("No endpoint url changes detected!")))
-      process.exit(1);
-      return
-    }
 
     try {
       if(editStatus==='YES' || editInvocationRate==='YES') {
@@ -204,18 +170,6 @@ module.exports = class extends Generator {
         const updateScheduleCommand = new UpdateScheduleCommand(updateScheduleInput)
         const responseScheduleUpdate = await schedulerClient.send(updateScheduleCommand);
       }
-      if(editInvocationEndpoint==='YES') {
-        const updateApiDestinationInput = {
-          Name: responseListApiDestination.Name,
-          ConnectionArn: responseListApiDestination.ConnectionArn,
-          InvocationEndpoint: endpointURL,
-          HttpMethod: responseListApiDestination.HttpMethod,
-          InvocationRateLimitPerSecond: responseListApiDestination.InvocationRateLimitPerSecond,
-        }
-        const updateApiDestinationCommand = new UpdateApiDestinationCommand(updateApiDestinationInput);
-        const responseApiDestinationUpdate = await eventbridgeClient.send(updateApiDestinationCommand);
-      }
-
     } catch (error) {
       console.log(error);
     }

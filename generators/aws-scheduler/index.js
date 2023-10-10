@@ -514,7 +514,6 @@ module.exports = class extends Generator {
     // The initial status is disabled and details are empty
 
     try {
-      //aggiungere domande extra per rate e enabled
       const createScheduleResponse = await scheduler.createSchedule({
         Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
         ScheduleExpression: `rate(${amount} ${timeUnit})`,
