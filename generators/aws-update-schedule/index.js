@@ -1,9 +1,8 @@
 const Generator = require("yeoman-generator");
-const { requirePackages, getSpas} = require("../../common");
+const { requirePackages} = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");
 
-const {ListApiDestinationsCommand, EventBridgeClient, UpdateApiDestinationCommand} = require("@aws-sdk/client-eventbridge");
 const { Scheduler, GetScheduleCommand, SchedulerClient, UpdateScheduleCommand} = require("@aws-sdk/client-scheduler");
 
 module.exports = class extends Generator {

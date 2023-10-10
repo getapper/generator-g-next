@@ -18,7 +18,6 @@ const getEndpointValidationsTemplate = require("../api/templates/endpoint/valida
 const getEndpointTestsTemplate = require("../api/templates/endpoint/index.test");
 const getEndpointPageTemplate = require("../api/templates/page");
 const fs = require("fs");
-const {camelCase} = require("camel-case");
 
 const schedulerExecutionRoleDocument = {
   Version: "2012-10-17",
