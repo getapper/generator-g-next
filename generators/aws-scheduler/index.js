@@ -74,7 +74,7 @@ const getFunctionName = (method, params) => {
       p
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   const variables = params
     .filter((p) => p[0] === "{")
@@ -84,7 +84,7 @@ const getFunctionName = (method, params) => {
         .replace("}", "")
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   return `${method}${models.join("")}${
     variables.length ? "By" : ""
@@ -97,7 +97,7 @@ const getEndpointRoutePath = (params) => {
     .filter((p) => p[0] === "{")
     .map((p) => p.replace("{", "").replace("}", ""));
   return `${models.join("-")}${variables.length ? "-by-" : ""}${variables.join(
-    "-and-"
+    "-and-",
   )}`;
 };
 
@@ -112,7 +112,7 @@ const getPagesApiFolders = (params) => {
           .map((p2, index) => (index ? capitalize(p2) : p2))
           .join("") +
         "]"
-      : p
+      : p,
   );
 };
 
@@ -129,7 +129,7 @@ const getAjaxPath = (params) => {
         .replace("}", "")
         .split("-")
         .map((p2, index) => (index ? capitalize(p2) : p2))
-        .join("")
+        .join(""),
     );
   if (urlParams.length) {
     return [
@@ -160,13 +160,24 @@ module.exports = class extends Generator {
     requirePackages(this, ["core"]);
 
     // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
+    if (!AWS?.accessKeyId || !AWS?.secretAccessKey || !AWS?.region) {
+      this.log(
+        yosay(
+          chalk.red(
+            "Please specify your AWS credentials and region in the .genyg.ignore.json file!",
+          ),
+        ),
+      );
+      process.exit(0);
+      return;
+    }
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
 
     // Create a new EventBridge and IAM instance
@@ -187,7 +198,7 @@ module.exports = class extends Generator {
       if (
         decodeURIComponent(role.AssumeRolePolicyDocument).replace(
           /\s/gm,
-          ""
+          "",
         ) === JSON.stringify(schedulerExecutionRoleDocument).replace(/\s/gm, "")
       ) {
         scheduleRoles.push(role.RoleName);
@@ -195,7 +206,7 @@ module.exports = class extends Generator {
       if (
         decodeURIComponent(role.AssumeRolePolicyDocument).replace(
           /\s/gm,
-          ""
+          "",
         ) ===
         JSON.stringify(apiDestinationExecutionRoleDocument).replace(/\s/gm, "")
       ) {
@@ -206,9 +217,9 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "Please create a scheduler role first using yo g-next:aws-scheduler-role command!"
-          )
-        )
+            "Please create a scheduler role first using yo g-next:aws-scheduler-role command!",
+          ),
+        ),
       );
       process.exit(0);
       return;
@@ -230,9 +241,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler!`
-      )
+          "Getapper NextJS Yeoman Generator (GeNYG)",
+        )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler!`,
+      ),
     );
 
     let answers = await this.prompt([
@@ -286,12 +297,12 @@ module.exports = class extends Generator {
         message: "What is your scheduler invocation rate? (1 minutes)",
       },
       {
-        type:"list",
+        type: "list",
         name: "status",
         message: "What is your scheduler status?",
-        choices: ["ENABLED","DISABLED"],
-        default: "DISABLED"
-      }
+        choices: ["ENABLED", "DISABLED"],
+        default: "DISABLED",
+      },
     ]);
 
     if (answers.destinationRole === "create a new destination role") {
@@ -324,17 +335,17 @@ module.exports = class extends Generator {
       method,
       invocationEndpoint,
       invocationRate,
-      status
+      status,
     } = this.answers;
 
     // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
 
     // Create a new EventBridge, IAM and Scheduler instance
@@ -356,11 +367,13 @@ module.exports = class extends Generator {
       HttpMethods.POST,
       HttpMethods.PUT,
     ].includes(method);
-    const [amount, timeUnit]=invocationRate.split(" ");
-    if(Number.isNaN(amount)){
+    const [amount, timeUnit] = invocationRate.split(" ");
+    if (Number.isNaN(amount)) {
       throw new Error("rate amount must be a number!");
     }
-    if(!(timeUnit==="minutes" || timeUnit==="hours" ||timeUnit==="days")){
+    if (
+      !(timeUnit === "minutes" || timeUnit === "hours" || timeUnit === "days")
+    ) {
       throw new Error("time unit must be minutes, hours or days!");
     }
 
@@ -380,7 +393,7 @@ module.exports = class extends Generator {
       if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
         this.fs.write(
           this.destinationPath(`${relativeToPagesFolder}index.ts`),
-          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
+          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1))),
         );
       }
     }
@@ -391,15 +404,15 @@ module.exports = class extends Generator {
       destinationRoleResponse = await iamClient.send(
         new CreateRoleCommand({
           AssumeRolePolicyDocument: JSON.stringify(
-            apiDestinationExecutionRoleDocument
+            apiDestinationExecutionRoleDocument,
           ),
           RoleName: `genyg-${projectName}-API-destination-role`,
-        })
+        }),
       );
     } else {
       // Return the information of the chosen API destination role
       destinationRoleResponse = await iamClient.send(
-        new GetRoleCommand({ RoleName: destinationRole })
+        new GetRoleCommand({ RoleName: destinationRole }),
       );
     }
 
@@ -418,7 +431,7 @@ module.exports = class extends Generator {
       };
 
       connectionResponse = await eventBridge.createConnection(
-        createConnectionParams
+        createConnectionParams,
       );
     } else {
       // return the information of the chosen connection
@@ -439,7 +452,7 @@ module.exports = class extends Generator {
     };
 
     const createApiDestinationResponse = await eventBridge.createApiDestination(
-      createApiDestinationParams
+      createApiDestinationParams,
     );
 
     // get the information of an existing event bus (best choice) ore create a new event bus
@@ -499,13 +512,13 @@ module.exports = class extends Generator {
         RoleName: `genyg-${projectName}-API-destination-role`,
         PolicyDocument: JSON.stringify(apiDestinationPolicyDocument),
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Invoke_Api_Destination`,
-      })
+      }),
     );
 
     const getRoleResponse = await iamClient.send(
       new GetRoleCommand({
         RoleName: schedulerRole,
-      })
+      }),
     );
 
     // Create a new schedule which will be activated every minute
@@ -536,29 +549,35 @@ module.exports = class extends Generator {
     // Endpoints folder
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/interfaces.ts`
+        `./src/endpoints/${endpointFolderName}/interfaces.ts`,
       ),
-      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload)
+      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload),
     );
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/validations.ts`
+        `./src/endpoints/${endpointFolderName}/validations.ts`,
       ),
-      getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
+      getEndpointValidationsTemplate(
+        capitalize(apiName),
+        urlParams,
+        hasPayload,
+      ),
     );
 
     //test di creazione senza cookie auth
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
-      getEndpointHandlersTemplate(
-        capitalize(apiName)
-      ),
+      getEndpointHandlersTemplate(capitalize(apiName)),
     );
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/index.test.ts`
+        `./src/endpoints/${endpointFolderName}/index.test.ts`,
       ),
-      getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
+      getEndpointTestsTemplate(
+        endpointFolderName,
+        apiName,
+        capitalize(apiName),
+      ),
     );
     this.fs.copyTpl(
       this.templatePath("./endpoint/index.ejs"),

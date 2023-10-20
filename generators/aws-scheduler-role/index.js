@@ -31,13 +31,24 @@ module.exports = class extends Generator {
     requirePackages(this, ["core"]);
 
     // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
+    if (!AWS?.accessKeyId || !AWS?.secretAccessKey || !AWS?.region) {
+      this.log(
+        yosay(
+          chalk.red(
+            "Please specify your AWS credentials and region in the .genyg.ignore.json file!",
+          ),
+        ),
+      );
+      process.exit(0);
+      return;
+    }
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
 
     // Create a new EventBridge instance
@@ -55,9 +66,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} AWS scheduler role generator, follow the quick and easy configuration to create a new AWS scheduler role!`
-      )
+          "Getapper NextJS Yeoman Generator (GeNYG)",
+        )} AWS scheduler role generator, follow the quick and easy configuration to create a new AWS scheduler role!`,
+      ),
     );
 
     let answers = await this.prompt([
@@ -83,13 +94,13 @@ module.exports = class extends Generator {
     const { eventBus, accept } = this.answers;
 
     // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
 
     // Create a new EventBridge, IAM and Scheduler instance
@@ -101,10 +112,10 @@ module.exports = class extends Generator {
     await iamClient.send(
       new CreateRoleCommand({
         AssumeRolePolicyDocument: JSON.stringify(
-          schedulerExecutionRoleDocument
+          schedulerExecutionRoleDocument,
         ),
         RoleName: `genyg-${projectName}-scheduler-role`,
-      })
+      }),
     );
 
     const eventBusResponse = await eventBridge.describeEventBus({
@@ -128,7 +139,7 @@ module.exports = class extends Generator {
         RoleName: schedulerRoleName,
         PolicyDocument: JSON.stringify(schedulerPolicyDocument),
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Scheduler_Execution_Policy`,
-      })
+      }),
     );
   }
 };

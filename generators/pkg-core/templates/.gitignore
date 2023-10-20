@@ -11,8 +11,7 @@
 # next.js
 /.next/
 /out/
-
-# production
+/dist
 /build
 
 # misc
@@ -25,17 +24,23 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env*.local
-.env*.test
-
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 
-/dist
+# vscode
+/.vscode
+
+# Jetbrains
 .idea
 
+# Sentry
+.sentryclirc
+
+# Sentry
+next.config.original.js
+
+#genyg
 .genyg.ignore.json
