@@ -154,6 +154,7 @@ const getAjaxPath = (params) => {
   return [`"/${params.join("/")}"`];
 };
 
+
 module.exports = class extends Generator {
   async prompting() {
     // Config checks
@@ -184,7 +185,8 @@ module.exports = class extends Generator {
     const iamClient = new IAMClient(AWSConfig);
     const eventBridge = new EventBridge(AWSConfig);
     //const scheduler = new Scheduler(AWSConfig);
-
+    const configFile = this.readDestinationJSON("package.json");
+    const projectName = configFile.name;
     // The following arrays will be the user's choices given by yeoman
     let scheduleRoles = [];
     let ApiDestinationRoles = ["create a new destination role"];
@@ -319,6 +321,24 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
+
+    const params = parseFromText(answers.route);
+    const eventBusName=`genyg-${projectName}-${answers.method.toUpperCase()}-${params}-event-bus`
+    if(eventBusName.length>=64){
+      const paramsLenght=64-new String(`genyg-${projectName}--event-bus`).length;
+      let iterator=true
+      while(iterator===true){
+        let schedulerParams=await this.prompt({
+          type:"input",
+          name:"shortParams",
+          message: `The actual name for your scheduler is genyg-${projectName}-schedule-${answers.method.toUpperCase()}-${params} but unfortunely is too long, please insert a shorter string, the new name of your scheduler will be genyg-${projectName}-schedule-newName, please take note that the new name could be maximum ${paramsLenght} characters: `
+        })
+        if(new String(`genyg-${projectName}-${schedulerParams.shortParams}-event-bus`).length<=64){
+          iterator=false;
+          answers.shortParams=schedulerParams.shortParams;
+        }
+      }
+    }
     this.answers = answers;
   }
   async writing() {
@@ -326,7 +346,6 @@ module.exports = class extends Generator {
       destinationRole,
       customDestination,
       schedulerRole,
-      customScheduler,
       connection,
       customConnection,
       eventBus,
@@ -336,8 +355,11 @@ module.exports = class extends Generator {
       invocationEndpoint,
       invocationRate,
       status,
+      shortParams,
     } = this.answers;
 
+    const configFile = this.readDestinationJSON("package.json");
+    const projectName = configFile.name;
     // Create a new EventBridge and Scheduler instance
     const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
@@ -352,11 +374,13 @@ module.exports = class extends Generator {
     const iamClient = new IAMClient(AWSConfig);
     const eventBridge = new EventBridge(AWSConfig);
     const scheduler = new Scheduler(AWSConfig);
-    const configFile = this.readDestinationJSON("package.json");
-    const projectName = configFile.name;
+
 
     // same as api generator
-    const params = parseFromText(route);
+    let params = parseFromText(route);
+    if(shortParams){
+      params=parseFromText(shortParams)
+    }
     const endpointRoutePath = getEndpointRoutePath(params);
     const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
     const apiName = getFunctionName(method, params);
@@ -406,7 +430,7 @@ module.exports = class extends Generator {
           AssumeRolePolicyDocument: JSON.stringify(
             apiDestinationExecutionRoleDocument,
           ),
-          RoleName: `genyg-${projectName}-API-destination-role`,
+          RoleName:  `genyg-${projectName}-API-destination-role`,
         }),
       );
     } else {
@@ -443,11 +467,15 @@ module.exports = class extends Generator {
     const params = parseFromText(test2);*/
 
     // Create the endpoint and specify which connection use
+    let apiDestinationName=`genyg-${projectName}-${method.toUpperCase()}-${params}`
+    if(shortParams){
+      apiDestinationName=`genyg-${projectName}-${shortParams}`
+    }
     const createApiDestinationParams = {
       ConnectionArn: connectionResponse.ConnectionArn,
       HttpMethod: method.toUpperCase(),
       InvocationEndpoint: invocationEndpoint,
-      Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
+      Name: apiDestinationName,
       InvocationRateLimitPerSecond: 100,
     };
 
@@ -458,9 +486,13 @@ module.exports = class extends Generator {
     // get the information of an existing event bus (best choice) ore create a new event bus
     let eventBusResponse = {};
     let createEventBusParams = {};
+    let eventBusName=`genyg-${projectName}-${method.toUpperCase()}-${params}-event-bus`
+    if(shortParams){
+      eventBusName=`genyg-${projectName}-${shortParams}-event-bus`
+    }
     if (customEventBus) {
       createEventBusParams = {
-        Name: `genyg-${projectName}-${method.toUpperCase()}-${params}-event-bus`,
+        Name: eventBusName,
       };
       eventBusResponse = await eventBridge.createEventBus(createEventBusParams);
     } else {
@@ -468,10 +500,14 @@ module.exports = class extends Generator {
     }
 
     // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
+    let ruleName=`genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`
+    if(shortParams){
+      ruleName=`genyg-${projectName}-trigger-${shortParams}`
+    }
     const putRuleParams = {
-      Name: `genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`,
+      Name: ruleName,
       EventPattern: JSON.stringify({
-        source: [`genyg-${projectName}-${method.toUpperCase()}-${params}`],
+        source: [apiDestinationName],
       }),
       EventBusName: customEventBus
         ? createEventBusParams.Name
@@ -482,11 +518,15 @@ module.exports = class extends Generator {
 
     // Create a  target which will be invoked when the above rule is activated
     // The march between rule and target takes place through the rule's name
+    let targetName=`genyg-${projectName}-${method.toUpperCase()}-${params}-target`
+    if(shortParams){
+      targetName=`genyg-${projectName}-${shortParams}-target`
+    }
     const putTargetParams = {
       Rule: putRuleParams.Name,
       Targets: [
         {
-          Id: `genyg-${projectName}-${method.toUpperCase()}-${params}-target`,
+          Id: targetName,
           Arn: createApiDestinationResponse.ApiDestinationArn,
           RoleArn: destinationRoleResponse.Role.Arn,
         },
@@ -526,15 +566,20 @@ module.exports = class extends Generator {
     // The initial status is disabled and details are empty
 
     try {
+
+        let schedulerNameInput=`genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`
+        if(shortParams){
+          schedulerNameInput=`genyg-${projectName}-schedule-${shortParams}`
+        }
       const createScheduleResponse = await scheduler.createSchedule({
-        Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
+        Name: schedulerNameInput,
         ScheduleExpression: `rate(${amount} ${timeUnit})`,
         State: status,
         Target: {
           RoleArn: getRoleResponse.Role.Arn,
           Arn: eventBusResponse.Arn,
           EventBridgeParameters: {
-            Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
+            Source: apiDestinationName,
             DetailType: JSON.stringify({}),
           },
         },

@@ -8,6 +8,32 @@ Welcome to the GeNYG project! GeNYG is a generator made with Yeoman by Getapper 
 
 Execute `npx create-next-app@latest` with support for NPM, TypeScript in the current directory (so you should first create a repo, clone locally, and run this command inside this repo).
 
+### yo g-next:aws-scheduler
+**dependencies: pkg-core.**\
+Thanks to this command is possible to create a new aws scheduler and select as a target an api destination, in particular:
+
+-It should add a new destination role if none existing or if the user wants to create a new one
+
+-It should add a new scheduler role if none existing or if the user wants to create a new one
+
+-It should add a new connection if none existing or if the user wants to create a new one
+
+-It should create a new event bus if none existing or if the user wants to create a new one
+
+-It should create a target for the selected api destination
+
+-It should add in the endpoint folder all the necessary files in order to manage the ajax calls
+
+-It should create a new scheduler and a new rule with the invocation rate selected
+
+### yo g-next:aws-update-schedule
+**dependencies: pkg-core.**\
+It updates the status or the invocation Rate of a specified scheduler
+
+### yo g-next:aws-delete-scheduler
+**dependencies: pkg-core.**\
+It deletes a specified scheduler and also all the rules and apiDestinations linked to him.
+
 ### yo g-next:pkg-core
 
 **Thanks to this package you will get basic linting support with eslint + prettier and initialize GeNYG configuration.**\
@@ -178,3 +204,5 @@ export default useAppHooks;
 - It should add all the backend library files inside the `./lib` folder
 - It should add all fe and be dependencies to the package json
 - It should add all the required env vars to all env files
+
+### yo g-next:aws-scheduler-role

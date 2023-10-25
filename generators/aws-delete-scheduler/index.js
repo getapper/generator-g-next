@@ -32,10 +32,10 @@ module.exports = class extends Generator {
     }
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
     const schedulerClient = new Scheduler(AWSConfig);
     const input = {};
