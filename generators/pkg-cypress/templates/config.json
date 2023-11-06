@@ -1,0 +1,118 @@
+{
+  "jobs": {
+    "deps": {
+      "working_directory": "~/project",
+      "environment": {
+        "CYPRESS_CACHE_FOLDER": "~/project/.cache/Cypress"
+      },
+      "docker": [
+        {
+          "image": "circleci/node:14.18.1"
+        }
+      ],
+      "steps": [
+        "checkout",
+        {
+          "restore_cache": {
+            "keys": [
+              "v2-deps-{{ .Branch }}-{{ checksum \"package-lock.json\" }}",
+              "v2-deps-{{ .Branch }}-",
+              "v2-deps-"
+            ]
+          }
+        },
+        {
+          "run": {
+            "name": "Install dependencies",
+            "command": "npm ci"
+          }
+        },
+        {
+          "save_cache": {
+            "key": "v2-deps-{{ .Branch }}-{{ checksum \"package-lock.json\" }}",
+            "paths": [
+              "~/.npm",
+              "~/.cache"
+            ]
+          }
+        },
+        {
+          "persist_to_workspace": {
+            "root": "~/project",
+            "paths": "."
+          }
+        }
+      ]
+    },
+
+    "e2e-tests": {
+      "working_directory": "~/project",
+      "environment": {
+        "CYPRESS_CACHE_FOLDER": "~/project/.cache/Cypress"
+      },
+      "docker": [
+        {
+          "image": "cypress/base:14.18.1"
+        },
+        {
+          "image": "circleci/mongo:3.6",
+          "command": "[mongod, --smallfiles]"
+        }
+      ],
+      "steps": [
+        {
+          "attach_workspace": {
+            "at": "~/project"
+          }
+        },
+        {
+          "restore_cache": {
+            "keys": [
+              "v2-deps-{{ .Branch }}-{{ checksum \"package-lock.json\" }}",
+              "v2-deps-{{ .Branch }}-",
+              "v2-deps-"
+            ]
+          }
+        },
+        {
+          "run": {
+            "name": "build",
+            "command": "npm run cypress:build"
+          }
+        },
+        {
+          "run": {
+            "name": "start-server",
+            "command": "npm run cypress:start",
+            "background": true
+          }
+        },
+        {
+          "run": {
+            "name": "e2e-tests",
+            "command": "npm run e2e-test"
+          }
+        },
+        {
+          "store_artifacts": {
+            "path": "cypress/videos"
+          }
+        },
+        {
+          "store_artifacts": {
+            "path": "cypress/screenshots"
+          }
+        }
+      ]
+    }
+  },
+  "workflows": {
+    "code-checks": {
+      "jobs": {
+        "e2e-tests": {
+          "requires": ["deps"]
+        }
+      }
+    }
+  }
+}
