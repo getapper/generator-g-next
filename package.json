@@ -1,6 +1,6 @@
 {
   "name": "generator-g-next",
-  "version": "0.3.15",
+  "version": "0.3.17",
   "description": "Getappaer NextJS Yeoman Generator",
   "main": "index.js",
   "scripts": {
