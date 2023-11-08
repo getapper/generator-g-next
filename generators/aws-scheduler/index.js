@@ -74,7 +74,7 @@ const getFunctionName = (method, params) => {
       p
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   const variables = params
     .filter((p) => p[0] === "{")
@@ -84,7 +84,7 @@ const getFunctionName = (method, params) => {
         .replace("}", "")
         .split("-")
         .map((p) => capitalize(p))
-        .join("")
+        .join(""),
     );
   return `${method}${models.join("")}${
     variables.length ? "By" : ""
@@ -97,7 +97,7 @@ const getEndpointRoutePath = (params) => {
     .filter((p) => p[0] === "{")
     .map((p) => p.replace("{", "").replace("}", ""));
   return `${models.join("-")}${variables.length ? "-by-" : ""}${variables.join(
-    "-and-"
+    "-and-",
   )}`;
 };
 
@@ -112,7 +112,7 @@ const getPagesApiFolders = (params) => {
           .map((p2, index) => (index ? capitalize(p2) : p2))
           .join("") +
         "]"
-      : p
+      : p,
   );
 };
 
@@ -129,7 +129,7 @@ const getAjaxPath = (params) => {
         .replace("}", "")
         .split("-")
         .map((p2, index) => (index ? capitalize(p2) : p2))
-        .join("")
+        .join(""),
     );
   if (urlParams.length) {
     return [
@@ -154,26 +154,39 @@ const getAjaxPath = (params) => {
   return [`"/${params.join("/")}"`];
 };
 
+
 module.exports = class extends Generator {
   async prompting() {
     // Config checks
     requirePackages(this, ["core"]);
 
     // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
+    if (!AWS?.accessKeyId || !AWS?.secretAccessKey || !AWS?.region) {
+      this.log(
+        yosay(
+          chalk.red(
+            "Please specify your AWS credentials and region in the .genyg.ignore.json file!",
+          ),
+        ),
+      );
+      process.exit(0);
+      return;
+    }
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
 
     // Create a new EventBridge and IAM instance
     const iamClient = new IAMClient(AWSConfig);
     const eventBridge = new EventBridge(AWSConfig);
     //const scheduler = new Scheduler(AWSConfig);
-
+    const configFile = this.readDestinationJSON("package.json");
+    const projectName = configFile.name;
     // The following arrays will be the user's choices given by yeoman
     let scheduleRoles = [];
     let ApiDestinationRoles = ["create a new destination role"];
@@ -187,7 +200,7 @@ module.exports = class extends Generator {
       if (
         decodeURIComponent(role.AssumeRolePolicyDocument).replace(
           /\s/gm,
-          ""
+          "",
         ) === JSON.stringify(schedulerExecutionRoleDocument).replace(/\s/gm, "")
       ) {
         scheduleRoles.push(role.RoleName);
@@ -195,7 +208,7 @@ module.exports = class extends Generator {
       if (
         decodeURIComponent(role.AssumeRolePolicyDocument).replace(
           /\s/gm,
-          ""
+          "",
         ) ===
         JSON.stringify(apiDestinationExecutionRoleDocument).replace(/\s/gm, "")
       ) {
@@ -206,9 +219,9 @@ module.exports = class extends Generator {
       this.log(
         yosay(
           chalk.red(
-            "Please create a scheduler role first using yo g-next:aws-scheduler-role command!"
-          )
-        )
+            "Please create a scheduler role first using yo g-next:aws-scheduler-role command!",
+          ),
+        ),
       );
       process.exit(0);
       return;
@@ -230,9 +243,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler!`
-      )
+          "Getapper NextJS Yeoman Generator (GeNYG)",
+        )} AWS scheduler generator, follow the quick and easy configuration to create a new AWS scheduler!`,
+      ),
     );
 
     let answers = await this.prompt([
@@ -286,12 +299,12 @@ module.exports = class extends Generator {
         message: "What is your scheduler invocation rate? (1 minutes)",
       },
       {
-        type:"list",
+        type: "list",
         name: "status",
         message: "What is your scheduler status?",
-        choices: ["ENABLED","DISABLED"],
-        default: "DISABLED"
-      }
+        choices: ["ENABLED", "DISABLED"],
+        default: "DISABLED",
+      },
     ]);
 
     if (answers.destinationRole === "create a new destination role") {
@@ -308,6 +321,24 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
+
+    const params = parseFromText(answers.route);
+    const eventBusName=`genyg-${projectName}-${answers.method.toUpperCase()}-${params}-event-bus`
+    if(eventBusName.length>=64){
+      const paramsLenght=64-new String(`genyg-${projectName}--event-bus`).length;
+      let iterator=true
+      while(iterator===true){
+        let schedulerParams=await this.prompt({
+          type:"input",
+          name:"shortParams",
+          message: `The actual name for your scheduler is genyg-${projectName}-schedule-${answers.method.toUpperCase()}-${params} but unfortunely is too long, please insert a shorter string, the new name of your scheduler will be genyg-${projectName}-schedule-newName, please take note that the new name could be maximum ${paramsLenght} characters: `
+        })
+        if(new String(`genyg-${projectName}-${schedulerParams.shortParams}-event-bus`).length<=64){
+          iterator=false;
+          answers.shortParams=schedulerParams.shortParams;
+        }
+      }
+    }
     this.answers = answers;
   }
   async writing() {
@@ -315,7 +346,6 @@ module.exports = class extends Generator {
       destinationRole,
       customDestination,
       schedulerRole,
-      customScheduler,
       connection,
       customConnection,
       eventBus,
@@ -324,28 +354,33 @@ module.exports = class extends Generator {
       method,
       invocationEndpoint,
       invocationRate,
-      status
+      status,
+      shortParams,
     } = this.answers;
 
+    const configFile = this.readDestinationJSON("package.json");
+    const projectName = configFile.name;
     // Create a new EventBridge and Scheduler instance
-    const credentialAccess = this.readDestinationJSON(".genyg.ignore.json");
+    const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
     const AWSConfig = {
       credentials: {
-        accessKeyId: credentialAccess.accessKeyId,
-        secretAccessKey: credentialAccess.secretAccessKey,
+        accessKeyId: AWS.accessKeyId,
+        secretAccessKey: AWS.secretAccessKey,
       },
-      region: credentialAccess.region,
+      region: AWS.region,
     };
 
     // Create a new EventBridge, IAM and Scheduler instance
     const iamClient = new IAMClient(AWSConfig);
     const eventBridge = new EventBridge(AWSConfig);
     const scheduler = new Scheduler(AWSConfig);
-    const configFile = this.readDestinationJSON("package.json");
-    const projectName = configFile.name;
+
 
     // same as api generator
-    const params = parseFromText(route);
+    let params = parseFromText(route);
+    if(shortParams){
+      params=parseFromText(shortParams)
+    }
     const endpointRoutePath = getEndpointRoutePath(params);
     const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
     const apiName = getFunctionName(method, params);
@@ -356,11 +391,13 @@ module.exports = class extends Generator {
       HttpMethods.POST,
       HttpMethods.PUT,
     ].includes(method);
-    const [amount, timeUnit]=invocationRate.split(" ");
-    if(Number.isNaN(amount)){
+    const [amount, timeUnit] = invocationRate.split(" ");
+    if (Number.isNaN(amount)) {
       throw new Error("rate amount must be a number!");
     }
-    if(!(timeUnit==="minutes" || timeUnit==="hours" ||timeUnit==="days")){
+    if (
+      !(timeUnit === "minutes" || timeUnit === "hours" || timeUnit === "days")
+    ) {
       throw new Error("time unit must be minutes, hours or days!");
     }
 
@@ -380,7 +417,7 @@ module.exports = class extends Generator {
       if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
         this.fs.write(
           this.destinationPath(`${relativeToPagesFolder}index.ts`),
-          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1)))
+          getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1))),
         );
       }
     }
@@ -391,15 +428,15 @@ module.exports = class extends Generator {
       destinationRoleResponse = await iamClient.send(
         new CreateRoleCommand({
           AssumeRolePolicyDocument: JSON.stringify(
-            apiDestinationExecutionRoleDocument
+            apiDestinationExecutionRoleDocument,
           ),
-          RoleName: `genyg-${projectName}-API-destination-role`,
-        })
+          RoleName:  `genyg-${projectName}-API-destination-role`,
+        }),
       );
     } else {
       // Return the information of the chosen API destination role
       destinationRoleResponse = await iamClient.send(
-        new GetRoleCommand({ RoleName: destinationRole })
+        new GetRoleCommand({ RoleName: destinationRole }),
       );
     }
 
@@ -418,7 +455,7 @@ module.exports = class extends Generator {
       };
 
       connectionResponse = await eventBridge.createConnection(
-        createConnectionParams
+        createConnectionParams,
       );
     } else {
       // return the information of the chosen connection
@@ -430,24 +467,32 @@ module.exports = class extends Generator {
     const params = parseFromText(test2);*/
 
     // Create the endpoint and specify which connection use
+    let apiDestinationName=`genyg-${projectName}-${method.toUpperCase()}-${params}`
+    if(shortParams){
+      apiDestinationName=`genyg-${projectName}-${shortParams}`
+    }
     const createApiDestinationParams = {
       ConnectionArn: connectionResponse.ConnectionArn,
       HttpMethod: method.toUpperCase(),
       InvocationEndpoint: invocationEndpoint,
-      Name: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
+      Name: apiDestinationName,
       InvocationRateLimitPerSecond: 100,
     };
 
     const createApiDestinationResponse = await eventBridge.createApiDestination(
-      createApiDestinationParams
+      createApiDestinationParams,
     );
 
     // get the information of an existing event bus (best choice) ore create a new event bus
     let eventBusResponse = {};
     let createEventBusParams = {};
+    let eventBusName=`genyg-${projectName}-${method.toUpperCase()}-${params}-event-bus`
+    if(shortParams){
+      eventBusName=`genyg-${projectName}-${shortParams}-event-bus`
+    }
     if (customEventBus) {
       createEventBusParams = {
-        Name: `genyg-${projectName}-${method.toUpperCase()}-${params}-event-bus`,
+        Name: eventBusName,
       };
       eventBusResponse = await eventBridge.createEventBus(createEventBusParams);
     } else {
@@ -455,10 +500,14 @@ module.exports = class extends Generator {
     }
 
     // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
+    let ruleName=`genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`
+    if(shortParams){
+      ruleName=`genyg-${projectName}-trigger-${shortParams}`
+    }
     const putRuleParams = {
-      Name: `genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`,
+      Name: ruleName,
       EventPattern: JSON.stringify({
-        source: [`genyg-${projectName}-${method.toUpperCase()}-${params}`],
+        source: [apiDestinationName],
       }),
       EventBusName: customEventBus
         ? createEventBusParams.Name
@@ -469,11 +518,15 @@ module.exports = class extends Generator {
 
     // Create a  target which will be invoked when the above rule is activated
     // The march between rule and target takes place through the rule's name
+    let targetName=`genyg-${projectName}-${method.toUpperCase()}-${params}-target`
+    if(shortParams){
+      targetName=`genyg-${projectName}-${shortParams}-target`
+    }
     const putTargetParams = {
       Rule: putRuleParams.Name,
       Targets: [
         {
-          Id: `genyg-${projectName}-${method.toUpperCase()}-${params}-target`,
+          Id: targetName,
           Arn: createApiDestinationResponse.ApiDestinationArn,
           RoleArn: destinationRoleResponse.Role.Arn,
         },
@@ -499,13 +552,13 @@ module.exports = class extends Generator {
         RoleName: `genyg-${projectName}-API-destination-role`,
         PolicyDocument: JSON.stringify(apiDestinationPolicyDocument),
         PolicyName: `genyg_${projectName}_Amazon_EventBridge_Invoke_Api_Destination`,
-      })
+      }),
     );
 
     const getRoleResponse = await iamClient.send(
       new GetRoleCommand({
         RoleName: schedulerRole,
-      })
+      }),
     );
 
     // Create a new schedule which will be activated every minute
@@ -513,16 +566,20 @@ module.exports = class extends Generator {
     // The initial status is disabled and details are empty
 
     try {
-      //aggiungere domande extra per rate e enabled
+
+        let schedulerNameInput=`genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`
+        if(shortParams){
+          schedulerNameInput=`genyg-${projectName}-schedule-${shortParams}`
+        }
       const createScheduleResponse = await scheduler.createSchedule({
-        Name: `genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`,
+        Name: schedulerNameInput,
         ScheduleExpression: `rate(${amount} ${timeUnit})`,
         State: status,
         Target: {
           RoleArn: getRoleResponse.Role.Arn,
           Arn: eventBusResponse.Arn,
           EventBridgeParameters: {
-            Source: `genyg-${projectName}-${method.toUpperCase()}-${params}`,
+            Source: apiDestinationName,
             DetailType: JSON.stringify({}),
           },
         },
@@ -537,29 +594,39 @@ module.exports = class extends Generator {
     // Endpoints folder
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/interfaces.ts`
+        `./src/endpoints/${endpointFolderName}/interfaces.ts`,
       ),
-      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload)
+      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload),
     );
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/validations.ts`
+        `./src/endpoints/${endpointFolderName}/validations.ts`,
       ),
-      getEndpointValidationsTemplate(capitalize(apiName), urlParams, hasPayload)
+      getEndpointValidationsTemplate(
+        capitalize(apiName),
+        urlParams,
+        hasPayload,
+      ),
     );
+
+    //test di creazione senza cookie auth
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
-      getEndpointHandlersTemplate(capitalize(apiName))
+      getEndpointHandlersTemplate(capitalize(apiName)),
     );
     this.fs.write(
       this.destinationPath(
-        `./src/endpoints/${endpointFolderName}/index.test.ts`
+        `./src/endpoints/${endpointFolderName}/index.test.ts`,
       ),
-      getEndpointTestsTemplate(endpointFolderName, apiName, capitalize(apiName))
+      getEndpointTestsTemplate(
+        endpointFolderName,
+        apiName,
+        capitalize(apiName),
+      ),
     );
-    this.fs.copy(
-      this.templatePath("../../api/templates/endpoint/index.ts"),
-      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`)
+    this.fs.copyTpl(
+      this.templatePath("./endpoint/index.ejs"),
+      this.destinationPath(`./src/endpoints/${endpointFolderName}/index.ts`),
     );
   }
 };
