@@ -54,7 +54,7 @@ const camelCaseToDash = (s) =>
 const capitalize = (s) => `${s[0].toUpperCase()}${s.slice(1)}`;
 
 const parseFromText = (text) => {
-  const params = text
+  return text
     .split("/")
     .filter((p) => p !== "")
     .map((p) => {
@@ -64,7 +64,6 @@ const parseFromText = (text) => {
 
       return p;
     });
-  return params;
 };
 
 const getFunctionName = (method, params) => {
@@ -154,7 +153,6 @@ const getAjaxPath = (params) => {
   return [`"/${params.join("/")}"`];
 };
 
-
 module.exports = class extends Generator {
   async prompting() {
     // Config checks
@@ -162,7 +160,12 @@ module.exports = class extends Generator {
 
     // Create a new EventBridge and Scheduler instance
     const { AWS } = this.readDestinationJSON(".genyg.ignore.json");
-    if (!AWS?.accessKeyId || !AWS?.secretAccessKey || !AWS?.region) {
+    if (
+      !AWS?.accessKeyId ||
+      !AWS?.secretAccessKey ||
+      !AWS?.region ||
+      !AWS?.apiSecretKeyValue
+    ) {
       this.log(
         yosay(
           chalk.red(
@@ -284,7 +287,8 @@ module.exports = class extends Generator {
       {
         type: "input",
         name: "invocationEndpoint",
-        message: "Insert the endpoint url you want to invoke.",
+        message:
+          "Insert the endpoint url you want to invoke (most of the time is PUBLIC_WEBSITE_URL/api/{schedulerApiRoute}.",
       },
       {
         type: "list",
@@ -297,6 +301,11 @@ module.exports = class extends Generator {
         type: "input",
         name: "invocationRate",
         message: "What is your scheduler invocation rate? (1 minutes)",
+      },
+      {
+        type: "input",
+        name: "schedulerName",
+        message: "What is your scheduler name?",
       },
       {
         type: "list",
@@ -317,25 +326,45 @@ module.exports = class extends Generator {
       answers.customEventBus = true;
     }
     if (answers.route === "") {
-      this.log(yosay(chalk.red("Please give your page a name next time!")));
+      this.log(yosay(chalk.red("Please specify a route!")));
+      process.exit(1);
+      return;
+    }
+    if (answers.invocationEndpoint === "") {
+      this.log(yosay(chalk.red("Please specify an invocation endpoint!")));
+      process.exit(1);
+      return;
+    }
+    if (answers.schedulerName === "") {
+      this.log(yosay(chalk.red("Please specify a scheduler name!")));
+      process.exit(1);
+      return;
+    }
+    if (answers.invocationRate === "") {
+      this.log(yosay(chalk.red("Please specify an invocation rate!")));
       process.exit(1);
       return;
     }
 
-    const params = parseFromText(answers.route);
-    const eventBusName=`genyg-${projectName}-${answers.method.toUpperCase()}-${params}-event-bus`
-    if(eventBusName.length>=64){
-      const paramsLenght=64-new String(`genyg-${projectName}--event-bus`).length;
-      let iterator=true
-      while(iterator===true){
-        let schedulerParams=await this.prompt({
-          type:"input",
-          name:"shortParams",
-          message: `The actual name for your scheduler is genyg-${projectName}-schedule-${answers.method.toUpperCase()}-${params} but unfortunely is too long, please insert a shorter string, the new name of your scheduler will be genyg-${projectName}-schedule-newName, please take note that the new name could be maximum ${paramsLenght} characters: `
-        })
-        if(new String(`genyg-${projectName}-${schedulerParams.shortParams}-event-bus`).length<=64){
-          iterator=false;
-          answers.shortParams=schedulerParams.shortParams;
+    let schedulerName = answers.schedulerName;
+    const eventBusName = `genyg-${projectName}-${schedulerName}-event-bus`;
+    if (eventBusName.length >= 64) {
+      const availableLength =
+        64 - String(`genyg-${projectName}--event-bus`).length;
+      let iterator = true;
+      while (iterator) {
+        let schedulerParams = await this.prompt({
+          type: "input",
+          name: "schedulerName",
+          message: `The actual name for your scheduler is genyg-${projectName}-schedule-${schedulerName} but unfortunately is too long, please insert a shorter string, the new name of your scheduler will be genyg-${projectName}-schedule-{schedulerName}-event-bus, please take note that {schedulerName} could be maximum ${availableLength} characters (insert only the {newName} string): `,
+        });
+        if (
+          String(
+            `genyg-${projectName}-${schedulerParams.schedulerName}-event-bus`,
+          ).length <= 64
+        ) {
+          iterator = false;
+          answers.schedulerName = schedulerParams.schedulerName;
         }
       }
     }
@@ -355,7 +384,7 @@ module.exports = class extends Generator {
       invocationEndpoint,
       invocationRate,
       status,
-      shortParams,
+      schedulerName,
     } = this.answers;
 
     const configFile = this.readDestinationJSON("package.json");
@@ -375,12 +404,8 @@ module.exports = class extends Generator {
     const eventBridge = new EventBridge(AWSConfig);
     const scheduler = new Scheduler(AWSConfig);
 
-
     // same as api generator
-    let params = parseFromText(route);
-    if(shortParams){
-      params=parseFromText(shortParams)
-    }
+    const params = parseFromText(route);
     const endpointRoutePath = getEndpointRoutePath(params);
     const endpointFolderName = getEndpointFolder(method, endpointRoutePath);
     const apiName = getFunctionName(method, params);
@@ -430,7 +455,7 @@ module.exports = class extends Generator {
           AssumeRolePolicyDocument: JSON.stringify(
             apiDestinationExecutionRoleDocument,
           ),
-          RoleName:  `genyg-${projectName}-API-destination-role`,
+          RoleName: `genyg-${projectName}-API-destination-role`,
         }),
       );
     } else {
@@ -448,7 +473,7 @@ module.exports = class extends Generator {
         AuthParameters: {
           ApiKeyAuthParameters: {
             ApiKeyName: `genyg-${projectName}-API-Connection-Key`,
-            ApiKeyValue: "EbPa9**e34Hb83@D@GNiZ2CF", // you can randomize its value
+            ApiKeyValue: AWS.apiSecretKeyValue,
           },
         },
         Name: `genyg-${projectName}-API-Connection`,
@@ -467,10 +492,7 @@ module.exports = class extends Generator {
     const params = parseFromText(test2);*/
 
     // Create the endpoint and specify which connection use
-    let apiDestinationName=`genyg-${projectName}-${method.toUpperCase()}-${params}`
-    if(shortParams){
-      apiDestinationName=`genyg-${projectName}-${shortParams}`
-    }
+    const apiDestinationName = `genyg-${projectName}-${schedulerName}`;
     const createApiDestinationParams = {
       ConnectionArn: connectionResponse.ConnectionArn,
       HttpMethod: method.toUpperCase(),
@@ -486,10 +508,7 @@ module.exports = class extends Generator {
     // get the information of an existing event bus (best choice) ore create a new event bus
     let eventBusResponse = {};
     let createEventBusParams = {};
-    let eventBusName=`genyg-${projectName}-${method.toUpperCase()}-${params}-event-bus`
-    if(shortParams){
-      eventBusName=`genyg-${projectName}-${shortParams}-event-bus`
-    }
+    const eventBusName = `genyg-${projectName}-${schedulerName}-event-bus`;
     if (customEventBus) {
       createEventBusParams = {
         Name: eventBusName,
@@ -500,10 +519,7 @@ module.exports = class extends Generator {
     }
 
     // Create a rule (a listener) which will be activated when an event with thi source: genyg-${projectName}-${method.toUpperCase()}-${apiNameCapital} will be sent
-    let ruleName=`genyg-${projectName}-trigger-${method.toUpperCase()}-${params}`
-    if(shortParams){
-      ruleName=`genyg-${projectName}-trigger-${shortParams}`
-    }
+    const ruleName = `genyg-${projectName}-trigger-${schedulerName}`;
     const putRuleParams = {
       Name: ruleName,
       EventPattern: JSON.stringify({
@@ -518,10 +534,7 @@ module.exports = class extends Generator {
 
     // Create a  target which will be invoked when the above rule is activated
     // The march between rule and target takes place through the rule's name
-    let targetName=`genyg-${projectName}-${method.toUpperCase()}-${params}-target`
-    if(shortParams){
-      targetName=`genyg-${projectName}-${shortParams}-target`
-    }
+    const targetName = `genyg-${projectName}-${schedulerName}-target`;
     const putTargetParams = {
       Rule: putRuleParams.Name,
       Targets: [
@@ -566,11 +579,7 @@ module.exports = class extends Generator {
     // The initial status is disabled and details are empty
 
     try {
-
-        let schedulerNameInput=`genyg-${projectName}-schedule-${method.toUpperCase()}-${params}`
-        if(shortParams){
-          schedulerNameInput=`genyg-${projectName}-schedule-${shortParams}`
-        }
+      const schedulerNameInput = `genyg-${projectName}-schedule-${schedulerName}`;
       const createScheduleResponse = await scheduler.createSchedule({
         Name: schedulerNameInput,
         ScheduleExpression: `rate(${amount} ${timeUnit})`,
