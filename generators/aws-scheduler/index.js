@@ -472,7 +472,7 @@ module.exports = class extends Generator {
         AuthorizationType: "API_KEY",
         AuthParameters: {
           ApiKeyAuthParameters: {
-            ApiKeyName: `genyg-${projectName}-API-Connection-Key`,
+            ApiKeyName: `genyg-${projectName}-api-connection-key`,
             ApiKeyValue: AWS.apiSecretKeyValue,
           },
         },
