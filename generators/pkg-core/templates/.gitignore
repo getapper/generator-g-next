@@ -44,3 +44,4 @@ next.config.original.js
 
 #genyg
 .genyg.ignore.json
+.env.local
