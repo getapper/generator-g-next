@@ -1,0 +1,8 @@
+{
+  "AWS": {
+    "accessKeyId": "",
+    "secretAccessKey": "",
+    "region": "",
+    "apiSecretKeyValue": ""
+  }
+}
