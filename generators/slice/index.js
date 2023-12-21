@@ -17,9 +17,9 @@ module.exports = class extends Generator {
     this.log(
       yosay(
         `Welcome to ${chalk.red(
-          "generator-g-next"
-        )} redux slice generator, follow the quick and easy configuration to create a new slice!`
-      )
+          "generator-g-next",
+        )} redux slice generator, follow the quick and easy configuration to create a new slice!`,
+      ),
     );
 
     let answers = {};
@@ -75,37 +75,37 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath("index.ejs"),
       this.destinationPath(
-        `./src/spas/${spaFolderName}/redux-store/slices/${sliceName}/index.ts`
+        `./src/spas/${spaFolderName}/redux-store/slices/${sliceName}/index.ts`,
       ),
       {
         sliceName,
         pCsliceName,
         useSagas,
-      }
+      },
     );
 
     // Slice/interface/index.tsx file
     this.fs.copyTpl(
       this.templatePath("interface.index.ejs"),
       this.destinationPath(
-        `${reduxStorePath}/slices/${sliceName}/${sliceName}.interfaces.ts`
+        `${reduxStorePath}/slices/${sliceName}/${sliceName}.interfaces.ts`,
       ),
       {
         pCsliceName,
-      }
+      },
     );
 
     //Slice/selectors/index.tsx file
     this.fs.copyTpl(
       this.templatePath("selectors.index.ejs"),
       this.destinationPath(
-        `${reduxStorePath}/slices/${sliceName}/${sliceName}.selectors.ts`
+        `${reduxStorePath}/slices/${sliceName}/${sliceName}.selectors.ts`,
       ),
       {
         sliceName,
         pCsliceName,
         spaFolderName,
-      }
+      },
     );
 
     // Slice/sagas/index.tsx file
@@ -113,58 +113,58 @@ module.exports = class extends Generator {
       this.fs.copyTpl(
         this.templatePath("sagas.index.ejs"),
         this.destinationPath(
-          `${reduxStorePath}/slices/${sliceName}/${sliceName}.sagas.ts`
+          `${reduxStorePath}/slices/${sliceName}/${sliceName}.sagas.ts`,
         ),
         {
           sliceName,
-        }
+        },
       );
     }
 
     let slicesIndex = this.fs.read(
-      this.destinationPath(`${reduxStorePath}/slices/index.ts`)
+      this.destinationPath(`${reduxStorePath}/slices/index.ts`),
     );
 
-    let match = slicesIndex.match(/import(.*?);\n\n/)[0];
+    let match = slicesIndex.match(/import(.*?);\r?\n\r?\n/)[0];
     slicesIndex = slicesIndex.replace(
       match,
       `${match.slice(0, -1)}import * as ${sliceName} from "./${sliceName}";
 
-`
+`,
     );
-    match = slicesIndex.match(/(.*)Store(.*?).reducer,?\n}/)[0];
+    match = slicesIndex.match(/(.*)Store(.*?).reducer,?\r?\n}/)[0];
     slicesIndex = slicesIndex.replace(
       match,
       `${match.slice(
         0,
-        -1
+        -1,
       )}  ${sliceName}: ${sliceName}.${sliceName}Store.reducer,
-}`
+}`,
     );
-    match = slicesIndex.match(/(.*)Store(.*?).actions,?\n}/)[0];
+    match = slicesIndex.match(/(.*)Store(.*?).actions,?\r?\n}/)[0];
     slicesIndex = slicesIndex.replace(
       match,
       `${match.slice(0, -1)}  ...${sliceName}.${sliceName}Store.actions,
-}`
+}`,
     );
-    match = slicesIndex.match(/(.*).selectors,?\n}/)[0];
+    match = slicesIndex.match(/(.*).selectors,?\r?\n}/)[0];
     slicesIndex = slicesIndex.replace(
       match,
       `${match.slice(0, -1)}  ...${sliceName}.selectors,
-}`
+}`,
     );
     if (useSagas) {
-      match = slicesIndex.match(/(.*)Object.values(.*),?\n]/)[0];
+      match = slicesIndex.match(/(.*)Object.values(.*),?\r?\n]/)[0];
       slicesIndex = slicesIndex.replace(
         match,
         `${match.slice(0, -1)}  ...Object.values(${sliceName}.sagas),
-]`
+]`,
       );
     }
 
     this.fs.write(
       this.destinationPath(`${reduxStorePath}/slices/index.ts`),
-      slicesIndex
+      slicesIndex,
     );
   }
 };
