@@ -164,20 +164,6 @@ module.exports = class extends Generator {
       process.exit(1);
       return;
     }
-    if (editStatus === "YES" && State === responseSchedule.State) {
-      this.log(yosay(chalk.red("No status changes detected!")));
-      process.exit(1);
-      return;
-    }
-    if (
-      editInvocationRate === "YES" &&
-      amount === scheduleExpression[0] &&
-      timeUnit === scheduleExpression[1]
-    ) {
-      this.log(yosay(chalk.red("No invocation rate changes detected!")));
-      process.exit(1);
-      return;
-    }
 
     try {
       if (editStatus === "YES" || editInvocationRate === "YES") {
