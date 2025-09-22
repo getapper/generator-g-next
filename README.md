@@ -145,6 +145,31 @@ It creates a new form component in the selected folder, with FormProvider and yu
 It creates a new API endpoint folder insider /endpoints, with interfaces, validations, tests and handler function.\
 It also connects this endpoint function to the Next `./api` folder and its configuration files
 
+#### CLI Usage
+
+The API generator now supports command-line arguments for non-interactive generation:
+
+```bash
+# Basic usage
+yo g-next:api <route> <method> [options]
+
+# Examples
+yo g-next:api users get
+yo g-next:api posts post
+yo g-next:api users/{userId} put
+yo g-next:api admin/users get --useCookieAuth --cookieRole admin
+```
+
+**Arguments:**
+- `route`: API route path (e.g., `users`, `users/{userId}`, `posts/{postId}/comments`)
+- `method`: HTTP method (`get`, `post`, `put`, `patch`, `delete`)
+
+**Options:**
+- `--useCookieAuth`: Enable cookie authentication (boolean)
+- `--cookieRole`: Specify cookie role for authentication (string)
+
+For detailed usage examples, see [API_CLI_USAGE.md](./API_CLI_USAGE.md).
+
 ## TODO
 
 ### yo g-next:pkg-core

@@ -6,8 +6,30 @@ const fs = require("fs");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const { requirePackages } = require("../../common");
+const {
+  createValidationSchema,
+  validateCliArguments,
+  hasCliArgs,
+  displayValidationErrors,
+  commonSchemas
+} = require("../../common/cli-yup-helper");
 
 module.exports = class extends Generator {
+  constructor(args, opts) {
+    super(args, opts);
+
+    // Define CLI options
+    this.option('formName', {
+      type: String,
+      description: 'Form name'
+    });
+
+    this.option('formPath', {
+      type: String,
+      description: 'Form path (relative to src/components)'
+    });
+  }
+
   initializing() {
     this.env.adapter.promptModule.registerPrompt(
       "directory",
@@ -19,37 +41,75 @@ module.exports = class extends Generator {
     // Config checks
     requirePackages(this, ["mui"]);
 
-    // Have Yeoman greet the user.
-    this.log(
-      yosay(
-        `Welcome to ${chalk.red(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )} form generator, follow the quick and easy configuration to create a new form!`
-      )
-    );
+    // Check if CLI options are provided
+    const hasCliArguments = hasCliArgs(this.options, ['formName']);
+    
+    if (hasCliArguments) {
+      // Use CLI options directly
+      this.log(
+        yosay(
+          `Welcome to ${chalk.red(
+            "Getapper NextJS Yeoman Generator (GeNYG)"
+          )} form generator! Using CLI options for non-interactive generation.`
+        )
+      );
 
-    const answers = await this.prompt([
-      {
-        type: "directory",
-        name: "formPath",
-        message: "Select where to create the form:",
-        basePath: "./src/components",
-      },
-      {
-        type: "input",
-        name: "formName",
-        message: "What is your form name?",
-      },
-    ]);
+      // Create validation schema
+      const validationSchema = createValidationSchema({
+        formName: commonSchemas.name,
+        formPath: {
+          required: false,
+          pattern: /^[a-zA-Z0-9\/\-]*$/,
+          patternMessage: "Form path contains invalid characters. Only letters, numbers, slashes, and hyphens are allowed"
+        }
+      });
 
-    if (answers.formName === "") {
-      this.log(yosay(chalk.red("Please give your form a name next time!")));
-      process.exit(1);
-      return;
+      // Validate CLI options
+      const validation = await validateCliArguments(this.options, this.options, this, validationSchema);
+      
+      if (!validation.isValid) {
+        displayValidationErrors(this, validation.errors);
+        process.exit(1);
+        return;
+      }
+
+      this.answers = {
+        formName: pascalCase(this.options.formName),
+        formPath: this.options.formPath || ""
+      };
+    } else {
+      // Interactive mode - show prompts
+      this.log(
+        yosay(
+          `Welcome to ${chalk.red(
+            "Getapper NextJS Yeoman Generator (GeNYG)"
+          )} form generator, follow the quick and easy configuration to create a new form!`
+        )
+      );
+
+      const answers = await this.prompt([
+        {
+          type: "directory",
+          name: "formPath",
+          message: "Select where to create the form:",
+          basePath: "./src/components",
+        },
+        {
+          type: "input",
+          name: "formName",
+          message: "What is your form name?",
+        },
+      ]);
+
+      if (answers.formName === "") {
+        this.log(yosay(chalk.red("Please give your form a name next time!")));
+        process.exit(1);
+        return;
+      }
+
+      answers.formName = pascalCase(answers.formName);
+      this.answers = answers;
     }
-
-    answers.formName = pascalCase(answers.formName);
-    this.answers = answers;
   }
 
   writing() {
