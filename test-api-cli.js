@@ -8,56 +8,60 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
+// Set working directory to test-project
+const testProjectPath = path.join(__dirname, 'test-project');
+
 // Test cases
 const testCases = [
   {
     name: 'Basic GET endpoint',
-    args: ['g-next:api', 'users', 'get'],
+    args: ['g-next:api', '--route', 'users', '--method', 'get'],
     expected: 'Should generate a GET /users endpoint'
   },
   {
     name: 'POST endpoint with dynamic parameter',
-    args: ['g-next:api', 'posts/{postId}', 'post'],
+    args: ['g-next:api', '--route', 'posts/{postId}', '--method', 'post'],
     expected: 'Should generate a POST /posts/{postId} endpoint'
   },
   {
     name: 'PUT endpoint with cookie auth',
-    args: ['g-next:api', 'users/{userId}', 'put', '--useCookieAuth', '--cookieRole', 'admin'],
+    args: ['g-next:api', '--route', 'users/{userId}', '--method', 'put', '--useCookieAuth', '--cookieRole', 'admin'],
     expected: 'Should generate a PUT /users/{userId} endpoint with cookie authentication'
   },
   {
     name: 'Invalid HTTP method',
-    args: ['g-next:api', 'users', 'invalid'],
+    args: ['g-next:api', '--route', 'users', '--method', 'invalid'],
     expected: 'Should show Yup validation error for invalid HTTP method'
   },
   {
     name: 'Missing cookie role with auth',
-    args: ['g-next:api', 'users', 'get', '--useCookieAuth'],
+    args: ['g-next:api', '--route', 'users', '--method', 'get', '--useCookieAuth'],
     expected: 'Should show Yup validation error for missing cookie role'
   },
   {
     name: 'Invalid route format - empty parameter',
-    args: ['g-next:api', 'users/{}', 'get'],
+    args: ['g-next:api', '--route', 'users/{}', '--method', 'get'],
     expected: 'Should show Yup validation error for empty parameter'
   },
   {
     name: 'Invalid route format - invalid parameter name',
-    args: ['g-next:api', 'users/{123invalid}', 'get'],
+    args: ['g-next:api', '--route', 'users/{123invalid}', '--method', 'get'],
     expected: 'Should show Yup validation error for invalid parameter name'
   },
   {
     name: 'Invalid route format - special characters',
-    args: ['g-next:api', 'users@#$', 'get'],
+    args: ['g-next:api', '--route', 'users@#$', '--method', 'get'],
     expected: 'Should show Yup validation error for invalid characters in route'
   },
   {
     name: 'Empty route path',
-    args: ['g-next:api', '', 'get'],
+    args: ['g-next:api', '--route', '', '--method', 'get'],
     expected: 'Should show Yup validation error for empty route'
   }
 ];
 
-console.log('🧪 Testing API Generator CLI functionality...\n');
+console.log('🧪 Testing API Generator CLI functionality...');
+console.log(`📁 Working directory: ${testProjectPath}\n`);
 
 // Function to run a test case
 function runTest(testCase) {
@@ -67,7 +71,7 @@ function runTest(testCase) {
     console.log(`   Expected: ${testCase.expected}`);
     
     const yoProcess = spawn('yo', testCase.args, {
-      cwd: process.cwd(),
+      cwd: testProjectPath,
       stdio: 'pipe'
     });
 
@@ -85,7 +89,7 @@ function runTest(testCase) {
     yoProcess.on('close', (code) => {
       console.log(`   Exit code: ${code}`);
       
-      if (output.includes('Using CLI arguments for non-interactive generation')) {
+      if (output.includes('Using CLI options for non-interactive generation')) {
         console.log('   ✅ CLI mode detected successfully');
       } else if (output.includes('Welcome to') && output.includes('follow the quick and easy configuration')) {
         console.log('   ✅ Interactive mode detected (no CLI args provided)');
@@ -128,7 +132,10 @@ async function runAllTests() {
 }
 
 // Check if yo is available
-const yoCheck = spawn('yo', ['--version'], { stdio: 'pipe' });
+const yoCheck = spawn('yo', ['--version'], { 
+  cwd: testProjectPath,
+  stdio: 'pipe' 
+});
 
 yoCheck.on('close', (code) => {
   if (code === 0) {
