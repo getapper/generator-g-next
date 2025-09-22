@@ -1,0 +1,35 @@
+{
+  "extends": "ts-node/node14/tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  },
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true
+  },
+  "include": [
+    "src/lib/**/*.ts",
+    "src/models/common/*.ts",
+    "src/models/server/*.ts",
+    "src/tasks/**/*.ts",
+    "src/endpoints/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

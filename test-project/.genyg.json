@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "packages": {
+    "core": true,
+    "mui": false,
+    "spa": false,
+    "translations": false,
+    "mongodb": false,
+    "cognito": false,
+    "cookieAuth": false
+  }
+}
