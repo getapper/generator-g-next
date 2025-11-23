@@ -10,6 +10,9 @@ export const <%= sliceName %>Store = createSlice({
   name: "<%= sliceName %>",
   initialState,
   reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(extraActions.clearSession, () => initialState);
+  },
 });
 
 export { selectors<% if (useSagas) { %>, sagas<% } %> };

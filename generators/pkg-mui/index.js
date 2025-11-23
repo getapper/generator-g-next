@@ -63,12 +63,83 @@ module.exports = class extends Generator {
         moment: "2.29.4",
         "react-dropzone": "12.0.5",
         "react-hook-form": "7.29.0",
+        "react-quill": "2.0.0",
         yup: "0.32.9",
       },
     });
 
     // Copy MUI form components
     this.fs.copy(this.templatePath(), this.destinationRoot());
+
+    // Add React Quill CSS to _app.tsx if it exists
+    const appTsxPath = this.destinationPath("src/pages/_app.tsx");
+    if (this.fs.exists(appTsxPath)) {
+      let appContent = this.fs.read(appTsxPath);
+      
+      // Add React Quill CSS import if not already present
+      if (!appContent.includes('react-quill/dist/quill.snow.css')) {
+        appContent = appContent.replace(
+          'import "@/styles/reset.css";',
+          'import "@/styles/reset.css";\nimport "react-quill/dist/quill.snow.css";'
+        );
+      }
+
+      // Add custom React Quill styles if not already present
+      if (!appContent.includes('const quillStyles =')) {
+        const quillStylesCode = `
+// Custom styles for React Quill editor to support HTML tags
+const quillStyles = \`
+  .ql-editor s,
+  .ql-editor strike,
+  .ql-editor del {
+    text-decoration: line-through;
+  }
+
+  .ql-editor em,
+  .ql-editor i {
+    font-style: italic;
+  }
+
+  .ql-editor strong,
+  .ql-editor b {
+    font-weight: bold;
+  }
+
+  .ql-editor u {
+    text-decoration: underline;
+  }
+
+  .ql-editor mark {
+    background-color: yellow;
+    padding: 2px 4px;
+  }
+
+  .ql-editor sup {
+    vertical-align: super;
+    font-size: 0.75em;
+  }
+
+  .ql-editor sub {
+    vertical-align: sub;
+    font-size: 0.75em;
+  }
+\`;
+
+// Inject custom styles
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = quillStyles;
+  document.head.appendChild(style);
+}`;
+
+        appContent = appContent.replace(
+          'export default function App({ Component, pageProps }: AppProps) {',
+          quillStylesCode + '\n\nexport default function App({ Component, pageProps }: AppProps) {'
+        );
+      }
+
+      this.fs.write(appTsxPath, appContent);
+    }
 
     extendConfigFile(this, {
       packages: {

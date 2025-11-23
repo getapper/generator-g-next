@@ -25,7 +25,7 @@ export default () => ({
   queryStringParameters: yup.object().shape(queryStringParametersValidations()),${
     hasPayload
       ? `
-  payload: yup.object().shape(payloadValidations()),`
+  payload: yup.object().shape(payloadValidations()).noUnknown(),`
       : ""
   }
 });

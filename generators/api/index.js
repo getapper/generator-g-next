@@ -397,6 +397,7 @@ module.exports = class extends Generator {
         capitalize(apiName),
         useCookieAuth,
         (useCookieAuth ? camelCase(cookieRole) : ""),
+        hasPayload,
       ),
     );
     this.fs.write(

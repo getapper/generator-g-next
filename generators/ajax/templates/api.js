@@ -22,7 +22,7 @@ export default apiActionBuilder<
     payload: apiRequestPayloadBuilder<${apiNamePC}Params>(
       {
         path: ${routePath},
-        method: HttpMethod.${methodUC},
+        method: HttpMethod.${methodUC},${['POST', 'PUT', 'PATCH'].includes(methodUC) ? '\n        body: params,' : ''}
       },
       options,
       params,

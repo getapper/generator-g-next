@@ -1,4 +1,4 @@
-module.exports = (apiNameCapital, useCookieAuth, cookieRoleCamelCase) => `import {
+module.exports = (apiNameCapital, useCookieAuth, cookieRoleCamelCase, hasPayload) => `import {
   ErrorResponse,
   ResponseHandler,
   StatusCodes,
@@ -11,7 +11,7 @@ export default async function handler(
   res: NextApiResponse<${apiNameCapital}Api.EndpointResponse>,
 ${useCookieAuth ? '  originalReq: NextApiRequest,\n' : ''}) {
   try {
-    const { validationResult${useCookieAuth ? ', queryStringParameters' : ''} } = req;
+    const { validationResult${useCookieAuth ? ', queryStringParameters' : ''}${hasPayload ? ', payload' : ''} } = req;
 
     ${useCookieAuth ? `if(!originalReq.session.${cookieRoleCamelCase}){
       return ResponseHandler.json<ErrorResponse>(

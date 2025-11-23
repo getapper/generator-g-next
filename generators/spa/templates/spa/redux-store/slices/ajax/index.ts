@@ -3,6 +3,10 @@ import { AjaxState } from "./ajax.interfaces";
 import * as selectors from "./ajax.selectors";
 import * as sagas from "./ajax.sagas";
 
+const initialState: AjaxState = {
+  isLoading: {},
+};
+
 export const ajaxStore = createSlice({
   name: "ajax",
   initialState: {
@@ -20,6 +24,9 @@ export const ajaxStore = createSlice({
     ) => {
       state.isLoading[payload.api] = payload.isLoading;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(extraActions.clearSession, () => initialState);
   },
 });
 

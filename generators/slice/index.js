@@ -205,40 +205,65 @@ module.exports = class extends Generator {
       this.destinationPath(`${reduxStorePath}/slices/index.ts`),
     );
 
-    let match = slicesIndex.match(/import(.*?);\r?\n\r?\n/)[0];
-    slicesIndex = slicesIndex.replace(
-      match,
-      `${match.slice(0, -1)}import * as ${sliceName} from "./${sliceName}";
+    // Helper function to safely match and replace with robust newline handling
+    const safeMatchAndReplace = (regex, replacementFn, context = '') => {
+      try {
+        const match = slicesIndex.match(regex);
+        if (match && match[0]) {
+          const replacement = replacementFn(match[0]);
+          slicesIndex = slicesIndex.replace(match[0], replacement);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        this.log(chalk.yellow(`Warning: Failed to process ${context}: ${error.message}`));
+        return false;
+      }
+    };
 
-`,
+    // More robust regex patterns that handle various newline combinations
+    const patterns = {
+      imports: /import\s+.*?;\s*\n\s*\n/g,
+      reducer: /(\s*)(\w+):\s*(\w+)\.\w+\.reducer,?\s*\n\s*}/g,
+      actions: /(\s*)(\w+):\s*(\w+)\.\w+\.actions,?\s*\n\s*}/g,
+      selectors: /(\s*)(\w+):\s*(\w+)\.selectors,?\s*\n\s*}/g,
+      sagas: /(\s*)(\w+):\s*Object\.values\((\w+)\.sagas\),?\s*\n\s*]/g
+    };
+
+    // Add import statement
+    safeMatchAndReplace(
+      patterns.imports,
+      (match) => `${match.trim()}\nimport * as ${sliceName} from "./${sliceName}";\n\n`,
+      'imports section'
     );
-    match = slicesIndex.match(/(.*)Store(.*?).reducer,?\r?\n}/)[0];
-    slicesIndex = slicesIndex.replace(
-      match,
-      `${match.slice(
-        0,
-        -1,
-      )}  ${sliceName}: ${sliceName}.${sliceName}Store.reducer,
-}`,
+    
+    // Add reducer
+    safeMatchAndReplace(
+      patterns.reducer,
+      (match) => `${match.trim()}\n  ${sliceName}: ${sliceName}.${sliceName}Store.reducer,\n}`,
+      'reducer section'
     );
-    match = slicesIndex.match(/(.*)Store(.*?).actions,?\r?\n}/)[0];
-    slicesIndex = slicesIndex.replace(
-      match,
-      `${match.slice(0, -1)}  ...${sliceName}.${sliceName}Store.actions,
-}`,
+    
+    // Add actions
+    safeMatchAndReplace(
+      patterns.actions,
+      (match) => `${match.trim()}\n  ...${sliceName}.${sliceName}Store.actions,\n}`,
+      'actions section'
     );
-    match = slicesIndex.match(/(.*).selectors,?\r?\n}/)[0];
-    slicesIndex = slicesIndex.replace(
-      match,
-      `${match.slice(0, -1)}  ...${sliceName}.selectors,
-}`,
+    
+    // Add selectors
+    safeMatchAndReplace(
+      patterns.selectors,
+      (match) => `${match.trim()}\n  ...${sliceName}.selectors,\n}`,
+      'selectors section'
     );
+    
+    // Add sagas if enabled
     if (useSagas) {
-      match = slicesIndex.match(/(.*)Object.values(.*),?\r?\n]/)[0];
-      slicesIndex = slicesIndex.replace(
-        match,
-        `${match.slice(0, -1)}  ...Object.values(${sliceName}.sagas),
-]`,
+      safeMatchAndReplace(
+        patterns.sagas,
+        (match) => `${match.trim()}\n  ...Object.values(${sliceName}.sagas),\n]`,
+        'sagas section'
       );
     }
 

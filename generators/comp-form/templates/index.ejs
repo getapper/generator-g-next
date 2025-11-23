@@ -1,0 +1,27 @@
+import React, { memo } from "react";
+import { use<%= componentName %> } from "./index.hooks";
+import { TextField, TextFieldProps } from "@mui/material";
+
+export type <%= componentName %>Props = {
+  name: string;
+} & TextFieldProps;
+
+export const <%= componentName %> = memo(
+  ({ name, helperText, ...props }: <%= componentName %>Props) => {
+    const { value, handleChange, error } = use<%= componentName %>(name);
+
+    return (
+      <TextField
+        name={name}
+        variant="outlined"
+        onChange={handleChange}
+        value={value}
+        error={!!error}
+        helperText={error ?? helperText}
+        {...props}
+      />
+    );
+  },
+);
+<%= componentName %>.displayName = "<%= componentName %>";
+

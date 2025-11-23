@@ -22,10 +22,11 @@ interface ApiRequestPayloadBuilderParams {
 }
 
 export interface ApiRequestPayloadBuilderOptions {
-  requestDelay: number;
+  requestDelay?: number;
   absolutePath?: boolean;
   withCredentials?: boolean;
   showFeedbackOnError?: boolean;
+  skipRedux?: boolean;
 }
 
 export interface ApiRequestPayloadType<T> {
@@ -44,9 +45,16 @@ export const apiRequestPayloadBuilder: <T>(
   prepareParams,
 });
 
+export interface Deferred<S = any, F = any> {
+  promise: Promise<S>;
+  resolve: (value: S) => void;
+  reject: (reason: F) => void;
+}
+
 export interface ApiRequestAction<T> extends Action<string> {
   payload: ApiRequestPayloadType<T>;
   retry?: boolean;
+  deferred?: Deferred;
 }
 
 interface ApiActionRequest<Args extends unknown[]>

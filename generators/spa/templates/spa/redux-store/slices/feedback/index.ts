@@ -4,13 +4,15 @@ import * as selectors from "./feedback.selectors";
 import * as sagas from "./feedback.sagas";
 import { AlertColor } from "@mui/material";
 
+const initialState: FeedbackState = {
+  open: false,
+  type: "info",
+  message: "",
+};
+
 export const feedbackStore = createSlice({
   name: "feedback",
-  initialState: {
-    open: false,
-    type: "info",
-    message: "",
-  } as FeedbackState,
+  initialState,
   reducers: {
     setFeedback: (
       state,
@@ -28,6 +30,9 @@ export const feedbackStore = createSlice({
     closeFeedback: (state) => {
       state.open = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(extraActions.clearSession, () => initialState);
   },
 });
 
