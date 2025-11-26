@@ -34,7 +34,7 @@ module.exports = class extends Generator {
     // New dependencies
     this.packageJson.merge({
       engines: {
-        node: ">=16.0.0 <17.0.0",
+        node: ">=16.0.0 <21.0.0",
       },
       scripts: {
         lint: "next lint",
