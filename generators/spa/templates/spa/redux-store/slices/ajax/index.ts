@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AjaxState } from "./ajax.interfaces";
 import * as selectors from "./ajax.selectors";
 import * as sagas from "./ajax.sagas";
+import * as extraActions from "../../extra-actions";
 
 const initialState: AjaxState = {
   isLoading: {},
@@ -27,6 +28,7 @@ export const ajaxStore = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(extraActions.clearSession, () => initialState);
+    builder.addCase(extraActions.appStartup, () => initialState);
   },
 });
 

@@ -112,6 +112,25 @@ export enum HttpMethods {
   PATCH = "patch",
 }
 
+// JSON Patch RFC 6902 operations
+export type JsonPatchOperation = {
+  op: "add" | "remove" | "replace" | "move" | "copy" | "test";
+  path: string;
+  value?: any;
+  from?: string;
+};
+
+// JSON Patch operation validation schema
+export const jsonPatchOperationValidation = yup.object().shape({
+  op: yup
+    .string()
+    .oneOf(["add", "remove", "replace", "move", "copy", "test"])
+    .required(),
+  path: yup.string().required(),
+  value: yup.mixed().optional(),
+  from: yup.string().optional(),
+});
+
 export { StatusCodes };
 export type {
   HttpHeader,

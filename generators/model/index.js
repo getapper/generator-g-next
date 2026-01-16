@@ -28,6 +28,17 @@ module.exports = class extends Generator {
       type: String,
       description: 'Model location (client, server, common)'
     });
+
+    // Force overwrite if CLI options are provided (non-interactive mode)
+    // Set it immediately after super() so Yeoman recognizes it
+    const hasCliArgs = opts.modelName && opts.location;
+    if (hasCliArgs) {
+      this.options.force = true;
+    }
+  }
+
+  initializing() {
+    // No-op: force is set in constructor
   }
 
   async prompting() {

@@ -56,6 +56,9 @@ module.exports = class extends Generator {
       dependencies: {
         mongodb: "4.4.0",
       },
+      devDependencies: {
+        "mongodb-memory-server": "^8.16.1",
+      },
     });
 
     //Environment variables
@@ -91,6 +94,20 @@ MONGODB_URI=mongodb://127.0.0.1:27017/$MONGODB_NAME`,
         "MONGODB_URI",
       ],
     });
+
+    // Update jest.config.js to add forceExit for MongoDB Memory Server cleanup
+    const jestConfigPath = this.destinationPath("jest.config.js");
+    if (this.fs.exists(jestConfigPath)) {
+      const jestConfig = this.fs.read(jestConfigPath);
+      // Add forceExit if not already present
+      if (!jestConfig.includes("forceExit")) {
+        const updatedConfig = jestConfig.replace(
+          /(\s+setupFilesAfterEnv:.*),/,
+          `$1,\n  // Force exit after tests complete to handle MongoDB Memory Server cleanup\n  // The MongoDB driver's internal monitoring timers may keep Jest from exiting\n  // even after all connections are properly closed\n  forceExit: true,`,
+        );
+        this.fs.write(jestConfigPath, updatedConfig);
+      }
+    }
 
     extendConfigFile(this, {
       packages: {

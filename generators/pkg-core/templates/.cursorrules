@@ -1,0 +1,1028 @@
+# Cursor Rules for Next.js Project
+
+## Project Overview
+This is a Next.js project with TypeScript, using the GeNYG (Generator Next.js) tool for code generation.
+
+## How to check if code is correct
+- Don't run `npm run build` or `npm run dev` or `npm run start`
+- Use instead `npm run tsc`
+
+## GeNYG Usage Guide
+
+### Prerequisites
+- Install Yeoman globally: `npm install -g yo`
+- Install the GeNYG generator: `npm install -g generator-g-next`
+
+### Available Generators
+
+#### 1. API Generator (`g-next:api`)
+Generates Next.js API endpoints with optional authentication.
+
+**Basic Usage:**
+```bash
+yo g-next:api --route users --method get
+yo g-next:api --route posts/{postId} --method post
+yo g-next:api --route users/{userId} --method put --useCookieAuth --cookieRole admin
+```
+
+**Parameters:**
+- `--route`: API route path (supports dynamic parameters like `{userId}`)
+- `--method`: HTTP method (get, post, put, delete, patch)
+- `--useCookieAuth`: Enable cookie-based authentication
+- `--cookieRole`: Required role when using cookie auth (admin, user, etc.)
+
+**Validation Rules:**
+- Route parameters must be in format `{paramName}` where paramName starts with a letter
+- HTTP method must be one of: get, post, put, delete, patch
+- Cookie role is required when using cookie authentication
+- Route path cannot contain special characters or be empty
+
+#### 2. AJAX Generator (`g-next:ajax`)
+Generates Redux AJAX actions for API calls in SPA applications.
+
+**Basic Usage:**
+```bash
+yo g-next:ajax --route users --method get
+yo g-next:ajax --route posts/{postId} --method post --spaFolderName admin
+yo g-next:ajax --route admin/sessions --method post --spaFolderName app
+```
+
+**Parameters:**
+- `--route`: API route path (supports dynamic parameters like `{postId}`)
+- `--method`: HTTP method (get, post, put, delete, patch)
+- `--spaFolderName`: SPA folder name where the AJAX will be generated (default: "app")
+
+**Generated Features:**
+- Redux action builder with request, success, fail, and cancel actions
+- TypeScript interfaces for request parameters and response data
+- API request payload builder with proper HTTP method configuration
+- Integration with Redux-Saga for async operations
+- Type-safe action dispatching
+
+**Generated Files:**
+- `src/spas/{spaFolderName}/redux-store/extra-actions/apis/{endpoint-name}/index.tsx`
+- Action builder with full TypeScript support
+- Interfaces for request/response data types
+
+**Usage in Sagas:**
+```typescript
+import postAdminSessions from "../../extra-actions/apis/post-admin-sessions";
+
+// Dispatch the request
+yield put(postAdminSessions.request({
+  email: "admin@example.com",
+  password: "password123"
+}));
+
+// Handle success/fail in sagas
+yield takeEvery(postAdminSessions.success.type, handleSuccess);
+yield takeEvery(postAdminSessions.fail.type, handleError);
+```
+
+**AJAX Success Data Structure:**
+- When an AJAX action succeeds, the data is available in `action.payload.data`
+- The data format is defined by the `*****ResponseData` interface exported from the same AJAX file
+- Example: For `postAdminSessions`, the success data structure is defined by `PostAdminSessionsResponseData` interface
+- Access the data in success handlers: `const responseData = action.payload.data`
+
+**Validation Rules:**
+- Route parameters must be in format `{paramName}` where paramName starts with a letter
+- HTTP method must be one of: get, post, put, delete, patch
+- SPA folder name must be a valid folder name (alphanumeric and hyphens)
+- Route path cannot contain special characters or be empty
+
+#### 3. Component Generator (`g-next:comp`)
+Generates React components with TypeScript.
+
+**Basic Usage:**
+```bash
+yo g-next:comp --componentName UserCard
+yo g-next:comp --componentName UserProfile --componentPath user
+```
+
+**Parameters:**
+- `--componentName`: Component name (must start with a letter, PascalCase)
+- `--componentPath`: Optional subfolder path
+
+#### 4. Form Generator (`g-next:form`)
+Generates form components with validation.
+
+**Basic Usage:**
+```bash
+yo g-next:form --formName LoginForm
+yo g-next:form --formName UserRegistration --formPath auth
+```
+
+**Parameters:**
+- `--formName`: Form component name (must start with a letter, PascalCase)
+- `--formPath`: Optional subfolder path
+
+#### 5. Model Generator (`g-next:model`)
+Generates data models for client or server.
+
+**Basic Usage:**
+```bash
+yo g-next:model --modelName User --location client
+yo g-next:model --modelName Product --location server
+```
+
+**Parameters:**
+- `--modelName`: Model name (must start with a letter, PascalCase)
+- `--location`: Either "client" or "server"
+
+#### 6. MongoDB Model Generator (`g-next:model-mongodb`)
+Generates MongoDB DAO models with full CRUD operations and TypeScript interfaces.
+
+**Basic Usage:**
+```bash
+yo g-next:model-mongodb --modelName User
+yo g-next:model-mongodb --modelName Product
+```
+
+**Parameters:**
+- `--modelName`: Model name (must start with a letter, PascalCase)
+
+**Generated Features:**
+- TypeScript interface with MongoDB types
+- Full CRUD operations (create, read, update, delete)
+- Pagination and filtering support
+- Automatic collection naming (pluralized, kebab-case)
+- MongoDB ObjectId handling
+- Version control and timestamps
+- Error handling for database operations
+
+**Generated Methods:**
+- `create()`: Create new document
+- `getById(_id)`: Find by ObjectId
+- `getList(filter, options)`: List with pagination and sorting
+- `patch(fields)`: Update specific fields
+- `delete(_id)`: Remove document
+- `refresh()`: Reload from database
+
+**When to use each model type:**
+- Use `g-next:model` for simple TypeScript interfaces and data structures
+- Use `g-next:model-mongodb` for database persistence with full CRUD operations
+- MongoDB models are automatically placed in `src/models/server/`
+- Regular models can be placed in either `client` or `server` location
+
+#### 7. Page Generator (`g-next:page`)
+Generates Next.js pages with various rendering strategies.
+
+**Basic Usage:**
+```bash
+yo g-next:page --pageName home --componentName HomePage --renderingStrategy none
+yo g-next:page --pageName [userId] --componentName UserDetail --renderingStrategy "Server-side Rendering Props (SSR)" --useCookieAuth --cookieRole user
+```
+
+**Parameters:**
+- `--pageName`: Page name (supports dynamic routes with `[paramName]`)
+- `--componentName`: Component name for the page
+- `--renderingStrategy`: Rendering strategy (none, SSR, SSG, ISR)
+- `--useCookieAuth`: Enable cookie authentication
+- `--cookieRole`: Required role for authentication
+
+#### 8. Task Generator (`g-next:task`)
+Generates background tasks.
+
+**Basic Usage:**
+```bash
+yo g-next:task --taskName SendEmails
+```
+
+**Parameters:**
+- `--taskName`: Task name (must start with a letter, PascalCase)
+
+### Interactive Mode
+If you don't provide CLI arguments, the generators will run in interactive mode, prompting you for each parameter.
+
+### Validation
+All generators use Yup validation to ensure:
+- Names start with letters and follow proper naming conventions
+- Required parameters are provided
+- Parameter values are valid for their type
+- Route parameters follow Next.js conventions
+
+### Error Handling
+When validation fails, you'll see clear error messages indicating:
+- Which parameters are invalid
+- What the correct format should be
+- Which required parameters are missing
+
+### Best Practices
+1. Use PascalCase for component, form, model, and task names
+2. Use kebab-case for route paths
+3. Always specify cookie roles when using authentication
+4. Use descriptive names that clearly indicate purpose
+5. Group related components in subfolders using the path parameters
+
+### Example Usage
+```bash
+# Generate API endpoints
+yo g-next:api --route users --method get
+yo g-next:api --route users/{userId} --method put --useCookieAuth --cookieRole admin
+
+# Generate AJAX actions
+yo g-next:ajax --route users --method get --spaFolderName app
+yo g-next:ajax --route admin/sessions --method post --spaFolderName app
+yo g-next:ajax --route items/{itemId} --method put --spaFolderName admin
+
+# Generate components
+yo g-next:comp --componentName UserCard --componentPath users
+yo g-next:comp --componentName ItemCard --componentPath items
+
+# Generate forms
+yo g-next:form --formName UserRegistration --formPath auth
+yo g-next:form --formName ItemEntry --formPath items
+
+# Generate models
+yo g-next:model --modelName User --location client
+yo g-next:model --modelName Item --location client
+yo g-next:model --modelName Order --location server
+
+# Generate MongoDB DAO models
+yo g-next:model-mongodb --modelName User
+yo g-next:model-mongodb --modelName Item
+yo g-next:model-mongodb --modelName Order
+
+# Generate pages
+yo g-next:page --pageName users --componentName UsersPage --renderingStrategy "Static Site Generation (SSG)"
+yo g-next:page --pageName [userId] --componentName UserDetail --renderingStrategy "Server-side Rendering Props (SSR)" --useCookieAuth --cookieRole user
+```
+
+## Project Structure
+- `src/components/`: React components
+- `src/pages/`: Next.js pages and API routes
+- `src/models/`: Data models and utilities
+- `src/lib/`: Utility functions and helpers
+- `src/styles/`: CSS and styling files
+
+## Model Architecture Rules
+
+### Client-Server Model Separation
+**CRITICAL**: Client-side files (`src/models/client/`, `src/components/`, `src/spas/`) MUST NEVER import from server-side models (`src/models/server/`).
+
+**✅ Correct Approach:**
+- Use common models (`src/models/common/`) for shared types, enums, and interfaces
+- Client models can import from `@/models/common/`
+- Server models can import from `@/models/common/`
+- Common models can import from other common models
+
+**❌ Prohibited Approach:**
+```typescript
+// ❌ NEVER do this in client files
+import { SomeType } from "@/models/server/SomeModel";
+import { SomeEnum } from "@/models/server/SomeModel";
+```
+
+**✅ Correct Pattern:**
+```typescript
+// ✅ Use common models for shared types
+import { Frequency } from "@/models/common/ResourceCommon";
+import { Status } from "@/models/common/StatusCommon";
+import { Type } from "@/models/common/TypeCommon";
+```
+
+**When to Create Common Models:**
+- If a type, enum, or interface is needed by both client and server code, it MUST be placed in `src/models/common/`
+- Common models should be organized by domain (e.g., `ResourceCommon`, `UserCommon`, `OrderCommon`)
+- Enums that are shared between client and server MUST be in common models
+- Types that represent business logic shared between client and server MUST be in common models
+
+**Examples:**
+- `Frequency` enum → `@/models/common/ResourceCommon`
+- `Status` enum → `@/models/common/StatusCommon`
+- `Type` type → `@/models/common/TypeCommon`
+- `AclAction` enum → `@/models/common/AclCommon`
+
+## Environment Variables
+- All environment variables used in the project MUST be added to `next.config.options.json`
+- This includes both server-side and client-side environment variables
+- Client-side variables must be prefixed with `NEXT_PUBLIC_`
+- Server-side variables (like database connections, API keys, secrets) should be added without the prefix
+- When adding new environment variables, always update the `env` array in `next.config.options.json`
+
+## Development Workflow
+1. Use GeNYG generators to scaffold new features
+2. Follow the established patterns in the codebase
+3. Use TypeScript for type safety
+4. Follow the project's ESLint and Prettier configuration
+5. Write tests for new functionality using Jest
+6. Always add new environment variables to `next.config.options.json`
+
+## Redux Store Access Standards
+- Always access Redux actions and selectors through the centralized imports from `@/spas/app/redux-store`
+- Use `actions.` prefix for all Redux actions (e.g., `actions.setUserList`)
+- Use `selectors.` prefix for all Redux selectors (e.g., `selectors.getUserFeList`)
+- Never import actions or selectors directly from individual slice files
+- This ensures consistent access patterns and proper TypeScript typing
+
+## API Development Best Practices
+
+### RESTful API Design Standards
+**CRITICAL RULES:**
+1. **All APIs MUST follow RESTful principles - every action must be a CRUD operation**
+2. **Use proper HTTP methods: GET (read), POST (create), PUT (update), DELETE (delete), PATCH (partial update)**
+3. **Use resource-based URLs - each resource should have its own endpoint**
+4. **Avoid action-based URLs - instead of `/resource/action`, use `/resource` with appropriate HTTP method**
+
+**✅ Correct RESTful Patterns:**
+```typescript
+// Creating a new verification token
+POST /user/account-verification-tokens  // ✅ Creates a new token
+
+// Reading a resource
+GET /users/{userId}  // ✅ Reads a user
+
+// Updating a resource
+PUT /users/{userId}  // ✅ Updates entire user
+PATCH /users/{userId}  // ✅ Partial update
+
+// Deleting a resource
+DELETE /users/{userId}  // ✅ Deletes a user
+```
+
+**❌ Avoid Non-RESTful Patterns:**
+```typescript
+// ❌ Don't use action-based URLs
+POST /user/account-verifications/resend  // Wrong - action in URL
+POST /users/{userId}/activate  // Wrong - action in URL
+POST /items/{itemId}/cancel  // Wrong - action in URL
+
+// ✅ Use resource-based URLs instead
+POST /user/account-verification-tokens  // Correct - creating a token
+PUT /users/{userId} with { isActive: true }  // Correct - updating user
+PUT /items/{itemId} with { status: "cancelled" }  // Correct - updating item
+```
+
+**Resource Naming Conventions:**
+- Use plural nouns for collections: `/users`, `/items`, `/tokens`
+- Use singular nouns for individual resources: `/user/{userId}`, `/item/{itemId}`
+- Use kebab-case for multi-word resources: `/account-verification-tokens`, `/business-clubs`
+- Avoid verbs in URLs - the HTTP method already indicates the action
+
+**Examples:**
+- Creating a verification token: `POST /user/account-verification-tokens` (not `/user/account-verifications/resend`)
+- Sending an email: `POST /admin/email-sends` (not `/admin/send-email`)
+- Cancelling an item: `PUT /items/{itemId}` with status field (not `/items/{itemId}/cancel`)
+
+### ObjectId Handling in APIs
+When working with MongoDB ObjectIds in API endpoints, follow these best practices:
+
+**✅ Correct Approach:**
+```typescript
+// interfaces.ts
+import { ObjectId } from "mongodb";
+
+export namespace DeleteAdminUsersByUserIdApi {
+  export type QueryStringParameters = {
+    userId: ObjectId,  // Use ObjectId type directly
+  };
+}
+
+// validations.ts
+import { yupObjectId } from "@/lib/mongodb/mongo-dao";
+
+const queryStringParametersValidations = () => ({
+  userId: yupObjectId().required(),  // Use yupObjectId() for validation
+});
+
+// handler.ts
+const { userId } = queryStringParameters;
+const user = await User.getById(userId);  // No casting needed!
+```
+
+**❌ Avoid This Approach:**
+```typescript
+// interfaces.ts
+export type QueryStringParameters = {
+  userId: string,  // Don't use string for ObjectId
+};
+
+// handler.ts
+const userObjectId = new ObjectId(userId);  // Avoid manual casting
+```
+
+**Benefits of Using ObjectId Type:**
+- Type safety: No need for manual casting with `new ObjectId()`
+- Validation: `yupObjectId()` ensures proper ObjectId format
+- Cleaner code: Direct usage without conversion
+- Better error handling: Automatic validation of ObjectId format
+
+**When to Use ObjectId vs String:**
+- Use `ObjectId` type when the parameter represents a MongoDB document ID
+- Use `string` type for regular string parameters (names, emails, etc.)
+- Always use `yupObjectId()` for ObjectId validation
+- Always use `yup.string()` for regular string validation
+
+### ObjectId Standards for All API Endpoints
+**CRITICAL RULES:**
+1. **All ObjectId parameters in API interfaces MUST use `ObjectId` type, never `string`**
+2. **All ObjectId validations MUST use `yupObjectId()` from `@/lib/mongodb/mongo-dao`**
+3. **All yup validations MUST include `.noUnknown()` to reject unexpected fields**
+4. **Never use manual casting with `new ObjectId()` in handlers**
+
+**Required Pattern for All API Endpoints:**
+```typescript
+// interfaces.ts - ALWAYS use ObjectId type
+import { ObjectId } from "mongodb";
+
+export namespace YourApi {
+  export type QueryStringParameters = {
+    id: ObjectId,           // ✅ Correct
+    userId: ObjectId,       // ✅ Correct
+    // name: string,        // ✅ Correct for non-ObjectId fields
+  };
+}
+
+// validations.ts - ALWAYS use yupObjectId for ObjectIds
+import { yupObjectId } from "@/lib/mongodb/mongo-dao";
+
+const queryStringParametersValidations = () => ({
+  id: yupObjectId().required(),     // ✅ Correct
+  userId: yupObjectId().required(), // ✅ Correct
+  // name: yup.string().required(), // ✅ Correct for non-ObjectId fields
+});
+
+export default () => ({
+  queryStringParameters: yup.object().shape(queryStringParametersValidations()).noUnknown(),
+  payload: yup.object().shape(payloadValidations()).noUnknown(),
+});
+
+// handler.ts - Direct usage without casting
+const { id, userId } = queryStringParameters;
+const document = await Model.getById(id);  // ✅ No casting needed!
+```
+
+**Validation Standards:**
+- ObjectId parameters: `yupObjectId().required()`
+- String parameters: `yup.string().required()`
+- Number parameters: `yup.number().required()`
+- Boolean parameters: `yup.boolean().required()`
+- Always add `.noUnknown()` to prevent unexpected fields
+
+### API Payload Handling in GeNYG Endpoints
+When working with PUT/POST API endpoints generated by GeNYG, follow these standards for reading request data:
+
+**✅ Correct Approach:**
+```typescript
+// handler.ts
+export default async function handler(
+  req: PutAdminUsersByUserIdApi.Request,
+  res: NextApiResponse<PutAdminUsersByUserIdApi.EndpointResponse>,
+  originalReq: NextApiRequest,
+) {
+  try {
+    const { validationResult, queryStringParameters, payload } = req;
+    
+    // Use the destructured payload directly
+    const { firstName, lastName, email } = payload;
+    
+    // Access query parameters
+    const { userId } = queryStringParameters;
+  } catch (e) {
+    // Handle errors
+  }
+}
+```
+
+**❌ Avoid This Approach:**
+```typescript
+// Don't access req.body directly
+const payload = req.body;  // Avoid this approach
+const { firstName, lastName } = req.body;  // Don't do this
+```
+
+**Key Benefits:**
+- **Type Safety**: The `payload` is properly typed according to the interface
+- **Validation**: The payload is already validated by the middleware
+- **Consistency**: Follows the GeNYG pattern for all API endpoints
+- **Error Handling**: Validation errors are handled automatically
+
+**Validation Standards:**
+- Always add `.noUnknown()` to yup validations to reject unexpected fields
+- Use proper yup validators for each field type
+- Define clear interfaces for payload structure
+
+```typescript
+// validations.ts
+export default () => ({
+  queryStringParameters: yup.object().shape(queryStringParametersValidations()).noUnknown(),
+  payload: yup.object().shape(payloadValidations()).noUnknown(),
+});
+```
+
+## Redux Slice Best Practices
+
+### Slice Naming Convention
+- **ALWAYS use singular names for slices**, not plural
+- Examples: `event` (not `events`), `item` (not `items`), `user` (not `users`)
+- State key in Redux store should match the slice name (singular)
+
+### Slice Structure
+Each Redux slice should follow this standardized structure:
+
+```
+src/spas/app/redux-store/slices/{sliceName}/
+├── {sliceName}.interfaces.ts  // State interface and initial state
+├── {sliceName}.selectors.ts   // Redux selectors
+├── {sliceName}.sagas.ts        // Side effects (sagas)
+└── index.ts                    // Slice definition with reducers
+```
+
+### Loading State Management
+**CRITICAL RULE: NEVER add `loading` boolean properties to slice state interfaces.**
+
+The application already has a centralized loading system through the `getAjaxIsLoadingByApi` selector that accepts any AJAX API action. This provides immediate loading state for any API call without duplicating loading state across slices.
+
+**✅ Correct Approach:**
+```typescript
+// Use the centralized loading selector
+const isLoading = useSelector(selectors.getAjaxIsLoadingByApi(actions.getAdminResources.api));
+
+// In components
+{isLoading ? <CircularProgress /> : <ResourcesList />}
+```
+
+**❌ Prohibited Approach:**
+```typescript
+// DON'T add loading to slice state
+export interface ResourceState {
+  list: IResourceFe[];
+  loading: boolean;  // ❌ NEVER do this
+}
+
+// DON'T manage loading in extraReducers
+builder.addCase(getAdminResources.request, (state) => {
+  state.loading = true;  // ❌ NEVER do this
+});
+```
+
+**Benefits of Centralized Loading:**
+- **No Duplication**: Single source of truth for loading states
+- **Automatic Management**: Loading state is handled automatically by AJAX actions
+- **Consistent Behavior**: All API calls follow the same loading pattern
+- **Reduced Boilerplate**: No need to manage loading state in every slice
+- **Better Performance**: No unnecessary state updates for loading flags
+
+**Usage Pattern:**
+```typescript
+// Always use this pattern for loading states
+const isLoading = useSelector(selectors.getAjaxIsLoadingByApi(actions.yourAjaxAction.api));
+```
+
+### Using extraReducers with builder.addCase
+
+**CRITICAL: Always use `extraReducers` with `builder.addCase` to handle AJAX action responses, NOT sagas with manual state updates.**
+
+#### ✅ Correct Pattern:
+```typescript
+// index.ts
+import { createSlice } from "@reduxjs/toolkit";
+import * as extraActions from "../../extra-actions";
+import {
+  getAdminResourcesByResourceId,
+  postAdminResourcesByResourceId,
+  putAdminResourcesByResourceIdAndItemId,
+  deleteAdminResourcesByResourceIdAndItemId,
+} from "../../extra-actions/apis";
+
+export const itemStore = createSlice({
+  name: "item",
+  initialState,
+  reducers: {
+    // Optional: custom reducers for manual state updates
+  },
+  extraReducers: (builder) => {
+    // Handle session lifecycle
+    builder.addCase(extraActions.clearSession, () => initialState);
+    builder.addCase(extraActions.appStartup, () => initialState);
+
+    // Handle GET request
+    builder.addCase(getAdminResourcesByResourceId.request, (state) => {
+      // Optional: set loading state if needed (but prefer centralized loading)
+    });
+
+    // Handle GET success - access data via action.payload.data
+    builder.addCase(getAdminResourcesByResourceId.success, (state, action) => {
+      const items = action.payload.data?.items;
+      if (items) {
+        state.list = items;
+      }
+    });
+
+    // Handle GET fail
+    builder.addCase(getAdminResourcesByResourceId.fail, (state) => {
+      // Handle error state if needed
+    });
+
+    // Handle POST success
+    builder.addCase(postAdminResourcesByResourceId.success, (state, action) => {
+      const item = action.payload.data?.item;
+      if (item) {
+        state.list.push(item);
+      }
+    });
+
+    // Handle PUT success
+    builder.addCase(putAdminResourcesByResourceIdAndItemId.success, (state, action) => {
+      const item = action.payload.data?.item;
+      if (item) {
+        const index = state.list.findIndex((e) => e._id === item._id);
+        if (index !== -1) {
+          state.list[index] = item;
+        }
+      }
+    });
+
+    // Handle DELETE success - access params via action.payload.prepareParams
+    builder.addCase(deleteAdminResourcesByResourceIdAndItemId.success, (state, action) => {
+      const itemId = action.payload.prepareParams.itemId;
+      state.list = state.list.filter((e) => e._id !== itemId);
+    });
+  },
+});
+```
+
+#### Sagas are ONLY for Side Effects
+Sagas should handle:
+- Triggering follow-up actions (e.g., refresh list after create/update/delete)
+- Complex async workflows
+- Navigation after operations
+- NOT direct state updates (use extraReducers instead)
+
+```typescript
+// item.sagas.ts
+import { takeEvery, put } from "redux-saga/effects";
+import {
+  postAdminResourcesByResourceId,
+  putAdminResourcesByResourceIdAndItemId,
+  deleteAdminResourcesByResourceIdAndItemId,
+} from "../../extra-actions/apis";
+import { actions } from "../../index";
+
+function* handlePostItemSuccess(
+  action: ReturnType<typeof postAdminResourcesByResourceId.success>
+) {
+  // Refresh list after creating item
+  const resourceId = action.payload.prepareParams.resourceId;
+  yield put(actions.getAdminResourcesByResourceId.request({ resourceId }));
+}
+
+function* handlePutItemSuccess(
+  action: ReturnType<typeof putAdminResourcesByResourceIdAndItemId.success>
+) {
+  // Refresh list after updating item
+  const resourceId = action.payload.prepareParams.resourceId;
+  yield put(actions.getAdminResourcesByResourceId.request({ resourceId }));
+}
+
+function* handleDeleteItemSuccess(
+  action: ReturnType<typeof deleteAdminResourcesByResourceIdAndItemId.success>
+) {
+  // Refresh list after deleting item
+  const resourceId = action.payload.prepareParams.resourceId;
+  yield put(actions.getAdminResourcesByResourceId.request({ resourceId }));
+}
+
+export function* itemSaga() {
+  yield takeEvery(postAdminResourcesByResourceId.success.type, handlePostItemSuccess);
+  yield takeEvery(putAdminResourcesByResourceIdAndItemId.success.type, handlePutItemSuccess);
+  yield takeEvery(deleteAdminResourcesByResourceIdAndItemId.success.type, handleDeleteItemSuccess);
+}
+```
+
+### Accessing AJAX Response Data
+
+When handling AJAX actions in extraReducers:
+- **Response data**: Access via `action.payload.data`
+- **Request parameters**: Access via `action.payload.prepareParams`
+
+```typescript
+builder.addCase(getAdminResourcesByResourceId.success, (state, action) => {
+  // Access response data
+  const items = action.payload.data?.items;
+  
+  // Access request parameters
+  const resourceId = action.payload.prepareParams.resourceId;
+});
+```
+
+### AJAX Response Type Definitions
+
+**CRITICAL: Always define proper TypeScript interfaces for AJAX response data in the generated AJAX action files.**
+
+When GeNYG generates AJAX actions, update the empty `ResponseData` interface:
+
+#### Frontend Model Convention
+- Use `IItemFe` (interface with `ObjectIdFe`) in AJAX response definitions
+- `ObjectIdFe` is a type alias for `string` defined in `@/models/common/JsUtility`
+- `ItemFe` is a type alias that equals `IItemFe` for convenience
+- This convention provides semantic clarity that these are ObjectId strings from the API
+
+```typescript
+// Before (generated by GeNYG)
+export interface GetItemsResponseData {}
+
+// After (add proper types using IItemFe)
+import { IItemFe } from "@/models/client/ItemFe";
+
+export interface GetItemsResponseData {
+  items: IItemFe[];
+}
+
+export interface PostItemResponseData {
+  item: IItemFe;
+}
+
+export interface DeleteItemResponseData {
+  message?: string;
+}
+```
+
+#### Model Structure Pattern
+Frontend models should follow this pattern:
+
+```typescript
+// src/models/client/ItemFe.ts
+import { DateString, ObjectIdFe } from "@/models/common/JsUtility";
+
+// Interface with ObjectIdFe for API responses
+export type IItemFe = {
+  _id: ObjectIdFe;
+  resourceId: ObjectIdFe;
+  name: string;
+  // ... other fields
+};
+
+// Type alias for convenience (same as IItemFe)
+export type ItemFe = IItemFe;
+```
+
+**Key Points:**
+- `ObjectIdFe` is `string` - it's just for semantic clarity
+- Use `IItemFe` in AJAX response interfaces
+- Use `ItemFe` in components and forms (they're the same type)
+- No mapping needed in selectors since `ObjectIdFe` is already `string`
+
+### Slice Export Pattern
+
+```typescript
+// index.ts
+export { selectors, sagas };
+export default itemStore.reducer;
+
+// NOT exported:
+// - Individual actions from the slice (keep them internal if not needed)
+// - Use extraActions for AJAX calls instead
+```
+
+### Integration in Redux Store
+
+```typescript
+// slices/index.ts
+import * as item from "./item";
+
+export const reducers = {
+  // ... other reducers
+  item: item.default,  // Use singular name
+};
+
+export const actions = {
+  ...extraActions,
+  // Don't spread slice actions unless needed
+};
+
+export const selectors = {
+  ...item.selectors,
+};
+
+export const sagas = [
+  ...Object.values(item.sagas),
+];
+```
+
+## MUI Component Standards
+- Always use MUI Stack for flex containers instead of MUI Box with display flex
+- MUI Stack provides better semantic meaning and cleaner code for flex layouts
+- Use MUI Box only for non-flex containers or when you need specific styling that Stack doesn't support
+
+## CSS Color Standards
+- Always use CSS custom properties (var(--color-name)) instead of hardcoded RGB/hex values
+- All colors must be defined in `src/styles/colors.css` using the established color system
+- If a color doesn't exist in the color system, add it to `colors.css` with a semantic name
+- Use semantic color names (e.g., `--Gray-700`, `--Brand-600`) rather than generic names
+- Never use hardcoded color values like `#414651` or `rgb(65, 70, 81)` in components
+- Import colors.css in your main CSS file or ensure it's loaded globally
+
+## React Component Architecture Standards
+- Every React component, scene, and frontend file that creates a React component MUST have a separate hooks file
+- Each component must be a folder with two files:
+  - `index.tsx`: Contains ONLY the UI/JSX code
+  - `index.hooks.tsx`: Contains ONLY the business logic, state management, and side effects
+- This separation ensures clean architecture with clear separation of concerns
+- UI components should be pure and focused only on rendering
+- Business logic, API calls, state management, and side effects belong in the hooks file
+- Use custom hooks pattern to extract and organize business logic
+- Import and use the hooks in the main component file
+
+## Form Component Standards
+**CRITICAL RULE: All form fields in the application MUST use standardized form components from `src/components/_form/` directory.**
+
+### Available Form Components
+The following standardized form components are available in `src/components/_form/`:
+
+#### Text Input Components
+- **`FormTextField`**: For text inputs, numbers, emails, passwords, etc.
+- **`FormPassword`**: Specialized password field with show/hide toggle
+- **`FormRichTextField`**: Rich text editor with formatting options
+
+#### Selection Components
+- **`FormSelect`**: Dropdown selection with options array
+- **`FormSelectBoolean`**: Yes/No or True/False selection
+- **`FormAutocomplete`**: Autocomplete selection with search
+
+#### Date/Time Components
+- **`FormDatePicker`**: Date selection with calendar
+- **`FormDateTimePicker`**: Date and time selection
+- **`FormTimePicker`**: Time selection only
+
+#### Boolean Components
+- **`FormSwitch`**: Toggle switch for boolean values
+- **`FormCheckbox`**: Checkbox for boolean values
+- **`FormRadioGroup`**: Radio button group for single selection
+
+#### Specialized Components
+- **`FormPhoneSelector`**: Phone number input with country selection
+- **`FormAddressSelector`**: Address input with autocomplete
+- **`FormChips`**: Chip input for tags or multiple values
+- **`FormImageDropZone`**: Image upload with drag and drop
+- **`FormImageUpload`**: Image upload with file selection
+
+### Form Component Usage Standards
+
+#### ✅ Correct Usage:
+```typescript
+import { FormTextField } from "@/components/_form/FormTextField";
+import { FormSelect } from "@/components/_form/FormSelect";
+import { FormSwitch } from "@/components/_form/FormSwitch";
+import { FormDatePicker } from "@/components/_form/FormDatePicker";
+
+// Text input
+<FormTextField
+  name="firstName"
+  label="First Name"
+  fullWidth
+/>
+
+// Select dropdown
+<FormSelect
+  name="country"
+  label="Country"
+  options={[
+    { value: "US", label: "United States" },
+    { value: "CA", label: "Canada" },
+  ]}
+  fullWidth
+/>
+
+// Switch toggle
+<FormSwitch
+  name="isActive"
+  label="Active Status"
+/>
+
+// Date picker
+<FormDatePicker
+  name="birthDate"
+  label="Birth Date"
+  fullWidth
+/>
+```
+
+#### ❌ Prohibited Usage:
+```typescript
+// NEVER use raw MUI components directly in forms
+import { TextField, Select, Switch, FormControl, InputLabel, MenuItem } from "@mui/material";
+
+// ❌ Don't do this
+<TextField
+  {...formData.register("firstName")}
+  label="First Name"
+  error={!!formData.formState.errors.firstName}
+  helperText={formData.formState.errors.firstName?.message}
+/>
+
+// ❌ Don't do this
+<FormControl>
+  <InputLabel>Country</InputLabel>
+  <Select {...formData.register("country")}>
+    <MenuItem value="US">United States</MenuItem>
+  </Select>
+</FormControl>
+
+// ❌ Don't do this
+<FormControlLabel
+  control={<Switch {...formData.register("isActive")} />}
+  label="Active Status"
+/>
+```
+
+### Form Component Benefits
+- **Automatic Error Handling**: All form components handle validation errors automatically
+- **Consistent Styling**: All components follow the same design system
+- **Type Safety**: Full TypeScript support with proper typing
+- **Accessibility**: Built-in accessibility features and ARIA support
+- **Validation Integration**: Seamless integration with react-hook-form validation
+- **Reduced Boilerplate**: No need to manually handle error states and validation
+
+### Form Component Props Standards
+All form components follow consistent prop patterns:
+
+#### Common Props (All Components):
+- `name`: string - The form field name (required)
+- `label`: string - The field label (optional)
+- `fullWidth`: boolean - Whether to take full width (optional)
+
+#### Component-Specific Props:
+- **FormTextField**: `type`, `inputProps`, `multiline`, `rows`
+- **FormSelect**: `options` - Array of `{value, label}` objects
+- **FormSwitch**: `color` - Switch color variant
+- **FormDatePicker**: `fullWidth`, date picker specific props
+- **FormAutocomplete**: `options` - Array of objects with `id` and `value` properties
+
+### Form Validation Integration
+All form components automatically integrate with react-hook-form:
+- Error messages are displayed automatically
+- Validation states are handled internally
+- No need to manually pass error props
+- Consistent error styling across all components
+
+### Migration Guidelines
+When updating existing forms to use standardized components:
+
+1. **Replace TextField**: `TextField` → `FormTextField`
+2. **Replace Select**: `Select` with `FormControl` → `FormSelect`
+3. **Replace Switch**: `Switch` with `FormControlLabel` → `FormSwitch`
+4. **Replace Checkbox**: `Checkbox` with `FormControlLabel` → `FormCheckbox`
+5. **Remove manual error handling**: Remove `error` and `helperText` props
+6. **Remove form registration**: Remove `{...formData.register()}` spread
+7. **Update imports**: Import from `@/components/_form/` instead of `@mui/material`
+
+### Form Component Architecture
+Each form component follows the established architecture pattern:
+- `index.tsx`: Contains the UI component
+- `index.hooks.tsx`: Contains the business logic and form integration
+- Uses `useFormField` hook for consistent form field management
+- Integrates with react-hook-form for validation and state management
+
+## Navigation and Routing Standards
+
+### React Router Basename
+- The application uses React Router with `basename="/app"`
+- **CRITICAL**: All `navigate()` calls must use paths WITHOUT the `/app` prefix
+- The basename is automatically prepended by React Router
+
+### Navigation Best Practices
+
+#### ✅ Correct Navigation:
+```typescript
+// Good - without /app prefix
+navigate("/settings/users");
+navigate("/settings/users/new");
+navigate(`/settings/users/${userId}`);
+navigate("/dashboard");
+```
+
+#### ❌ Incorrect Navigation:
+```typescript
+// Bad - includes /app prefix (will result in /app/app/settings/users)
+navigate("/app/settings/users");
+navigate("/app/settings/users/new");
+navigate(`/app/settings/users/${userId}`);
+```
+
+### Dynamic Route Parameters
+- Use `useParams()` hook to read route parameters
+- For nested routes with IDs, follow the pattern: `/resource/:resourceId`
+- Example: `/settings/users/:userId`
+
+### Route Configuration
+- Define routes without `/app` prefix in route configuration
+- Routes are relative to the basename
+
+```typescript
+// Correct route configuration
+<Route path="users" element={<UsersSettings />} />
+<Route path="users/new" element={<UsersSettings />} />
+<Route path="users/:userId" element={<UsersSettings />} />
+```
+
+## Code Language Standards
+- **CRITICAL**: All comments in the code must be written in English
+- **CRITICAL**: All documentation files (`.md`, `.txt`, etc.) must be written in English
+- **CRITICAL**: All comments in shell scripts (`.sh`) must be written in English
+- All labels, messages, and user-facing text must be in English
+- Variable names, function names, and identifiers should follow English conventions
+- Documentation and README files should be in English
+- Error messages and console logs should be in English
+- Script output messages and echo statements should be in English

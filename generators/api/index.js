@@ -243,6 +243,24 @@ module.exports = class extends Generator {
       type: String,
       description: 'Cookie role for authentication'
     });
+
+    // Define force option for automatic overwrite in CLI mode
+    this.option('force', {
+      type: Boolean,
+      description: 'Force overwrite existing files',
+      default: false
+    });
+
+    // Force overwrite if CLI options are provided (non-interactive mode)
+    // Set it immediately after super() so Yeoman recognizes it
+    const hasCliArgs = opts.route && opts.method;
+    if (hasCliArgs) {
+      this.options.force = true;
+    }
+  }
+
+  initializing() {
+    // No-op: force is set in constructor
   }
 
   async prompting() {
@@ -379,7 +397,7 @@ module.exports = class extends Generator {
       this.destinationPath(
         `./src/endpoints/${endpointFolderName}/interfaces.ts`,
       ),
-      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload),
+      getEndpointInterfacesTemplate(capitalize(apiName), urlParams, hasPayload, method),
     );
     this.fs.write(
       this.destinationPath(
@@ -389,8 +407,12 @@ module.exports = class extends Generator {
         capitalize(apiName),
         urlParams,
         hasPayload,
+        method,
       ),
     );
+    // Build full API route path
+    const fullRoutePath = `/api/${params.join("/")}`;
+    
     this.fs.write(
       this.destinationPath(`./src/endpoints/${endpointFolderName}/handler.ts`),
       getEndpointHandlersTemplate(
@@ -398,6 +420,8 @@ module.exports = class extends Generator {
         useCookieAuth,
         (useCookieAuth ? camelCase(cookieRole) : ""),
         hasPayload,
+        method,
+        `"${fullRoutePath}"`,
       ),
     );
     this.fs.write(

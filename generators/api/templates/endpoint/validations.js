@@ -1,8 +1,12 @@
 module.exports = (
   apiNameCapital,
   urlParams,
-  hasPayload
-) => `import { YupShapeByInterface } from "@/lib/response-handler";
+  hasPayload,
+  httpMethod
+) => {
+  const isPatch = httpMethod === "patch";
+  
+  return `import { YupShapeByInterface${isPatch ? ", JsonPatchOperation, jsonPatchOperationValidation" : ""} } from "@/lib/response-handler";
 import * as yup from "yup";
 import { ${apiNameCapital}Api } from "./interfaces";
 
@@ -15,7 +19,18 @@ const queryStringParametersValidations =
 }});
 ${
   hasPayload
-    ? `
+    ? isPatch
+      ? `
+const payloadValidations = (): YupShapeByInterface<{
+  operations: JsonPatchOperation[];
+}> => ({
+  operations: yup
+    .array()
+    .of(jsonPatchOperationValidation)
+    .min(1, "At least one operation is required")
+    .required(),
+});`
+      : `
 const payloadValidations =
   (): YupShapeByInterface<${apiNameCapital}Api.Payload> => ({});
 `
@@ -30,3 +45,4 @@ export default () => ({
   }
 });
 `;
+};

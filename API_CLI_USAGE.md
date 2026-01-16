@@ -55,8 +55,23 @@ yo g-next:api --route admin/users/{userId} --method put --useCookieAuth --cookie
 
 ## Modalità interattiva vs CLI
 
-- **Modalità CLI**: Quando vengono fornite le opzioni `--route` e `--method`, il generator salta i prompt e utilizza i valori forniti
-- **Modalità interattiva**: Quando le opzioni non vengono fornite, il generator mostra i prompt per l'inserimento manuale
+- **Modalità CLI**: Quando vengono fornite le opzioni `--route` e `--method`, il generator salta i prompt e utilizza i valori forniti. In questa modalità, **tutti i file esistenti vengono sovrascritti automaticamente** senza chiedere conferma.
+- **Modalità interattiva**: Quando le opzioni non vengono fornite, il generator mostra i prompt per l'inserimento manuale. In questa modalità, Yeoman chiederà conferma prima di sovrascrivere file esistenti.
+
+## Gestione Automatica dei Conflitti
+
+Quando vengono forniti parametri CLI (modalità non interattiva), il generator **accetta automaticamente tutte le modifiche ai file** senza chiedere conferma. Questo comportamento è ideale per script automatizzati e pipeline CI/CD dove non è possibile interagire con i prompt.
+
+**Esempio:**
+```bash
+# Modalità CLI: accetta automaticamente tutte le modifiche
+yo g-next:api --route users --method get
+
+# Modalità interattiva: chiederà conferma se un file esiste già
+yo g-next:api
+```
+
+**Nota:** In modalità CLI, tutti i file esistenti verranno sovrascritti automaticamente. Usare con cautela in produzione.
 
 ## Validazione
 

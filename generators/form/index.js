@@ -28,9 +28,18 @@ module.exports = class extends Generator {
       type: String,
       description: 'Form path (relative to src/components)'
     });
+
+    // Force overwrite if CLI options are provided (non-interactive mode)
+    // Set it immediately after super() so Yeoman recognizes it
+    const hasCliArgs = opts.formName;
+    if (hasCliArgs) {
+      this.options.force = true;
+    }
   }
 
   initializing() {
+    // No-op: force is set in constructor
+
     this.env.adapter.promptModule.registerPrompt(
       "directory",
       require("inquirer-directory")

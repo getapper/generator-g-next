@@ -51,9 +51,18 @@ module.exports = class extends Generator {
       type: String,
       description: 'Cookie role for authentication'
     });
+
+    // Force overwrite if CLI options are provided (non-interactive mode)
+    // Set it immediately after super() so Yeoman recognizes it
+    const hasCliArgs = opts.pageName && opts.componentName && opts.renderingStrategy;
+    if (hasCliArgs) {
+      this.options.force = true;
+    }
   }
 
   initializing() {
+    // No-op: force is set in constructor
+
     this.env.adapter.promptModule.registerPrompt(
       "directory",
       require("inquirer-directory"),
@@ -137,39 +146,159 @@ module.exports = class extends Generator {
         ),
       );
 
-      let answers = await this.prompt([
-        {
-          type: "directory",
-          name: "pagePath",
-          message: "Select where to create the page:",
-          basePath: "./src/pages",
-        },
-        {
-          type: "input",
-          name: "pageName",
-          message:
-            "What is your page name? (Use squared brackets for single parameters - eg. [postId] -, double square brackets with trailing dots for multiple parameters - eg. [[...params]])",
-        },
-        {
-          type: "input",
-          name: "componentName",
-          message: "What is your page component name?",
-        },
-        {
-          type: "list",
-          name: "renderingStrategy",
-          message: "Which function for rendering should be used?",
-          choices: [
-            "none",
-            "Static Generation Props (SSG)",
-            "Server-side Rendering Props (SSR)",
-          ],
-          default: "none",
-        },
-      ]);
-
-      //cookie auth
+      // Get config for cookie auth
       const config = getGenygConfigFile(this);
+      const availableCookieRoles = getAvailableCookieRoles(this);
+
+      let answers = {};
+      let validationErrors = [];
+
+      // Prompt loop with validation
+      let isValid = false;
+      while (!isValid) {
+        // Clear previous errors
+        if (validationErrors.length > 0) {
+          this.log(chalk.red("\nValidation errors:"));
+          validationErrors.forEach((error) => {
+            this.log(chalk.red(`  - ${error.message}`));
+          });
+          this.log("");
+        }
+
+        const promptAnswers = await this.prompt([
+          {
+            type: "directory",
+            name: "pagePath",
+            message: "Select where to create the page:",
+            basePath: "./src/pages",
+            validate: (input) => {
+              if (!input || input.trim() === "" || input === "choose this directory") {
+                return true; // Empty path is valid (root of pages)
+              }
+              const pathPattern = /^[a-zA-Z0-9\/\-]*$/;
+              if (!pathPattern.test(input)) {
+                return "Page path contains invalid characters. Only letters, numbers, slashes, and hyphens are allowed";
+              }
+              return true;
+            },
+          },
+          {
+            type: "input",
+            name: "pageName",
+            message:
+              "What is your page name? (Use squared brackets for single parameters - eg. [postId] -, double square brackets with trailing dots for multiple parameters - eg. [[...params]])",
+            validate: (input) => {
+              if (!input || input.trim() === "") {
+                return "Page name is required";
+              }
+              const trimmed = input.trim();
+              // Check if it's a dynamic route
+              if (trimmed[0] === "[") {
+                // Dynamic route - validate format
+                if (trimmed[1] === "[") {
+                  // Multiple parameters: [[...params]]
+                  if (!trimmed.match(/^\[\[\.\.\.[a-zA-Z][a-zA-Z0-9]*\]\]$/)) {
+                    return "Invalid multiple parameter format. Use [[...paramName]] where paramName starts with a letter";
+                  }
+                } else {
+                  // Single parameter: [param]
+                  if (!trimmed.match(/^\[[a-zA-Z][a-zA-Z0-9]*\]$/)) {
+                    return "Invalid parameter format. Use [paramName] where paramName starts with a letter";
+                  }
+                }
+              } else {
+                // Static route - must start with a letter
+                if (!/^[a-zA-Z]/.test(trimmed)) {
+                  return "Page name must start with a letter";
+                }
+              }
+              return true;
+            },
+          },
+          {
+            type: "input",
+            name: "componentName",
+            message: "What is your page component name?",
+            validate: (input) => {
+              if (!input || input.trim() === "") {
+                return "Component name is required";
+              }
+              const trimmed = input.trim();
+              if (!/^[a-zA-Z]/.test(trimmed)) {
+                return "Component name must start with a letter";
+              }
+              return true;
+            },
+          },
+          {
+            type: "list",
+            name: "renderingStrategy",
+            message: "Which function for rendering should be used?",
+            choices: [
+              "none",
+              "Static Generation Props (SSG)",
+              "Server-side Rendering Props (SSR)",
+            ],
+            default: "none",
+          },
+        ]);
+
+        // Normalize pagePath - handle "choose this directory" option
+        let normalizedPagePath = promptAnswers.pagePath;
+        if (normalizedPagePath === "choose this directory" || normalizedPagePath === "" || !normalizedPagePath) {
+          normalizedPagePath = "";
+        } else {
+          normalizedPagePath = normalizedPagePath.trim();
+        }
+
+        // Validate with Yup schema
+        const validationSchema = createValidationSchema({
+          pageName: {
+            required: true,
+            requiredMessage: "Page name is required",
+            minLength: 1,
+            minLengthMessage: "Page name cannot be empty"
+          },
+          componentName: commonSchemas.name,
+          renderingStrategy: commonSchemas.renderingStrategy,
+          pagePath: {
+            required: false,
+            pattern: /^[a-zA-Z0-9\/\-]*$/,
+            patternMessage: "Page path contains invalid characters. Only letters, numbers, slashes, and hyphens are allowed"
+          }
+        });
+
+        const dataToValidate = {
+          pageName: promptAnswers.pageName,
+          componentName: promptAnswers.componentName,
+          renderingStrategy: promptAnswers.renderingStrategy,
+          pagePath: normalizedPagePath
+        };
+
+        try {
+          await validationSchema.validate(dataToValidate, {
+            abortEarly: false,
+            stripUnknown: true
+          });
+          isValid = true;
+          answers = {
+            ...promptAnswers,
+            pagePath: normalizedPagePath
+          };
+        } catch (error) {
+          if (error.name === 'ValidationError') {
+            validationErrors = error.inner.map(err => ({
+              field: err.path,
+              message: err.message,
+              value: err.value
+            }));
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      // Cookie auth prompts
       if (
         config.packages.cookieAuth &&
         config.cookieRoles.length !== 0 &&
@@ -196,24 +325,49 @@ module.exports = class extends Generator {
               choices: config.cookieRoles,
             }),
           );
+        } else {
+          answers.cookieRole = null;
         }
+      } else {
+        answers.useCookieAuth = false;
+        answers.cookieRole = null;
       }
 
+      // Process page name for dynamic routes
       if (answers.pageName[0] === "[") {
         answers.dynamic = true;
         answers.multipleParameters = answers.pageName[1] === "[";
       } else {
         answers.dynamic = false;
+        answers.multipleParameters = false;
       }
 
-      if (answers.pageName === "" || answers.componentName === "") {
-        this.log(yosay(chalk.red("Please give your page a name next time!")));
-        process.exit(1);
-        return;
-      }
-
+      // Normalize names
       answers.componentName = pascalCase(answers.componentName).trim();
-      answers.pageName = kebabCase(answers.pageName).trim();
+      
+      // Normalize pageName - preserve brackets and camelCase for dynamic routes
+      if (answers.dynamic) {
+        // For dynamic routes, preserve the bracket format and ensure parameter name is camelCase
+        if (answers.multipleParameters) {
+          // [[...params]] format - extract param name and normalize to camelCase
+          const paramMatch = answers.pageName.match(/\[\[\.\.\.([a-zA-Z][a-zA-Z0-9]*)\]\]/);
+          if (paramMatch) {
+            const paramName = camelCase(paramMatch[1]);
+            answers.pageName = `[[...${paramName}]]`;
+          }
+        } else {
+          // [param] format - extract param name and normalize to camelCase
+          const paramMatch = answers.pageName.match(/\[([a-zA-Z][a-zA-Z0-9]*)\]/);
+          if (paramMatch) {
+            const paramName = camelCase(paramMatch[1]);
+            answers.pageName = `[${paramName}]`;
+          }
+        }
+      } else {
+        // For static routes, apply kebabCase normally
+        answers.pageName = kebabCase(answers.pageName).trim();
+      }
+      
       this.answers = answers;
     }
   }

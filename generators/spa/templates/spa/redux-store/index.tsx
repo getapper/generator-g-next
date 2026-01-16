@@ -17,6 +17,7 @@ const rootReducer = createRootReducer();
 const persistConfig = {
   key: "<%= spaName %>-root",
   storage,
+  blacklist: ["ajax", "feedback"], // Don't persist ajax and feedback state
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -26,9 +26,18 @@ module.exports = class extends Generator {
       type: String,
       description: 'Task name'
     });
+
+    // Force overwrite if CLI options are provided (non-interactive mode)
+    // Set it immediately after super() so Yeoman recognizes it
+    const hasCliArgs = opts.taskName;
+    if (hasCliArgs) {
+      this.options.force = true;
+    }
   }
 
   initializing() {
+    // No-op: force is set in constructor
+
     this.env.adapter.promptModule.registerPrompt(
       "directory",
       require("inquirer-directory")

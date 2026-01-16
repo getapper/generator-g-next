@@ -44,4 +44,47 @@ export class JsUtility {
       .split(".")
       .reduce((o, i) => (o ?? {})?.[i] ?? (o ?? {})?.[parseInt(i, 10)], obj);
   }
+
+  /**
+   * Sets a nested value in an object using a path string with "/" separators.
+   * Creates intermediate objects if they don't exist.
+   * @param obj - The target object
+   * @param path - Path string with "/" separators (e.g., "key1/key2/key3")
+   * @param value - The value to set
+   */
+  static setNestedValue(obj: any, path: string, value: any): void {
+    const keys = path.split("/");
+    let current = obj;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!(key in current) || typeof current[key] !== "object") {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
+  }
+
+  /**
+   * Gets a nested value from an object using a path string with "/" separators.
+   * Returns undefined if the path doesn't exist.
+   * @param obj - The source object
+   * @param path - Path string with "/" separators (e.g., "key1/key2/key3")
+   * @returns The value at the path, or undefined if not found
+   */
+  static getNestedValue(obj: any, path: string): any {
+    const keys = path.split("/");
+    let current = obj;
+
+    for (const key of keys) {
+      if (current === null || current === undefined || !(key in current)) {
+        return undefined;
+      }
+      current = current[key];
+    }
+
+    return current;
+  }
 }

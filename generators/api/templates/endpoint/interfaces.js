@@ -1,8 +1,12 @@
 module.exports = (
   apiNameCapital,
   urlParams,
-  hasPayload
-) => `import { ErrorResponse, RequestI } from "@/lib/response-handler";
+  hasPayload,
+  httpMethod
+) => {
+  const isPatch = httpMethod === "patch";
+  
+  return `import { ErrorResponse, RequestI${isPatch ? ", JsonPatchOperation" : ""} } from "@/lib/response-handler";
 
 export namespace ${apiNameCapital}Api {
   export type QueryStringParameters = {${
@@ -11,7 +15,14 @@ export namespace ${apiNameCapital}Api {
       : ""
   }};${
   hasPayload
-    ? `
+    ? isPatch
+      ? `
+
+  // JSON Patch RFC 6902 operations
+  export type Payload = {
+    operations: JsonPatchOperation[];
+  };`
+      : `
 
   export type Payload = {};`
     : ""
@@ -28,3 +39,4 @@ export namespace ${apiNameCapital}Api {
   }> {}
 }
 `;
+};

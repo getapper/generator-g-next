@@ -1,4 +1,4 @@
-import mongoClientPromise from "@/lib/mongodb";
+import { getMongoClient } from "@/lib/mongodb";
 import {
   BulkWriteOptions,
   Db,
@@ -61,7 +61,7 @@ class MongoDao<Interface, Class> {
       throw new Error("Please specify process.env.MONGODB_NAME");
     }
     if (!this.db) {
-      this.mongoClient = await mongoClientPromise;
+      this.mongoClient = await getMongoClient();
       this.db = this.mongoClient.db(process.env.MONGODB_NAME);
     }
   }

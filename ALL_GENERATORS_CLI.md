@@ -63,7 +63,7 @@ yo g-next:form --formName UserRegistration --formPath auth
 
 ## Generator Model
 
-**Comando:** `yo g-next:model --modelName <modelName> --location <location>`
+**Comando:** `yo g-next:model --modelName <modelName> --location <location> [options]`
 
 **Opzioni:**
 - `--modelName` (obbligatorio): Nome del modello
@@ -125,7 +125,7 @@ yo g-next:slice --sliceName products --spaFolderName main --useSagas false
 
 ## Generator Task
 
-**Comando:** `yo g-next:task --taskName <taskName>`
+**Comando:** `yo g-next:task --taskName <taskName> [options]`
 
 **Opzioni:**
 - `--taskName` (obbligatorio): Nome del task
@@ -138,7 +138,7 @@ yo g-next:task --taskName ProcessData
 
 ## Generator Model MongoDB
 
-**Comando:** `yo g-next:model-mongodb --modelName <modelName>`
+**Comando:** `yo g-next:model-mongodb --modelName <modelName> [options]`
 
 **Opzioni:**
 - `--modelName` (obbligatorio): Nome del modello MongoDB
@@ -196,6 +196,24 @@ Quando vengono forniti i parametri obbligatori, il generator salta i prompt e ut
 ### Modalità Interattiva
 Quando i parametri non vengono forniti, il generator mostra i prompt per l'inserimento manuale.
 
+### Gestione Automatica dei Conflitti
+Quando vengono forniti parametri CLI (modalità non interattiva), il generator **accetta automaticamente tutte le modifiche ai file** senza chiedere conferma. Questo comportamento è ideale per script automatizzati e pipeline CI/CD dove non è possibile interagire con i prompt.
+
+**Comportamento:**
+- **Modalità CLI**: Tutti i file esistenti vengono sovrascritti automaticamente senza chiedere conferma
+- **Modalità Interattiva**: Yeoman chiederà conferma prima di sovrascrivere file esistenti
+
+**Esempio:**
+```bash
+# Modalità CLI: accetta automaticamente tutte le modifiche
+yo g-next:api --route users --method get
+
+# Modalità interattiva: chiederà conferma se un file esiste già
+yo g-next:api
+```
+
+**Nota:** In modalità CLI, tutti i file esistenti verranno sovrascritti automaticamente. Usare con cautela in produzione.
+
 ## Vantaggi
 
 1. **Automazione**: Possibilità di integrare la generazione in script e pipeline CI/CD
@@ -232,7 +250,7 @@ yo g-next:comp --componentName UserProfile --componentPath user
 yo g-next:form --formName LoginForm --formPath auth
 yo g-next:form --formName UserRegistration --formPath auth
 
-# API Endpoints
+# API Endpoints (modalità CLI: accetta automaticamente modifiche ai file)
 yo g-next:api --route users --method get
 yo g-next:api --route users/{userId} --method put --useCookieAuth --cookieRole admin
 yo g-next:api --route products --method post --useCookieAuth --cookieRole admin

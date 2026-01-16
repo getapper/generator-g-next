@@ -105,8 +105,9 @@ function* ajaxTask(
       if (requestAction.deferred) {
         requestAction.deferred.reject(failPayload);
       }
-      if (status === 401 && api !== actions.postAdminSessions.api) {
-        if (!window.location.search.includes("redirect")) {
+      if (status === 401) {
+        // Avoid redirect loop if already on login page
+        if (!window.location.pathname.includes("/login") && !window.location.search.includes("redirect")) {
           const redirectPath = `${window.location.pathname.replace(
             "app/",
             "",
