@@ -30,7 +30,7 @@ export const FormSwitch = memo(
     name,
     label,
     labelPosition = "top",
-    color = "default",
+    color = "primary",
     ...props
   }: FormSwitchProps) => {
     const { value, handleChange, error } = useFormSwitch(name);

@@ -84,6 +84,34 @@ MONGODB_URI=mongodb://127.0.0.1:27017/$MONGODB_NAME`,
     // Copy MongoDB lib files
     this.fs.copy(this.templatePath(), this.destinationRoot());
 
+    // Copy database export/import tasks
+    this.fs.copy(
+      this.templatePath("src/tasks/export-database"),
+      this.destinationPath("src/tasks/export-database"),
+    );
+    this.fs.copy(
+      this.templatePath("src/tasks/import-database"),
+      this.destinationPath("src/tasks/import-database"),
+    );
+
+    // Add task scripts to package.json
+    this.packageJson.merge({
+      scripts: {
+        "TASK:ExportDatabase": "ts-node --project tsconfig-ts-node.json -r tsconfig-paths/register src/tasks/export-database/exec",
+        "TASK:ImportDatabase": "ts-node --project tsconfig-ts-node.json -r tsconfig-paths/register src/tasks/import-database/exec",
+      },
+    });
+
+    // Add .db-exports to .gitignore if not already present
+    const gitignorePath = this.destinationPath(".gitignore");
+    if (this.fs.exists(gitignorePath)) {
+      const gitignoreContent = this.fs.read(gitignorePath);
+      if (!gitignoreContent.includes(".db-exports")) {
+        const updatedGitignore = `${gitignoreContent}\n.db-exports`;
+        this.fs.write(gitignorePath, updatedGitignore);
+      }
+    }
+
     const nextConfigOptionsJson = require(this.destinationPath(
       "next.config.options.json",
     ));
