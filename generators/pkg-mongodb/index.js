@@ -102,12 +102,12 @@ MONGODB_URI=mongodb://127.0.0.1:27017/$MONGODB_NAME`,
       },
     });
 
-    // Add .db-exports to .gitignore if not already present
+    // Add db-exports to .gitignore if not already present
     const gitignorePath = this.destinationPath(".gitignore");
     if (this.fs.exists(gitignorePath)) {
       const gitignoreContent = this.fs.read(gitignorePath);
-      if (!gitignoreContent.includes(".db-exports")) {
-        const updatedGitignore = `${gitignoreContent}\n.db-exports`;
+      if (!gitignoreContent.includes("db-exports")) {
+        const updatedGitignore = `${gitignoreContent}\ndb-exports`;
         this.fs.write(gitignorePath, updatedGitignore);
       }
     }

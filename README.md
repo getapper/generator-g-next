@@ -41,8 +41,8 @@ Welcome to the **GeNYG (Getapper Next.js Yeoman Generator)** project! GeNYG is a
 ## Quick Start
 
 ```bash
-# Install Yeoman globally
-npm install -g yo
+# Install Yeoman globally (version 4.3.1 required)
+npm install -g yo@4.3.1
 
 # Install GeNYG generator
 npm install -g generator-g-next
@@ -62,7 +62,7 @@ yo g-next:pkg-core
 
 - **Node.js**: Version 16.x, 17.x, 18.x, 19.x, or 20.x
 - **npm**: Usually comes with Node.js
-- **Yeoman**: Install globally with `npm install -g yo`
+- **Yeoman**: Install globally with `npm install -g yo@4.3.1` (version 4.3.1 required)
 
 ### Install GeNYG Generator
 
@@ -247,7 +247,7 @@ yo g-next:pkg-translations
 - Adds MongoDB library files inside `/lib`
 - Adds MongoDB environment variables to env files
 - Creates database export/import tasks
-- Adds `.db-exports` to `.gitignore`
+- Adds `db-exports` to `.gitignore`
 - Updates Jest config for MongoDB Memory Server
 
 **Interactive Mode:**
@@ -1057,82 +1057,82 @@ This section provides detailed examples for the API generator with various use c
 
 ### Basic Examples
 
-#### 1. Endpoint GET semplice
+#### 1. Simple GET endpoint
 ```bash
 yo g-next:api --route users --method get
 ```
-**Risultato**: Crea un endpoint GET per `/users`
+**Result**: Creates a GET endpoint for `/users`
 
-#### 2. Endpoint POST per creazione
+#### 2. POST endpoint for creation
 ```bash
 yo g-next:api --route posts --method post
 ```
-**Risultato**: Crea un endpoint POST per `/posts`
+**Result**: Creates a POST endpoint for `/posts`
 
-#### 3. Endpoint PUT per aggiornamento
+#### 3. PUT endpoint for update
 ```bash
 yo g-next:api --route users/{userId} --method put
 ```
-**Risultato**: Crea un endpoint PUT per `/users/{userId}`
+**Result**: Creates a PUT endpoint for `/users/{userId}`
 
-#### 4. Endpoint PATCH per aggiornamento parziale
+#### 4. PATCH endpoint for partial update
 ```bash
 yo g-next:api --route posts/{postId} --method patch
 ```
-**Risultato**: Crea un endpoint PATCH per `/posts/{postId}`
+**Result**: Creates a PATCH endpoint for `/posts/{postId}`
 
-#### 5. Endpoint DELETE per eliminazione
+#### 5. DELETE endpoint for deletion
 ```bash
 yo g-next:api --route comments/{commentId} --method delete
 ```
-**Risultato**: Crea un endpoint DELETE per `/comments/{commentId}`
+**Result**: Creates a DELETE endpoint for `/comments/{commentId}`
 
 ### Examples with Dynamic Parameters
 
-#### 6. Endpoint con parametro singolo
+#### 6. Endpoint with single parameter
 ```bash
 yo g-next:api users/{userId} get
 ```
-**Risultato**: Crea un endpoint GET per `/users/{userId}`
+**Result**: Creates a GET endpoint for `/users/{userId}`
 
-#### 7. Endpoint con parametri multipli
+#### 7. Endpoint with multiple parameters
 ```bash
 yo g-next:api posts/{postId}/comments/{commentId} get
 ```
-**Risultato**: Crea un endpoint GET per `/posts/{postId}/comments/{commentId}`
+**Result**: Creates a GET endpoint for `/posts/{postId}/comments/{commentId}`
 
-#### 8. Endpoint con parametri e metodo POST
+#### 8. Endpoint with parameters and POST method
 ```bash
 yo g-next:api users/{userId}/posts post
 ```
-**Risultato**: Crea un endpoint POST per `/users/{userId}/posts`
+**Result**: Creates a POST endpoint for `/users/{userId}/posts`
 
 ### Examples with Cookie Authentication
 
-#### 9. Endpoint admin con autenticazione
+#### 9. Admin endpoint with authentication
 ```bash
 yo g-next:api admin/users get --useCookieAuth --cookieRole admin
 ```
-**Risultato**: Crea un endpoint GET per `/admin/users` con autenticazione cookie per ruolo admin
+**Result**: Creates a GET endpoint for `/admin/users` with cookie authentication for admin role
 
-#### 10. Endpoint utente con autenticazione
+#### 10. User endpoint with authentication
 ```bash
 yo g-next:api profile put --useCookieAuth --cookieRole user
 ```
-**Risultato**: Crea un endpoint PUT per `/profile` con autenticazione cookie per ruolo user
+**Result**: Creates a PUT endpoint for `/profile` with cookie authentication for user role
 
-#### 11. Endpoint con parametri e autenticazione
+#### 11. Endpoint with parameters and authentication
 ```bash
 yo g-next:api admin/users/{userId} put --useCookieAuth --cookieRole admin
 ```
-**Risultato**: Crea un endpoint PUT per `/admin/users/{userId}` con autenticazione cookie per ruolo admin
+**Result**: Creates a PUT endpoint for `/admin/users/{userId}` with cookie authentication for admin role
 
 ### Automation Scripts
 
-#### 12. Script di automazione
+#### 12. Automation script
 ```bash
 #!/bin/bash
-# Script per creare multiple API endpoints
+# Script to create multiple API endpoints
 
 echo "Creating user management APIs..."
 
@@ -1160,10 +1160,10 @@ yo g-next:api --route comments/{commentId} --method delete
 echo "All APIs created successfully!"
 ```
 
-#### 13. Script con autenticazione
+#### 13. Script with authentication
 ```bash
 #!/bin/bash
-# Script per creare API con autenticazione
+# Script to create APIs with authentication
 
 echo "Creating authenticated APIs..."
 
@@ -1182,53 +1182,53 @@ echo "Authenticated APIs created successfully!"
 
 ### Validation Examples
 
-#### 14. Test di validazione metodo HTTP
+#### 14. HTTP method validation test
 ```bash
 yo g-next:api users invalid
 ```
-**Risultato**: Mostra errore Yup "HTTP method must be one of: get, post, put, patch, delete"
+**Result**: Shows Yup error "HTTP method must be one of: get, post, put, patch, delete"
 
-#### 15. Test di validazione autenticazione
+#### 15. Authentication validation test
 ```bash
 yo g-next:api --route users --method get --useCookieAuth
 ```
-**Risultato**: Mostra errore Yup "Cookie role is required when using cookie authentication"
+**Result**: Shows Yup error "Cookie role is required when using cookie authentication"
 
-#### 16. Test di validazione formato route
+#### 16. Route format validation test
 ```bash
 yo g-next:api users@#$ get
 ```
-**Risultato**: Mostra errore Yup "Route path contains invalid characters. Only letters, numbers, slashes, curly braces, and hyphens are allowed"
+**Result**: Shows Yup error "Route path contains invalid characters. Only letters, numbers, slashes, curly braces, and hyphens are allowed"
 
-#### 17. Test di validazione parametri dinamici
+#### 17. Dynamic parameters validation test
 ```bash
 yo g-next:api users/{} get
 ```
-**Risultato**: Mostra errore Yup "Parameter name cannot be empty inside curly braces"
+**Result**: Shows Yup error "Parameter name cannot be empty inside curly braces"
 
-#### 18. Test di validazione nome parametro
+#### 18. Parameter name validation test
 ```bash
 yo g-next:api users/{123invalid} get
 ```
-**Risultato**: Mostra errore Yup "Parameter name '123invalid' must start with a letter and contain only letters and numbers"
+**Result**: Shows Yup error "Parameter name '123invalid' must start with a letter and contain only letters and numbers"
 
-#### 19. Test di validazione route vuoto
+#### 19. Empty route validation test
 ```bash
 yo g-next:api "" get
 ```
-**Risultato**: Mostra errore Yup "Route path cannot be empty"
+**Result**: Shows Yup error "Route path cannot be empty"
 
-#### 20. Test di validazione ruolo cookie non valido
+#### 20. Invalid cookie role validation test
 ```bash
 yo g-next:api --route users --method get --useCookieAuth --cookieRole superadmin
 ```
-**Risultato**: Mostra errore Yup "Cookie role must be one of: admin, user, moderator"
+**Result**: Shows Yup error "Cookie role must be one of: admin, user, moderator"
 
-#### 21. Test di validazione multipla
+#### 21. Multiple validation test
 ```bash
 yo g-next:api users@#$ invalid --useCookieAuth --cookieRole guest
 ```
-**Risultato**: Mostra errori Yup multipli:
+**Result**: Shows multiple Yup errors:
 ```
 Validation errors found:
   • method: HTTP method must be one of: get, post, put, patch, delete
@@ -1236,32 +1236,32 @@ Validation errors found:
   • cookieRole: Cookie role must be one of: admin, user, moderator
 ```
 
-### File Generati
+### Generated Files
 
-Ogni comando genera i seguenti file:
+Each command generates the following files:
 
 ```
 src/
 ├── pages/
 │   └── api/
 │       └── [route]/
-│           └── index.ts          # Endpoint API Next.js
+│           └── index.ts          # Next.js API endpoint
 └── endpoints/
     └── [method]-[route]/
-        ├── interfaces.ts         # Interfacce TypeScript
-        ├── validations.ts        # Validazioni Yup
-        ├── handler.ts            # Logica dell'handler
-        ├── index.test.ts         # Test unitari
-        └── index.ts              # File principale
+        ├── interfaces.ts         # TypeScript interfaces
+        ├── validations.ts        # Yup validations
+        ├── handler.ts            # Handler logic
+        ├── index.test.ts         # Unit tests
+        └── index.ts              # Main file
 ```
 
 ### Important Notes
 
-1. **Parametri dinamici**: Usa la sintassi `{paramName}` per parametri singoli
-2. **Metodi HTTP**: Sono supportati solo `get`, `post`, `put`, `patch`, `delete`
-3. **Autenticazione**: Se usi `--useCookieAuth`, devi specificare anche `--cookieRole`
-4. **Validazione**: Il generator valida automaticamente tutti i parametri
-5. **Modalità mista**: Puoi usare sia CLI che modalità interattiva nello stesso progetto
+1. **Dynamic parameters**: Use the syntax `{paramName}` for single parameters
+2. **HTTP methods**: Only `get`, `post`, `put`, `patch`, `delete` are supported
+3. **Authentication**: If you use `--useCookieAuth`, you must also specify `--cookieRole`
+4. **Validation**: The generator automatically validates all parameters
+5. **Mixed mode**: You can use both CLI and interactive mode in the same project
 
 ---
 
@@ -1269,14 +1269,14 @@ src/
 
 ### Generator AJAX
 
-**Comando:** `yo g-next:ajax --route <route> --method <method> [options]`
+**Command:** `yo g-next:ajax --route <route> --method <method> [options]`
 
-**Opzioni:**
-- `--route` (obbligatorio): Percorso dell'API
-- `--method` (obbligatorio): Metodo HTTP
-- `--spaFolderName`: Nome della cartella SPA
+**Options:**
+- `--route` (required): API route path
+- `--method` (required): HTTP method
+- `--spaFolderName`: SPA folder name
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:ajax --route users --method get
 yo g-next:ajax --route posts/{postId} --method post --spaFolderName main
@@ -1284,13 +1284,13 @@ yo g-next:ajax --route posts/{postId} --method post --spaFolderName main
 
 ### Generator Component
 
-**Comando:** `yo g-next:comp --componentName <componentName> [options]`
+**Command:** `yo g-next:comp --componentName <componentName> [options]`
 
-**Opzioni:**
-- `--componentName` (obbligatorio): Nome del componente
-- `--componentPath`: Percorso del componente (relativo a src/components)
+**Options:**
+- `--componentName` (required): Component name
+- `--componentPath`: Component path (relative to src/components)
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:comp --componentName UserCard
 yo g-next:comp --componentName UserProfile --componentPath user
@@ -1298,13 +1298,13 @@ yo g-next:comp --componentName UserProfile --componentPath user
 
 ### Generator Form
 
-**Comando:** `yo g-next:form --formName <formName> [options]`
+**Command:** `yo g-next:form --formName <formName> [options]`
 
-**Opzioni:**
-- `--formName` (obbligatorio): Nome del form
-- `--formPath`: Percorso del form (relativo a src/components)
+**Options:**
+- `--formName` (required): Form name
+- `--formPath`: Form path (relative to src/components)
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:form --formName LoginForm
 yo g-next:form --formName UserRegistration --formPath auth
@@ -1312,13 +1312,13 @@ yo g-next:form --formName UserRegistration --formPath auth
 
 ### Generator Model
 
-**Comando:** `yo g-next:model --modelName <modelName> --location <location> [options]`
+**Command:** `yo g-next:model --modelName <modelName> --location <location> [options]`
 
-**Opzioni:**
-- `--modelName` (obbligatorio): Nome del modello
-- `--location` (obbligatorio): Posizione (`client`, `server`, `common`)
+**Options:**
+- `--modelName` (required): Model name
+- `--location` (required): Location (`client`, `server`, `common`)
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:model --modelName User --location client
 yo g-next:model --modelName Product --location server
@@ -1327,17 +1327,17 @@ yo g-next:model --modelName ApiResponse --location common
 
 ### Generator Page
 
-**Comando:** `yo g-next:page --pageName <pageName> --componentName <componentName> --renderingStrategy <renderingStrategy> [options]`
+**Command:** `yo g-next:page --pageName <pageName> --componentName <componentName> --renderingStrategy <renderingStrategy> [options]`
 
-**Opzioni:**
-- `--pageName` (obbligatorio): Nome della pagina (es. `users`, `[userId]`, `[[...params]]`)
-- `--componentName` (obbligatorio): Nome del componente pagina
-- `--renderingStrategy` (obbligatorio): Strategia di rendering (`none`, `Static Generation Props (SSG)`, `Server-side Rendering Props (SSR)`)
-- `--pagePath`: Percorso della pagina (relativo a src/pages)
-- `--useCookieAuth`: Abilita autenticazione cookie
-- `--cookieRole`: Ruolo per autenticazione cookie
+**Options:**
+- `--pageName` (required): Page name (e.g., `users`, `[userId]`, `[[...params]]`)
+- `--componentName` (required): Page component name
+- `--renderingStrategy` (required): Rendering strategy (`none`, `Static Generation Props (SSG)`, `Server-side Rendering Props (SSR)`)
+- `--pagePath`: Page path (relative to src/pages)
+- `--useCookieAuth`: Enable cookie authentication
+- `--cookieRole`: Cookie role for authentication
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:page --pageName users --componentName UserList --renderingStrategy "Static Generation Props (SSG)"
 yo g-next:page --pageName "[userId]" --componentName UserDetail --renderingStrategy "Server-side Rendering Props (SSR)" --useCookieAuth --cookieRole admin
@@ -1345,13 +1345,13 @@ yo g-next:page --pageName "[userId]" --componentName UserDetail --renderingStrat
 
 ### Generator Scene
 
-**Comando:** `yo g-next:scene --sceneName <sceneName> [options]`
+**Command:** `yo g-next:scene --sceneName <sceneName> [options]`
 
-**Opzioni:**
-- `--sceneName` (obbligatorio): Nome della scena
-- `--spaFolderName`: Nome della cartella SPA
+**Options:**
+- `--sceneName` (required): Scene name
+- `--spaFolderName`: SPA folder name
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:scene --sceneName HomePage
 yo g-next:scene --sceneName UserDashboard --spaFolderName admin
@@ -1359,14 +1359,14 @@ yo g-next:scene --sceneName UserDashboard --spaFolderName admin
 
 ### Generator Slice
 
-**Comando:** `yo g-next:slice --sliceName <sliceName> [options]`
+**Command:** `yo g-next:slice --sliceName <sliceName> [options]`
 
-**Opzioni:**
-- `--sliceName` (obbligatorio): Nome dello slice Redux
-- `--spaFolderName`: Nome della cartella SPA
-- `--useSagas`: Crea file saga (default: true)
+**Options:**
+- `--sliceName` (required): Redux slice name
+- `--spaFolderName`: SPA folder name
+- `--useSagas`: Create saga file (default: true)
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:slice --sliceName user
 yo g-next:slice --sliceName products --spaFolderName main --useSagas false
@@ -1374,12 +1374,12 @@ yo g-next:slice --sliceName products --spaFolderName main --useSagas false
 
 ### Generator Task
 
-**Comando:** `yo g-next:task --taskName <taskName> [options]`
+**Command:** `yo g-next:task --taskName <taskName> [options]`
 
-**Opzioni:**
-- `--taskName` (obbligatorio): Nome del task
+**Options:**
+- `--taskName` (required): Task name
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:task --taskName SendEmails
 yo g-next:task --taskName ProcessData
@@ -1387,12 +1387,12 @@ yo g-next:task --taskName ProcessData
 
 ### Generator Model MongoDB
 
-**Comando:** `yo g-next:model-mongodb --modelName <modelName> [options]`
+**Command:** `yo g-next:model-mongodb --modelName <modelName> [options]`
 
-**Opzioni:**
-- `--modelName` (obbligatorio): Nome del modello MongoDB
+**Options:**
+- `--modelName` (required): MongoDB model name
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:model-mongodb --modelName User
 yo g-next:model-mongodb --modelName Product
@@ -1400,14 +1400,14 @@ yo g-next:model-mongodb --modelName Product
 
 ### Generator SPA
 
-**Comando:** `yo g-next:spa --spaName <spaName> --pageName <pageName> [options]`
+**Command:** `yo g-next:spa --spaName <spaName> --pageName <pageName> [options]`
 
-**Opzioni:**
-- `--spaName` (obbligatorio): Nome della SPA
-- `--pageName` (obbligatorio): Nome della pagina
-- `--pagePath`: Percorso della pagina (relativo a src/pages)
+**Options:**
+- `--spaName` (required): SPA name
+- `--pageName` (required): Page name
+- `--pagePath`: Page path (relative to src/pages)
 
-**Esempi:**
+**Examples:**
 ```bash
 yo g-next:spa --spaName AdminApp --pageName AdminDashboard
 yo g-next:spa --spaName UserApp --pageName UserProfile --pagePath user
@@ -1415,10 +1415,10 @@ yo g-next:spa --spaName UserApp --pageName UserProfile --pagePath user
 
 ### Automation Examples
 
-#### Script di Setup Progetto
+#### Project Setup Script
 ```bash
 #!/bin/bash
-# Setup completo di un progetto Next.js
+# Complete Next.js project setup
 
 # Core packages
 yo g-next:pkg-core
@@ -1440,7 +1440,7 @@ yo g-next:comp --componentName UserProfile --componentPath user
 yo g-next:form --formName LoginForm --formPath auth
 yo g-next:form --formName UserRegistration --formPath auth
 
-# API Endpoints (modalità CLI: accetta automaticamente modifiche ai file)
+# API Endpoints (CLI mode: automatically accepts file changes)
 yo g-next:api --route users --method get
 yo g-next:api --route users/{userId} --method put --useCookieAuth --cookieRole admin
 yo g-next:api --route products --method post --useCookieAuth --cookieRole admin
@@ -1533,13 +1533,13 @@ yo g-next:api
 
 ### Gestione Automatica dei Conflitti
 
-Quando vengono forniti parametri CLI (modalità non interattiva), il generator **accetta automaticamente tutte le modifiche ai file** senza chiedere conferma. Questo comportamento è ideale per script automatizzati e pipeline CI/CD dove non è possibile interagire con i prompt.
+When CLI parameters are provided (non-interactive mode), the generator **automatically accepts all file changes** without asking for confirmation. This behavior is ideal for automated scripts and CI/CD pipelines where it's not possible to interact with prompts.
 
-**Comportamento:**
-- **Modalità CLI**: Tutti i file esistenti vengono sovrascritti automaticamente senza chiedere conferma
-- **Modalità Interattiva**: Yeoman chiederà conferma prima di sovrascrivere file esistenti
+**Behavior:**
+- **CLI Mode**: All existing files are automatically overwritten without asking for confirmation
+- **Interactive Mode**: Yeoman will ask for confirmation before overwriting existing files
 
-**Nota:** In modalità CLI, tutti i file esistenti verranno sovrascritti automaticamente. Usare con cautela in produzione.
+**Note:** In CLI mode, all existing files will be automatically overwritten. Use with caution in production.
 
 ---
 
