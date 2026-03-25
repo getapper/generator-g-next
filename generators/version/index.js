@@ -1,5 +1,5 @@
 "use strict";
-const Generator = require("yeoman-generator");
+const Generator = require("../../common/yeoman-generator-base");
 const pkgJSON = require("../../package.json");
 const yosay = require("yosay");
 const chalk = require("chalk");

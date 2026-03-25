@@ -1,5 +1,5 @@
 "use strict";
-const Generator = require("yeoman-generator");
+const Generator = require("../../common/yeoman-generator-base");
 const chalk = require("chalk");
 const yosay = require("yosay");
 const yup = require("yup");
@@ -10,6 +10,7 @@ const getEndpointTestsTemplate = require("./templates/endpoint/index.test");
 const getEndpointPageTemplate = require("./templates/page");
 const { getGenygConfigFile, requirePackages } = require("../../common");
 const fs = require("fs");
+const path = require("path");
 const { camelCase } = require("camel-case");
 const { pascalCase } = require("pascal-case");
 
@@ -371,22 +372,18 @@ module.exports = class extends Generator {
     ].includes(method);
 
 
-    let currentRoute = "";
+    const apiPagesRoot = this.destinationPath("src/pages/api");
+    const parts = [];
     for (let i = 0; i < pagesApiFolders.length; i++) {
-      const folder = pagesApiFolders[i];
-      currentRoute += folder + "/";
-      const relativeToPagesFolder = `./src/pages/api/${currentRoute}/`;
-      if (
-        !(
-          fs.existsSync(relativeToPagesFolder) &&
-          fs.lstatSync(relativeToPagesFolder).isDirectory()
-        )
-      ) {
-        fs.mkdirSync(relativeToPagesFolder);
+      parts.push(pagesApiFolders[i]);
+      const dir = path.join(apiPagesRoot, ...parts);
+      if (!(fs.existsSync(dir) && fs.lstatSync(dir).isDirectory())) {
+        fs.mkdirSync(dir, { recursive: true });
       }
-      if (!fs.existsSync(`${relativeToPagesFolder}index.ts`)) {
+      const indexFile = path.join(dir, "index.ts");
+      if (!fs.existsSync(indexFile)) {
         this.fs.write(
-          this.destinationPath(`${relativeToPagesFolder}index.ts`),
+          indexFile,
           getEndpointPageTemplate(getEndpointRoutePath(params.slice(0, i + 1))),
         );
       }

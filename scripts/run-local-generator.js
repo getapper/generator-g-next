@@ -2,7 +2,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const yeoman = require("yeoman-environment");
 
 const repoRoot = path.resolve(__dirname, "..");
 const generatorsRoot = path.join(repoRoot, "generators");
@@ -70,15 +69,17 @@ const registerLocalGenerators = (env) => {
 };
 
 const run = async () => {
+  const { createEnv } = await import("yeoman-environment");
+
   if (!namespace) {
     throw new Error("Missing generator namespace");
   }
 
-  const env = yeoman.createEnv();
+  const env = createEnv();
   const originalPrompt = env.adapter.prompt.bind(env.adapter);
-  env.adapter.prompt = (questions, answers) => {
+  env.adapter.prompt = async (questions, initialAnswers) => {
     if (!questions?.length) {
-      return originalPrompt(questions, answers);
+      return originalPrompt(questions, initialAnswers);
     }
     return resolvePromptAnswers(questions);
   };

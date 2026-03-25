@@ -1,0 +1,15 @@
+{
+  "name": "generator-g-next-test-project",
+  "private": true,
+  "engines": {
+    "node": "^20.17.0 || >=22.9.0"
+  },
+  "description": "Sandbox project for generator runs; pins yo 7.x for test:yeoman7",
+  "devDependencies": {
+    "generator-g-next": "file:..",
+    "yo": "^7.0.0"
+  },
+  "scripts": {
+    "TASK:SendEmails": "ts-node --project tsconfig-ts-node.json -r tsconfig-paths/register src/tasks/send-emails/exec"
+  }
+}
