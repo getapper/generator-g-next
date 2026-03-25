@@ -216,66 +216,46 @@ module.exports = class extends Generator {
       this.destinationPath(`${reduxStorePath}/slices/index.ts`),
     );
 
-    // Helper function to safely match and replace with robust newline handling
-    const safeMatchAndReplace = (regex, replacementFn, context = '') => {
-      try {
-        const match = slicesIndex.match(regex);
-        if (match && match[0]) {
-          const replacement = replacementFn(match[0]);
-          slicesIndex = slicesIndex.replace(match[0], replacement);
-          return true;
-        }
-        return false;
-      } catch (error) {
-        this.log(chalk.yellow(`Warning: Failed to process ${context}: ${error.message}`));
-        return false;
-      }
-    };
-
-    // More robust regex patterns that handle various newline combinations
-    const patterns = {
-      imports: /import\s+.*?;\s*\n\s*\n/g,
-      reducer: /(\s*)(\w+):\s*(\w+)\.\w+\.reducer,?\s*\n\s*}/g,
-      actions: /(\s*)(\w+):\s*(\w+)\.\w+\.actions,?\s*\n\s*}/g,
-      selectors: /(\s*)(\w+):\s*(\w+)\.selectors,?\s*\n\s*}/g,
-      sagas: /(\s*)(\w+):\s*Object\.values\((\w+)\.sagas\),?\s*\n\s*]/g
-    };
-
-    // Add import statement
-    safeMatchAndReplace(
-      patterns.imports,
-      (match) => `${match.trim()}\nimport * as ${sliceName} from "./${sliceName}";\n\n`,
-      'imports section'
-    );
-    
-    // Add reducer
-    safeMatchAndReplace(
-      patterns.reducer,
-      (match) => `${match.trim()}\n  ${sliceName}: ${sliceName}.${sliceName}Store.reducer,\n}`,
-      'reducer section'
-    );
-    
-    // Add actions
-    safeMatchAndReplace(
-      patterns.actions,
-      (match) => `${match.trim()}\n  ...${sliceName}.${sliceName}Store.actions,\n}`,
-      'actions section'
-    );
-    
-    // Add selectors
-    safeMatchAndReplace(
-      patterns.selectors,
-      (match) => `${match.trim()}\n  ...${sliceName}.selectors,\n}`,
-      'selectors section'
-    );
-    
-    // Add sagas if enabled
-    if (useSagas) {
-      safeMatchAndReplace(
-        patterns.sagas,
-        (match) => `${match.trim()}\n  ...Object.values(${sliceName}.sagas),\n]`,
-        'sagas section'
+    const importLine = `import * as ${sliceName} from "./${sliceName}";`;
+    if (!slicesIndex.includes(importLine)) {
+      slicesIndex = slicesIndex.replace(
+        `import * as feedback from "./feedback";`,
+        `import * as feedback from "./feedback";\n${importLine}`,
       );
+    }
+
+    const reducerLine = `  ${sliceName}: ${sliceName}.${sliceName}Store.reducer,`;
+    if (!slicesIndex.includes(reducerLine)) {
+      slicesIndex = slicesIndex.replace(
+        "  feedback: feedback.feedbackStore.reducer,\n};",
+        `  feedback: feedback.feedbackStore.reducer,\n${reducerLine}\n};`,
+      );
+    }
+
+    const actionsLine = `  ...${sliceName}.${sliceName}Store.actions,`;
+    if (!slicesIndex.includes(actionsLine)) {
+      slicesIndex = slicesIndex.replace(
+        "  ...feedback.feedbackStore.actions,\n};",
+        `  ...feedback.feedbackStore.actions,\n${actionsLine}\n};`,
+      );
+    }
+
+    const selectorsLine = `  ...${sliceName}.selectors,`;
+    if (!slicesIndex.includes(selectorsLine)) {
+      slicesIndex = slicesIndex.replace(
+        "  ...feedback.selectors,\n};",
+        `  ...feedback.selectors,\n${selectorsLine}\n};`,
+      );
+    }
+
+    if (useSagas) {
+      const sagasLine = `  ...Object.values(${sliceName}.sagas),`;
+      if (!slicesIndex.includes(sagasLine)) {
+        slicesIndex = slicesIndex.replace(
+          "  ...Object.values(feedback.sagas),\n];",
+          `  ...Object.values(feedback.sagas),\n${sagasLine}\n];`,
+        );
+      }
     }
 
     this.fs.write(

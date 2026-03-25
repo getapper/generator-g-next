@@ -172,6 +172,11 @@ module.exports = class extends Generator {
       }
     );
 
+    this.fs.copy(
+      this.templatePath("src/models/client/DomNavigation"),
+      this.destinationPath("src/models/client/DomNavigation"),
+    );
+
     const nextConfigOptionsJson = require(this.destinationPath(
       "next.config.options.json"
     ));

@@ -1,0 +1,46 @@
+import { <%= managerName %>ManagerFactory as <%= managerName %>ManagerFactoryClass } from "./<%= managerName %>ManagerFactory";
+import { <%= managerName %>ManagerMockFactory } from "./<%= managerName %>ManagerMockFactory";
+
+export interface <%= managerName %>ManagerFactory {
+  // Define interface methods here
+  // Example:
+  // someMethod(params: any): Promise<any>;
+}
+
+// Lazy singleton for <%= managerName %>ManagerReal to avoid instantiation during module import
+let <%= managerName.toLowerCase() %>ManagerRealInstance: <%= managerName %>ManagerFactory | undefined;
+
+const get<%= managerName %>ManagerReal = (): <%= managerName %>ManagerFactory => {
+  if (!<%= managerName.toLowerCase() %>ManagerRealInstance) {
+    // Add credential validation here if needed
+    // Example:
+    // if (!process.env["<%= managerName.toUpperCase() %>_API_KEY"]) {
+    //   throw new Error(
+    //     '<%= managerName %> is enabled (<%= envVarName %>="false") but credentials are missing. Set <%= managerName.toUpperCase() %>_API_KEY or enable the mock by setting <%= envVarName %>="true".',
+    //   );
+    // }
+    <%= managerName.toLowerCase() %>ManagerRealInstance = new <%= managerName %>ManagerFactoryClass();
+  }
+  return <%= managerName.toLowerCase() %>ManagerRealInstance;
+};
+
+// Factory function to get the appropriate <%= managerName %> manager.
+// By default, use the real implementation unless <%= envVarName %> is explicitly set to "true".
+export const get<%= managerName %>Manager = (): <%= managerName %>ManagerFactory => {
+  const use<%= managerName %>Mock = process.env["<%= envVarName %>"];
+
+  if (use<%= managerName %>Mock === "true") {
+    return new <%= managerName %>ManagerMockFactory();
+  }
+
+  return get<%= managerName %>ManagerReal();
+};
+
+// Backwards-compatible singleton accessor used throughout the codebase.
+let <%= managerName.toLowerCase() %>ManagerInstance: <%= managerName %>ManagerFactory | undefined;
+export const <%= managerName %>Manager = (): <%= managerName %>ManagerFactory => {
+  if (!<%= managerName.toLowerCase() %>ManagerInstance) {
+    <%= managerName.toLowerCase() %>ManagerInstance = get<%= managerName %>Manager();
+  }
+  return <%= managerName.toLowerCase() %>ManagerInstance;
+};

@@ -1,0 +1,20 @@
+import { <%= managerName %>ManagerFactory } from "./<%= managerName %>ManagerFactory";
+
+/**
+ * <%= managerName %> Manager Mock Factory - Mock implementation for development/testing
+ * Logs operations instead of making actual API calls
+ */
+export class <%= managerName %>ManagerMockFactory extends <%= managerName %>ManagerFactory {
+  constructor() {
+    super();
+    console.log("[<%= managerName %>ManagerMock] Using mock implementation");
+  }
+
+  // Override methods from <%= managerName %>ManagerFactory with mock implementations
+  // Example:
+  // async someMethod(params: any): Promise<any> {
+  //   console.log("[<%= managerName %>ManagerMock] Would call someMethod:", params);
+  //   // Return mock data
+  //   return { mock: "data" };
+  // }
+}

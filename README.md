@@ -32,6 +32,19 @@ Welcome to the **GeNYG (Getapper Next.js Yeoman Generator)** project! GeNYG is a
 - [CLI Examples for All Generators](#cli-examples-for-all-generators)
 - [Validation & Error Handling](#validation--error-handling)
 - [Best Practices](#best-practices)
+- [Development Standards](#development-standards)
+  - [Model Architecture Rules](#model-architecture-rules)
+  - [Environment Variables](#environment-variables)
+  - [Development Workflow](#development-workflow)
+  - [Redux Store Access Standards](#redux-store-access-standards)
+  - [API Development Best Practices](#api-development-best-practices)
+  - [Redux Slice Best Practices](#redux-slice-best-practices)
+  - [MUI Component Standards](#mui-component-standards)
+  - [CSS Color Standards](#css-color-standards)
+  - [React Component Architecture Standards](#react-component-architecture-standards)
+  - [Form Component Standards](#form-component-standards)
+  - [Navigation and Routing Standards](#navigation-and-routing-standards)
+  - [Code Language Standards](#code-language-standards)
 - [Complete Example: Setting Up a Project](#complete-example-setting-up-a-project)
 - [Troubleshooting](#troubleshooting)
 - [TODO](#todo)
@@ -1610,6 +1623,506 @@ Use CLI mode in scripts and CI/CD pipelines:
 yo g-next:api --route users --method get
 yo g-next:api --route users/{userId} --method put --useCookieAuth --cookieRole admin
 ```
+
+---
+
+## Development Standards
+
+### Model Architecture Rules
+
+#### Client-Server Model Separation
+**CRITICAL**: Client-side files (`src/models/client/`, `src/components/`, `src/spas/`) MUST NEVER import from server-side models (`src/models/server/`).
+
+**✅ Correct Approach:**
+- Use common models (`src/models/common/`) for shared types, enums, and interfaces
+- Client models can import from `@/models/common/`
+- Server models can import from `@/models/common/`
+- Common models can import from other common models
+
+**❌ Prohibited Approach:**
+```typescript
+// ❌ NEVER do this in client files
+import { SomeType } from "@/models/server/SomeModel";
+import { SomeEnum } from "@/models/server/SomeModel";
+```
+
+**✅ Correct Pattern:**
+```typescript
+// ✅ Use common models for shared types
+import { Frequency } from "@/models/common/ResourceCommon";
+import { Status } from "@/models/common/StatusCommon";
+import { Type } from "@/models/common/TypeCommon";
+```
+
+**When to Create Common Models:**
+- If a type, enum, or interface is needed by both client and server code, it MUST be placed in `src/models/common/`
+- Common models should be organized by domain (e.g., `ResourceCommon`, `UserCommon`, `OrderCommon`)
+- Enums that are shared between client and server MUST be in common models
+- Types that represent business logic shared between client and server MUST be in common models
+
+### Environment Variables
+
+- All environment variables used in the project MUST be added to `next.config.options.json`
+- This includes both server-side and client-side environment variables
+- Client-side variables must be prefixed with `NEXT_PUBLIC_`
+- Server-side variables (like database connections, API keys, secrets) should be added without the prefix
+- When adding new environment variables, always update the `env` array in `next.config.options.json`
+
+### Development Workflow
+
+1. Use GeNYG generators to scaffold new features
+2. Follow the established patterns in the codebase
+3. Use TypeScript for type safety
+4. Follow the project's ESLint and Prettier configuration
+5. Write tests for new functionality using Jest
+6. Always add new environment variables to `next.config.options.json`
+
+### Redux Store Access Standards
+
+- Always access Redux actions and selectors through the centralized imports from `@/spas/app/redux-store`
+- Use `actions.` prefix for all Redux actions (e.g., `actions.setUserList`)
+- Use `selectors.` prefix for all Redux selectors (e.g., `selectors.getUserFeList`)
+- Never import actions or selectors directly from individual slice files
+- This ensures consistent access patterns and proper TypeScript typing
+
+### API Development Best Practices
+
+#### User Authentication Helper
+**CRITICAL RULE: Always use the `isUser()` helper function to check user authentication in API handlers.**
+
+**✅ Correct Approach:**
+```typescript
+import { isUser } from "@/lib/api-helpers/isUser";
+
+export default async function handler(
+  req: YourApi.Request,
+  res: NextApiResponse<YourApi.EndpointResponse>,
+  originalReq: NextApiRequest,
+) {
+  if (!isUser(originalReq)) {
+    return ResponseHandler.json<ErrorResponse>(
+      res,
+      { message: "Unauthorized" },
+      StatusCodes.Unauthorized,
+    );
+  }
+  // ... rest of handler
+}
+```
+
+**❌ Prohibited Approach:**
+```typescript
+// DON'T check session.user directly
+if (!originalReq.session.user) {
+  // Wrong - use isUser() helper instead
+}
+
+if (!originalReq.session.user?.isLoggedIn) {
+  // Wrong - use isUser() helper instead
+}
+```
+
+#### RESTful API Design Standards
+**CRITICAL RULES:**
+1. **All APIs MUST follow RESTful principles - every action must be a CRUD operation**
+2. **Use proper HTTP methods: GET (read), POST (create), PUT (update), DELETE (delete), PATCH (partial update)**
+3. **Use resource-based URLs - each resource should have its own endpoint**
+4. **Avoid action-based URLs - instead of `/resource/action`, use `/resource` with appropriate HTTP method**
+
+**✅ Correct RESTful Patterns:**
+```typescript
+// Creating a new verification token
+POST /user/account-verification-tokens  // ✅ Creates a new token
+
+// Reading a resource
+GET /users/{userId}  // ✅ Reads a user
+
+// Updating a resource
+PUT /users/{userId}  // ✅ Updates entire user
+PATCH /users/{userId}  // ✅ Partial update
+
+// Deleting a resource
+DELETE /users/{userId}  // ✅ Deletes a user
+```
+
+**❌ Avoid Non-RESTful Patterns:**
+```typescript
+// ❌ Don't use action-based URLs
+POST /user/account-verifications/resend  // Wrong - action in URL
+POST /users/{userId}/activate  // Wrong - action in URL
+POST /items/{itemId}/cancel  // Wrong - action in URL
+
+// ✅ Use resource-based URLs instead
+POST /user/account-verification-tokens  // Correct - creating a token
+PUT /users/{userId} with { isActive: true }  // Correct - updating user
+PUT /items/{itemId} with { status: "cancelled" }  // Correct - updating item
+```
+
+**Resource Naming Conventions:**
+- Use plural nouns for collections: `/users`, `/items`, `/tokens`
+- Use singular nouns for individual resources: `/user/{userId}`, `/item/{itemId}`
+- Use kebab-case for multi-word resources: `/account-verification-tokens`, `/business-clubs`
+- Avoid verbs in URLs - the HTTP method already indicates the action
+
+#### ObjectId Handling in APIs
+When working with MongoDB ObjectIds in API endpoints, follow these best practices:
+
+**✅ Correct Approach:**
+```typescript
+// interfaces.ts
+import { ObjectId } from "mongodb";
+
+export namespace DeleteAdminUsersByUserIdApi {
+  export type QueryStringParameters = {
+    userId: ObjectId,  // Use ObjectId type directly
+  };
+}
+
+// validations.ts
+import { yupObjectId } from "@/lib/mongodb/mongo-dao";
+
+const queryStringParametersValidations = () => ({
+  userId: yupObjectId().required(),  // Use yupObjectId() for validation
+});
+
+// handler.ts
+const { userId } = queryStringParameters;
+const user = await User.getById(userId);  // No casting needed!
+```
+
+**❌ Avoid This Approach:**
+```typescript
+// interfaces.ts
+export type QueryStringParameters = {
+  userId: string,  // Don't use string for ObjectId
+};
+
+// handler.ts
+const userObjectId = new ObjectId(userId);  // Avoid manual casting
+```
+
+**Benefits of Using ObjectId Type:**
+- Type safety: No need for manual casting with `new ObjectId()`
+- Validation: `yupObjectId()` ensures proper ObjectId format
+- Cleaner code: Direct usage without conversion
+- Better error handling: Automatic validation of ObjectId format
+
+**When to Use ObjectId vs String:**
+- Use `ObjectId` type when the parameter represents a MongoDB document ID
+- Use `string` type for regular string parameters (names, emails, etc.)
+- Always use `yupObjectId()` for ObjectId validation
+- Always use `yup.string()` for regular string validation
+
+#### ObjectId Standards for All API Endpoints
+**CRITICAL RULES:**
+1. **All ObjectId parameters in API interfaces MUST use `ObjectId` type, never `string`**
+2. **All ObjectId validations MUST use `yupObjectId()` from `@/lib/mongodb/mongo-dao`**
+3. **All yup validations MUST include `.noUnknown()` to reject unexpected fields**
+4. **Never use manual casting with `new ObjectId()` in handlers**
+
+**Required Pattern for All API Endpoints:**
+```typescript
+// interfaces.ts - ALWAYS use ObjectId type
+import { ObjectId } from "mongodb";
+
+export namespace YourApi {
+  export type QueryStringParameters = {
+    id: ObjectId,           // ✅ Correct
+    userId: ObjectId,       // ✅ Correct
+    // name: string,        // ✅ Correct for non-ObjectId fields
+  };
+}
+
+// validations.ts - ALWAYS use yupObjectId for ObjectIds
+import { yupObjectId } from "@/lib/mongodb/mongo-dao";
+
+const queryStringParametersValidations = () => ({
+  id: yupObjectId().required(),     // ✅ Correct
+  userId: yupObjectId().required(), // ✅ Correct
+  // name: yup.string().required(), // ✅ Correct for non-ObjectId fields
+});
+
+export default () => ({
+  queryStringParameters: yup.object().shape(queryStringParametersValidations()).noUnknown(),
+  payload: yup.object().shape(payloadValidations()).noUnknown(),
+});
+
+// handler.ts - Direct usage without casting
+const { id, userId } = queryStringParameters;
+const document = await Model.getById(id);  // ✅ No casting needed!
+```
+
+#### API Payload Handling in GeNYG Endpoints
+When working with PUT/POST API endpoints generated by GeNYG, follow these standards for reading request data:
+
+**✅ Correct Approach:**
+```typescript
+// handler.ts
+export default async function handler(
+  req: PutAdminUsersByUserIdApi.Request,
+  res: NextApiResponse<PutAdminUsersByUserIdApi.EndpointResponse>,
+  originalReq: NextApiRequest,
+) {
+  try {
+    const { validationResult, queryStringParameters, payload } = req;
+    
+    // Use the destructured payload directly
+    const { firstName, lastName, email } = payload;
+    
+    // Access query parameters
+    const { userId } = queryStringParameters;
+  } catch (e) {
+    // Handle errors
+  }
+}
+```
+
+**❌ Avoid This Approach:**
+```typescript
+// Don't access req.body directly
+const payload = req.body;  // Avoid this approach
+const { firstName, lastName } = req.body;  // Don't do this
+```
+
+**Key Benefits:**
+- **Type Safety**: The `payload` is properly typed according to the interface
+- **Validation**: The payload is already validated by the middleware
+- **Consistency**: Follows the GeNYG pattern for all API endpoints
+- **Error Handling**: Validation errors are handled automatically
+
+### Redux Slice Best Practices
+
+#### Slice Naming Convention
+- **ALWAYS use singular names for slices**, not plural
+- Examples: `event` (not `events`), `item` (not `items`), `user` (not `users`)
+- State key in Redux store should match the slice name (singular)
+
+#### Loading State Management
+**CRITICAL RULE: NEVER add `loading` boolean properties to slice state interfaces.**
+
+The application already has a centralized loading system through the `getAjaxIsLoadingByApi` selector that accepts any AJAX API action. This provides immediate loading state for any API call without duplicating loading state across slices.
+
+**✅ Correct Approach:**
+```typescript
+// Use the centralized loading selector
+const isLoading = useSelector(selectors.getAjaxIsLoadingByApi(actions.getAdminResources.api));
+
+// In components
+{isLoading ? <CircularProgress /> : <ResourcesList />}
+```
+
+**❌ Prohibited Approach:**
+```typescript
+// DON'T add loading to slice state
+export interface ResourceState {
+  list: IResourceFe[];
+  loading: boolean;  // ❌ NEVER do this
+}
+
+// DON'T manage loading in extraReducers
+builder.addCase(getAdminResources.request, (state) => {
+  state.loading = true;  // ❌ NEVER do this
+});
+```
+
+**Benefits of Centralized Loading:**
+- **No Duplication**: Single source of truth for loading states
+- **Automatic Management**: Loading state is handled automatically by AJAX actions
+- **Consistent Behavior**: All API calls follow the same loading pattern
+- **Reduced Boilerplate**: No need to manage loading state in every slice
+- **Better Performance**: No unnecessary state updates for loading flags
+
+#### Using extraReducers with builder.addCase
+
+**CRITICAL: Always use `extraReducers` with `builder.addCase` to handle AJAX action responses, NOT sagas with manual state updates.**
+
+**✅ Correct Pattern:**
+```typescript
+// index.ts
+import { createSlice } from "@reduxjs/toolkit";
+import * as extraActions from "../../extra-actions";
+import {
+  getAdminResourcesByResourceId,
+  postAdminResourcesByResourceId,
+  putAdminResourcesByResourceIdAndItemId,
+  deleteAdminResourcesByResourceIdAndItemId,
+} from "../../extra-actions/apis";
+
+export const itemStore = createSlice({
+  name: "item",
+  initialState,
+  reducers: {
+    // Optional: custom reducers for manual state updates
+  },
+  extraReducers: (builder) => {
+    // Handle session lifecycle
+    builder.addCase(extraActions.clearSession, () => initialState);
+    builder.addCase(extraActions.appStartup, () => initialState);
+
+    // Handle GET success - access data via action.payload.data
+    builder.addCase(getAdminResourcesByResourceId.success, (state, action) => {
+      const items = action.payload.data?.items;
+      if (items) {
+        state.list = items;
+      }
+    });
+
+    // Handle POST success
+    builder.addCase(postAdminResourcesByResourceId.success, (state, action) => {
+      const item = action.payload.data?.item;
+      if (item) {
+        state.list.push(item);
+      }
+    });
+
+    // Handle PUT success
+    builder.addCase(putAdminResourcesByResourceIdAndItemId.success, (state, action) => {
+      const item = action.payload.data?.item;
+      if (item) {
+        const index = state.list.findIndex((e) => e._id === item._id);
+        if (index !== -1) {
+          state.list[index] = item;
+        }
+      }
+    });
+
+    // Handle DELETE success - access params via action.payload.prepareParams
+    builder.addCase(deleteAdminResourcesByResourceIdAndItemId.success, (state, action) => {
+      const itemId = action.payload.prepareParams.itemId;
+      state.list = state.list.filter((e) => e._id !== itemId);
+    });
+  },
+});
+```
+
+**Sagas are ONLY for Side Effects**
+Sagas should handle:
+- Triggering follow-up actions (e.g., refresh list after create/update/delete)
+- Complex async workflows
+- Navigation after operations
+- NOT direct state updates (use extraReducers instead)
+
+#### Accessing AJAX Response Data
+
+When handling AJAX actions in extraReducers:
+- **Response data**: Access via `action.payload.data`
+- **Request parameters**: Access via `action.payload.prepareParams`
+
+### MUI Component Standards
+- Always use MUI Stack for flex containers instead of MUI Box with display flex
+- MUI Stack provides better semantic meaning and cleaner code for flex layouts
+- Use MUI Box only for non-flex containers or when you need specific styling that Stack doesn't support
+
+### CSS Color Standards
+- Always use CSS custom properties (var(--color-name)) instead of hardcoded RGB/hex values
+- All colors must be defined in `src/styles/colors.css` using the established color system
+- If a color doesn't exist in the color system, add it to `colors.css` with a semantic name
+- Use semantic color names (e.g., `--Gray-700`, `--Brand-600`) rather than generic names
+- Never use hardcoded color values like `#414651` or `rgb(65, 70, 81)` in components
+- Import colors.css in your main CSS file or ensure it's loaded globally
+
+### React Component Architecture Standards
+- Every React component, scene, and frontend file that creates a React component MUST have a separate hooks file
+- Each component must be a folder with two files:
+  - `index.tsx`: Contains ONLY the UI/JSX code
+  - `index.hooks.tsx`: Contains ONLY the business logic, state management, and side effects
+- This separation ensures clean architecture with clear separation of concerns
+- UI components should be pure and focused only on rendering
+- Business logic, API calls, state management, and side effects belong in the hooks file
+- Use custom hooks pattern to extract and organize business logic
+- Import and use the hooks in the main component file
+
+### Form Component Standards
+**CRITICAL RULE: All form fields in the application MUST use standardized form components from `src/components/_form/` directory.**
+
+#### Available Form Components
+The following standardized form components are available in `src/components/_form/`:
+
+**Text Input Components:**
+- **`FormTextField`**: For text inputs, numbers, emails, passwords, etc.
+- **`FormPassword`**: Specialized password field with show/hide toggle
+- **`FormRichTextField`**: Rich text editor with formatting options
+
+**Selection Components:**
+- **`FormSelect`**: Dropdown selection with options array
+- **`FormSelectBoolean`**: Yes/No or True/False selection
+- **`FormAutocomplete`**: Autocomplete selection with search
+
+**Date/Time Components:**
+- **`FormDatePicker`**: Date selection with calendar
+- **`FormDateTimePicker`**: Date and time selection
+- **`FormTimePicker`**: Time selection only
+
+**Boolean Components:**
+- **`FormSwitch`**: Toggle switch for boolean values
+- **`FormCheckbox`**: Checkbox for boolean values
+- **`FormRadioGroup`**: Radio button group for single selection
+
+**Specialized Components:**
+- **`FormPhoneSelector`**: Phone number input with country selection
+- **`FormAddressSelector`**: Address input with autocomplete
+- **`FormChips`**: Chip input for tags or multiple values
+- **`FormImageDropZone`**: Image upload with drag and drop
+- **`FormImageUpload`**: Image upload with file selection
+
+**✅ Correct Usage:**
+```typescript
+import { FormTextField } from "@/components/_form/FormTextField";
+import { FormSelect } from "@/components/_form/FormSelect";
+import { FormSwitch } from "@/components/_form/FormSwitch";
+
+<FormTextField name="firstName" label="First Name" fullWidth />
+<FormSelect name="country" label="Country" options={[...]} fullWidth />
+<FormSwitch name="isActive" label="Active Status" />
+```
+
+**❌ Prohibited Usage:**
+```typescript
+// NEVER use raw MUI components directly in forms
+import { TextField, Select, Switch } from "@mui/material";
+
+// ❌ Don't do this
+<TextField {...formData.register("firstName")} />
+```
+
+**Benefits:**
+- **Automatic Error Handling**: All form components handle validation errors automatically
+- **Consistent Styling**: All components follow the same design system
+- **Type Safety**: Full TypeScript support with proper typing
+- **Accessibility**: Built-in accessibility features and ARIA support
+- **Validation Integration**: Seamless integration with react-hook-form validation
+- **Reduced Boilerplate**: No need to manually handle error states and validation
+
+### Navigation and Routing Standards
+
+#### React Router Basename
+- The application uses React Router with `basename="/app"`
+- **CRITICAL**: All `navigate()` calls must use paths WITHOUT the `/app` prefix
+- The basename is automatically prepended by React Router
+
+**✅ Correct Navigation:**
+```typescript
+// Good - without /app prefix
+navigate("/settings/users");
+navigate("/settings/users/new");
+navigate(`/settings/users/${userId}`);
+```
+
+**❌ Incorrect Navigation:**
+```typescript
+// Bad - includes /app prefix (will result in /app/app/settings/users)
+navigate("/app/settings/users");
+```
+
+### Code Language Standards
+- **CRITICAL**: All comments in the code must be written in English
+- **CRITICAL**: All documentation files (`.md`, `.txt`, etc.) must be written in English
+- **CRITICAL**: All comments in shell scripts (`.sh`) must be written in English
+- All labels, messages, and user-facing text must be in English
+- Variable names, function names, and identifiers should follow English conventions
+- Documentation and README files should be in English
+- Error messages and console logs should be in English
+- Script output messages and echo statements should be in English
 
 ---
 

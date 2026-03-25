@@ -7,6 +7,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectProps,
 } from "@mui/material";
 
 export type FormSelectProps = {
@@ -16,10 +17,19 @@ export type FormSelectProps = {
     label: number | string;
   }[];
   label?: string;
+  value?: string | number;
+  selectProps?: SelectProps;
 } & FormControlProps;
 
 export const FormSelect = memo(
-  ({ name, options, label, ...props }: FormSelectProps) => {
+  ({
+    name,
+    options,
+    label,
+    value: externalValue,
+    selectProps,
+    ...props
+  }: FormSelectProps) => {
     const { value, handleChange, error } = useFormSelect(name);
 
     return (
@@ -29,12 +39,13 @@ export const FormSelect = memo(
         )}
         <Select
           labelId={label ? `mui-select-${name.trim()}` : ""}
-          value={value}
+          value={externalValue ?? value}
           onChange={handleChange}
           variant="outlined"
           name={name}
           label={label}
           error={!!error}
+          {...selectProps}
         >
           {options.map((option) => (
             <MenuItem value={option.value} key={option.value}>
