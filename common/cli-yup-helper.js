@@ -13,7 +13,7 @@ const { getGenygConfigFile, getSpas } = require("./index");
  */
 const createCliConfig = (config) => {
   return function(args, opts) {
-    const Generator = require("yeoman-generator");
+    const Generator = require("./yeoman-generator-base");
     Generator.apply(this, [args, opts]);
 
     // Add arguments

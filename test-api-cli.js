@@ -2,153 +2,152 @@
 
 /**
  * Test script for API generator CLI functionality
- * This script tests the new CLI arguments feature
+ * Uses yo from test-project/node_modules when present (yo 7.x), else global yo.
  */
 
-const { spawn } = require('child_process');
-const path = require('path');
+const { spawnYo, resolveYo } = require("./scripts/resolve-yo");
+const { cliTestPassed } = require("./scripts/cli-test-shared");
 
-// Set working directory to test-project
-const testProjectPath = path.join(__dirname, 'test-project');
+const repoRoot = __dirname;
 
-// Test cases
 const testCases = [
   {
-    name: 'Basic GET endpoint',
-    args: ['g-next:api', '--route', 'users', '--method', 'get'],
-    expected: 'Should generate a GET /users endpoint'
+    name: "Basic GET endpoint",
+    args: ["g-next:api", "--route", "users", "--method", "get"],
+    expect: "cli-success",
   },
   {
-    name: 'POST endpoint with dynamic parameter',
-    args: ['g-next:api', '--route', 'posts/{postId}', '--method', 'post'],
-    expected: 'Should generate a POST /posts/{postId} endpoint'
+    name: "POST endpoint with dynamic parameter",
+    args: ["g-next:api", "--route", "posts/{postId}", "--method", "post"],
+    expect: "cli-success",
   },
   {
-    name: 'PUT endpoint with cookie auth',
-    args: ['g-next:api', '--route', 'users/{userId}', '--method', 'put', '--useCookieAuth', '--cookieRole', 'admin'],
-    expected: 'Should generate a PUT /users/{userId} endpoint with cookie authentication'
+    name: "PUT endpoint with cookie auth",
+    args: [
+      "g-next:api",
+      "--route",
+      "users/{userId}",
+      "--method",
+      "put",
+      "--useCookieAuth",
+      "--cookieRole",
+      "admin",
+    ],
+    expect: "cli-success",
   },
   {
-    name: 'Invalid HTTP method',
-    args: ['g-next:api', '--route', 'users', '--method', 'invalid'],
-    expected: 'Should show Yup validation error for invalid HTTP method'
+    name: "Invalid HTTP method",
+    args: ["g-next:api", "--route", "users", "--method", "invalid"],
+    expect: "validation",
   },
   {
-    name: 'Missing cookie role with auth',
-    args: ['g-next:api', '--route', 'users', '--method', 'get', '--useCookieAuth'],
-    expected: 'Should show Yup validation error for missing cookie role'
+    name: "Missing cookie role with auth",
+    args: ["g-next:api", "--route", "users", "--method", "get", "--useCookieAuth"],
+    expect: "validation",
   },
   {
-    name: 'Invalid route format - empty parameter',
-    args: ['g-next:api', '--route', 'users/{}', '--method', 'get'],
-    expected: 'Should show Yup validation error for empty parameter'
+    name: "Invalid route format - empty parameter",
+    args: ["g-next:api", "--route", "users/{}", "--method", "get"],
+    expect: "validation",
   },
   {
-    name: 'Invalid route format - invalid parameter name',
-    args: ['g-next:api', '--route', 'users/{123invalid}', '--method', 'get'],
-    expected: 'Should show Yup validation error for invalid parameter name'
+    name: "Invalid route format - invalid parameter name",
+    args: ["g-next:api", "--route", "users/{123invalid}", "--method", "get"],
+    expect: "validation",
   },
   {
-    name: 'Invalid route format - special characters',
-    args: ['g-next:api', '--route', 'users@#$', '--method', 'get'],
-    expected: 'Should show Yup validation error for invalid characters in route'
+    name: "Invalid route format - special characters",
+    args: ["g-next:api", "--route", "users@#$", "--method", "get"],
+    expect: "validation",
   },
-  {
-    name: 'Empty route path',
-    args: ['g-next:api', '--route', '', '--method', 'get'],
-    expected: 'Should show Yup validation error for empty route'
-  }
 ];
 
-console.log('🧪 Testing API Generator CLI functionality...');
-console.log(`📁 Working directory: ${testProjectPath}\n`);
+console.log("🧪 Testing API Generator CLI functionality...");
+const yoInfo = resolveYo(repoRoot);
+console.log(`📁 Working directory: ${yoInfo.cwd}`);
+console.log(`📌 Yeoman CLI: ${yoInfo.label}\n`);
 
-// Function to run a test case
 function runTest(testCase) {
   return new Promise((resolve) => {
     console.log(`\n📋 Test: ${testCase.name}`);
-    console.log(`   Command: yo ${testCase.args.join(' ')}`);
-    console.log(`   Expected: ${testCase.expected}`);
-    
-    const yoProcess = spawn('yo', testCase.args, {
-      cwd: testProjectPath,
-      stdio: 'pipe'
+    console.log(`   Command: yo ${testCase.args.join(" ")}`);
+    console.log(`   Expected: ${testCase.expect}`);
+
+    const child = spawnYo(repoRoot, testCase.args, { stdio: "pipe" });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (data) => {
+      stdout += data.toString();
     });
 
-    let output = '';
-    let errorOutput = '';
-
-    yoProcess.stdout.on('data', (data) => {
-      output += data.toString();
+    child.stderr.on("data", (data) => {
+      stderr += data.toString();
     });
 
-    yoProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    yoProcess.on('close', (code) => {
+    let settled = false;
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
       console.log(`   Exit code: ${code}`);
-      
-      if (output.includes('Using CLI options for non-interactive generation')) {
-        console.log('   ✅ CLI mode detected successfully');
-      } else if (output.includes('Welcome to') && output.includes('follow the quick and easy configuration')) {
-        console.log('   ✅ Interactive mode detected (no CLI args provided)');
-      } else if (errorOutput.includes('Validation errors found:') || 
-                 errorOutput.includes('HTTP method must be one of:') ||
-                 errorOutput.includes('Cookie role is required when using cookie authentication') ||
-                 errorOutput.includes('Route path contains invalid characters') ||
-                 errorOutput.includes('Parameter name cannot be empty') ||
-                 errorOutput.includes('must start with a letter') ||
-                 errorOutput.includes('Route path cannot be empty')) {
-        console.log('   ✅ Yup validation error detected as expected');
+      const ok = cliTestPassed({
+        code,
+        stdout,
+        stderr,
+        expect: testCase.expect,
+      });
+      if (ok) {
+        console.log("   ✅ Passed");
       } else {
-        console.log('   ⚠️  Unexpected behavior');
-        console.log(`   Output: ${output.substring(0, 200)}...`);
-        if (errorOutput) {
-          console.log(`   Error: ${errorOutput.substring(0, 200)}...`);
-        }
+        console.log("   ❌ Failed");
+        if (stdout) console.log(`   stdout (trim): ${stdout.slice(0, 400)}`);
+        if (stderr) console.log(`   stderr (trim): ${stderr.slice(0, 400)}`);
       }
-      
-      resolve();
-    });
+      resolve(ok);
+    };
 
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      yoProcess.kill();
-      console.log('   ⏰ Test timed out');
-      resolve();
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      console.log("   ⏰ Test timed out");
+      finish(-1);
     }, 10000);
+
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      finish(code);
+    });
   });
 }
 
-// Run all tests
-async function runAllTests() {
-  for (const testCase of testCases) {
-    await runTest(testCase);
-  }
-  
-  console.log('\n🎉 All tests completed!');
-  console.log('\n📖 For detailed usage examples, see API_CLI_USAGE.md');
-}
+async function main() {
+  const yoCheck = spawnYo(repoRoot, ["--version"], { stdio: "pipe" });
+  const yoAvailable = await new Promise((resolve) => {
+    yoCheck.on("error", () => resolve(false));
+    yoCheck.on("close", (code) => resolve(code === 0));
+  });
 
-// Check if yo is available
-const yoCheck = spawn('yo', ['--version'], { 
-  cwd: testProjectPath,
-  stdio: 'pipe' 
-});
-
-yoCheck.on('close', (code) => {
-  if (code === 0) {
-    runAllTests();
-  } else {
-    console.log('❌ Yeoman (yo) is not available. Please install it first:');
-    console.log('   npm install -g yo');
+  if (!yoAvailable) {
+    console.log("❌ Yeoman (yo) is not available. Install test-project deps or global yo:");
+    console.log("   npm install --prefix test-project");
     process.exit(1);
   }
-});
 
-yoCheck.on('error', () => {
-  console.log('❌ Yeoman (yo) is not available. Please install it first:');
-  console.log('   npm install -g yo');
+  let failed = 0;
+  for (const tc of testCases) {
+    const ok = await runTest(tc);
+    if (!ok) failed++;
+  }
+
+  console.log("\n🎉 API CLI tests finished.");
+  if (failed > 0) {
+    console.log(`\n❌ ${failed} test(s) failed.`);
+    process.exit(1);
+  }
+  console.log("\n✅ All API CLI tests passed.");
+}
+
+main().catch((err) => {
+  console.error(err);
   process.exit(1);
 });

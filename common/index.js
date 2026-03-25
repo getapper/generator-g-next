@@ -3,11 +3,25 @@ const yosay = require("yosay");
 const chalk = require("chalk");
 
 const getGenygConfigFile = (genyg) => {
-  return genyg.readDestinationJSON(".genyg.json");
+  let raw;
+  try {
+    raw = genyg.readDestinationJSON(".genyg.json");
+  } catch {
+    raw = undefined;
+  }
+  if (!raw || typeof raw !== "object") {
+    return { packages: {}, cookieRoles: [] };
+  }
+  return {
+    ...raw,
+    packages:
+      raw.packages && typeof raw.packages === "object" ? raw.packages : {},
+    cookieRoles: Array.isArray(raw.cookieRoles) ? raw.cookieRoles : [],
+  };
 };
 
 const requirePackages = (genyg, pkgs) => {
-  const configFile = genyg.readDestinationJSON(".genyg.json");
+  const configFile = getGenygConfigFile(genyg);
   for (let pkg of pkgs) {
     if (!configFile.packages[pkg]) {
       genyg.log(
@@ -63,8 +77,8 @@ ${newContent}`
 };
 
 const checkPackageInstalled = (genyg, pkg) => {
-  const configFile = genyg.readDestinationJSON(".genyg.json");
-  return configFile.packages[pkg];
+  const configFile = getGenygConfigFile(genyg);
+  return Boolean(configFile.packages[pkg]);
 };
 
 const checkGenygVersion = (genyg) => {};

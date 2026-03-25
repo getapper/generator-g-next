@@ -1,4 +1,4 @@
-const Generator = require("yeoman-generator");
+const Generator = require("../../common/yeoman-generator-base");
 const { requirePackages } = require("../../common");
 const yosay = require("yosay");
 const chalk = require("chalk");

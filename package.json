@@ -8,7 +8,11 @@
     "test:api-cli": "node test-api-cli.js",
     "test:yup-validation": "node test-yup-validation.js",
     "test:all-generators-cli": "node test-all-generators-cli.js",
-    "test:local-generator-todo": "node scripts/test-local-generator-todo.js"
+    "test:local-generator-todo": "node scripts/test-local-generator-todo.js",
+    "clean:test-project": "node scripts/clean-test-project.js",
+    "test:yeoman7": "npm run clean:test-project && npm install --prefix test-project && npm test",
+    "test:yeoman6": "npm run test:yeoman7",
+    "test:yeoman5": "npm run test:yeoman7"
   },
   "repository": {
     "type": "git",
@@ -23,6 +27,9 @@
     "url": "https://github.com/getapper/generator-g-next/issues"
   },
   "homepage": "https://github.com/getapper/generator-g-next#readme",
+  "engines": {
+    "node": "^20.17.0 || >=22.9.0"
+  },
   "dependencies": {
     "@aws-sdk/client-eventbridge": "^3.259.0",
     "@aws-sdk/client-iam": "^3.259.0",
@@ -42,12 +49,14 @@
     "react-dom": "18.3.1",
     "snake-case": "3.0.4",
     "typescript": "4.9.5",
-    "yeoman-generator": "5.10.0",
+    "yeoman-generator": "^7.5.1",
     "yosay": "2.0.2",
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@yeoman/types": "^1.10.3",
+    "mem-fs": "^4.1.4",
     "prettier": "2.5.1",
-    "yeoman-environment": "^3.19.3"
+    "yeoman-environment": "^6.0.0"
   }
 }

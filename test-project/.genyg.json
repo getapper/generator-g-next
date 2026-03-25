@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "packages": {
+    "core": true,
+    "mui": true,
+    "spa": false,
+    "translations": false,
+    "mongodb": false,
+    "cognito": false,
+    "cookieAuth": true
+  },
+  "cookieRoles": ["admin", "user", "moderator"]
+}

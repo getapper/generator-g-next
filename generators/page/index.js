@@ -1,11 +1,14 @@
 "use strict";
-const Generator = require("yeoman-generator");
+const Generator = require("../../common/yeoman-generator-base");
 const chalk = require("chalk");
 const yosay = require("yosay");
 const path = require("path");
 const { pascalCase } = require("pascal-case");
 const kebabCase = require("kebab-case");
 const { requirePackages, getGenygConfigFile } = require("../../common");
+const {
+  registerInquirerDirectoryPrompt,
+} = require("../../common/register-inquirer-directory");
 const { generatePage } = require("../../common/file-generators");
 const { camelCase } = require("camel-case");
 const {
@@ -63,10 +66,7 @@ module.exports = class extends Generator {
   initializing() {
     // No-op: force is set in constructor
 
-    this.env.adapter.promptModule.registerPrompt(
-      "directory",
-      require("inquirer-directory"),
-    );
+    registerInquirerDirectoryPrompt(this);
   }
 
   async prompting() {

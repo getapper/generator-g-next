@@ -1,5 +1,5 @@
 "use strict";
-const Generator = require("yeoman-generator");
+const Generator = require("../../common/yeoman-generator-base");
 const chalk = require("chalk");
 const yosay = require("yosay");
 const kebabCase = require("kebab-case");
@@ -9,6 +9,9 @@ const {
   copyEjsTemplateFolder,
   checkPackageInstalled,
 } = require("../../common");
+const {
+  registerInquirerDirectoryPrompt,
+} = require("../../common/register-inquirer-directory");
 const {
   createValidationSchema,
   validateCliArguments,
@@ -38,10 +41,7 @@ module.exports = class extends Generator {
   initializing() {
     // No-op: force is set in constructor
 
-    this.env.adapter.promptModule.registerPrompt(
-      "directory",
-      require("inquirer-directory")
-    );
+    registerInquirerDirectoryPrompt(this);
   }
 
   async prompting() {
