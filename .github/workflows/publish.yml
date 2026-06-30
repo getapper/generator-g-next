@@ -16,7 +16,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      # write: needed to create the git tag + GitHub Release on publish.
+      contents: write
       # Required for npm Trusted Publishing (OIDC). Without this the OIDC
       # token can't be minted and npm publish falls back to needing a token.
       id-token: write
@@ -68,3 +69,21 @@ jobs:
         # No NODE_AUTH_TOKEN: auth is handled via OIDC once the Trusted
         # Publisher is configured on npm. Provenance is attached automatically.
         run: npm publish --access public
+
+      - name: Create git tag and GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.pkg.outputs.version }}"
+          TAG="v$VERSION"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::notice::Release $TAG already exists — skipping."
+          else
+            # gh release create also creates the annotated tag at the pushed commit
+            gh release create "$TAG" \
+              --target "$GITHUB_SHA" \
+              --title "$TAG" \
+              --generate-notes
+            echo "::notice::Created release $TAG"
+          fi
