@@ -300,6 +300,76 @@ npm run TASK:ImportDatabase
 
 ---
 
+### `yo g-next:pkg-prisma`
+
+**Dependencies:** `pkg-core`
+
+**Description:** Installs [Prisma](https://www.prisma.io/) with a PostgreSQL datasource preconfigured for serverless Postgres (e.g. [Neon](https://neon.tech/)). Run once per project.
+
+**What it does:**
+- Adds `@prisma/client` dependency and `prisma` devDependency
+- Creates `prisma/schema.prisma` with a `postgresql` datasource using `DATABASE_URL` (pooled) and `directUrl` (`DIRECT_URL`, used by Prisma Migrate)
+- Creates a `PrismaClient` singleton at `src/lib/prisma/index.ts` (dev hot-reload safe)
+- Adds `DATABASE_URL` / `DIRECT_URL` to `.env`, `.env.local`, `.env.test`, `.env.template`
+- Exposes `DATABASE_URL` / `DIRECT_URL` through `next.config.options.json`
+- Adds npm scripts: `prisma:generate`, `prisma:migrate`, `prisma:deploy`, `prisma:push`, `prisma:studio`
+- Marks `prisma` as installed in `.genyg.json`
+
+**Interactive Mode:**
+```bash
+yo g-next:pkg-prisma
+```
+You'll be prompted to confirm the installation.
+
+**Environment Variables Added:**
+- `DATABASE_URL` - Pooled connection string (Neon `-pooler` host), used by the app at runtime
+- `DIRECT_URL` - Direct connection string, used by Prisma Migrate
+
+**Files Created:**
+- `prisma/schema.prisma` - Prisma schema with the Postgres datasource
+- `src/lib/prisma/index.ts` - `PrismaClient` singleton
+
+**Next steps:**
+```bash
+npm install
+# fill DATABASE_URL / DIRECT_URL in your .env files (Neon dashboard)
+yo g-next:model-prisma --modelName Task
+npm run prisma:migrate
+```
+
+---
+
+### `yo g-next:model-prisma`
+
+**Dependencies:** `pkg-prisma`
+
+**Description:** Adds a model to `prisma/schema.prisma` and generates a server-side data-access class with full CRUD on top of the Prisma client.
+
+**What it does:**
+- Appends a `model <ModelName>` block to `prisma/schema.prisma` (id `cuid`, `created`, `updated`, `v` defaults) if it doesn't already exist
+- Generates `src/models/server/<ModelName>/index.ts` exposing CRUD helpers: `create`, `getById`, `getList`, `count`, `patch`, `delete`, `deleteAll`, plus `refresh`
+- Types are derived from the generated Prisma client (`I<ModelName>`, `Prisma.<ModelName>CreateInput`, etc.)
+
+**Interactive Mode:**
+```bash
+yo g-next:model-prisma
+```
+
+**CLI Mode:**
+```bash
+yo g-next:model-prisma --modelName <modelName>
+```
+
+**Examples:**
+```bash
+yo g-next:model-prisma --modelName Task
+yo g-next:model-prisma --modelName Project
+```
+
+After generating, edit the model block in `prisma/schema.prisma` to add fields, then run `npm run prisma:generate` (and `npm run prisma:migrate`) to sync the types. Pair with `yo g-next:api` to expose REST endpoints that use the generated class.
+
+---
+
 ### `yo g-next:pkg-cookie-auth`
 
 **Dependencies:** `pkg-core`
