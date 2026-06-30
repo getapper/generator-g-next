@@ -8,46 +8,42 @@ const {
   requirePackages,
   extendEnv,
 } = require("../../common");
+const {
+  configurePkgCliOptions,
+  promptPkgAccept,
+} = require("../../common/pkg-cli-helper");
 
 module.exports = class extends Generator {
+  constructor(args, opts) {
+    super(args, opts);
+    configurePkgCliOptions(this, opts);
+  }
+
   async prompting() {
     // Config checks
     requirePackages(this, ["spa"]);
 
-    this.log(
-      yosay(
-        `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )}. ${chalk.red(
-          "This command will install all Cognito packages for BE and FE"
-        )}`
-      )
-    );
-
-    // Config checks
     const configFile = getGenygConfigFile(this);
     if (configFile.packages.cognito) {
       this.log(
         yosay(
           chalk.red(
-            "It looks like the GeNYG Cognito files were already installed!"
-          )
-        )
+            "It looks like the GeNYG Cognito files were already installed!",
+          ),
+        ),
       );
       process.exit(0);
     }
 
-    this.answers = await this.prompt([
-      {
-        type: "confirm",
-        name: "accept",
-        message: "Are you sure to proceed?",
-      },
-    ]);
-
-    if (!this.answers.accept) {
-      process.exit(0);
-    }
+    await promptPkgAccept(
+      this,
+      `Hi! Welcome to the official ${chalk.blue(
+        "Getapper NextJS Yeoman Generator (GeNYG)",
+      )}. ${chalk.red(
+        "This command will install all Cognito packages for BE and FE",
+      )}`,
+      "pkg-cognito",
+    );
   }
 
   writing() {

@@ -10,8 +10,12 @@ const namespace = process.argv[2];
 const rawOptions = process.argv[3] ?? "{}";
 const rawPromptAnswers = process.argv[4] ?? "{}";
 
-const options = JSON.parse(rawOptions);
+let options = JSON.parse(rawOptions);
 const promptAnswers = JSON.parse(rawPromptAnswers);
+
+if (promptAnswers.accept && !options.accept) {
+  options = { ...options, accept: true };
+}
 
 const toPromptAnswer = (question) => {
   if (Object.prototype.hasOwnProperty.call(promptAnswers, question.name)) {

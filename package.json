@@ -1,6 +1,6 @@
 {
   "name": "generator-g-next",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Getapper NextJS Yeoman Generator",
   "main": "index.js",
   "scripts": {

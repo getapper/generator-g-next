@@ -28,8 +28,7 @@ const stepDefinitions = [
   {
     name: "pkg-core",
     namespace: "g-next:pkg-core",
-    options: {},
-    promptAnswers: { accept: true },
+    options: { accept: true },
     expectedPaths: [
       ".genyg.json",
       "jest.config.js",
@@ -41,8 +40,7 @@ const stepDefinitions = [
   {
     name: "pkg-mui",
     namespace: "g-next:pkg-mui",
-    options: {},
-    promptAnswers: { accept: true },
+    options: { accept: true },
     expectedPaths: [
       "src/components/AppSnackbar/index.tsx",
       "src/themes/index.ts",
@@ -52,15 +50,13 @@ const stepDefinitions = [
   {
     name: "pkg-spa",
     namespace: "g-next:pkg-spa",
-    options: {},
-    promptAnswers: { accept: true },
+    options: { accept: true },
     expectedPaths: ["src/components/AppButton/index.tsx"],
   },
   {
     name: "pkg-mongodb",
     namespace: "g-next:pkg-mongodb",
-    options: {},
-    promptAnswers: { accept: true },
+    options: { accept: true },
     expectedPaths: [
       "src/lib/mongodb/index.ts",
       "src/lib/mongodb/mongo-dao.ts",

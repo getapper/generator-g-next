@@ -1,33 +1,27 @@
 "use strict";
 const Generator = require("../../common/yeoman-generator-base");
 const chalk = require("chalk");
-const yosay = require("yosay");
-const fs = require("fs");
-const path = require("path");
+const {
+  configurePkgCliOptions,
+  promptPkgAccept,
+} = require("../../common/pkg-cli-helper");
 
 module.exports = class extends Generator {
+  constructor(args, opts) {
+    super(args, opts);
+    configurePkgCliOptions(this, opts);
+  }
+
   async prompting() {
-    this.log(
-      yosay(
-        `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)",
-        )}. ${chalk.red(
-          "This command SHOULD only be executed right after create-next-app install, not sooner, not later!",
-        )}\nAnd it will install Redux, Sagas, Persist, React-Router, MUI, and basic app templates.`,
-      ),
+    await promptPkgAccept(
+      this,
+      `Hi! Welcome to the official ${chalk.blue(
+        "Getapper NextJS Yeoman Generator (GeNYG)",
+      )}. ${chalk.red(
+        "This command SHOULD only be executed right after create-next-app install, not sooner, not later!",
+      )}\nAnd it will install Redux, Sagas, Persist, React-Router, MUI, and basic app templates.`,
+      "pkg-core",
     );
-
-    this.answers = await this.prompt([
-      {
-        type: "confirm",
-        name: "accept",
-        message: "Are you sure to proceed?",
-      },
-    ]);
-
-    if (!this.answers.accept) {
-      process.exit(0);
-    }
   }
 
   async writing() {

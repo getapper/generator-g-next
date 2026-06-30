@@ -1,39 +1,35 @@
 "use strict";
 const Generator = require("../../common/yeoman-generator-base");
 const chalk = require("chalk");
-const yosay = require("yosay");
 const {
   getGenygConfigFile,
   extendConfigFile,
   requirePackages,
 } = require("../../common");
+const {
+  configurePkgCliOptions,
+  promptPkgAccept,
+} = require("../../common/pkg-cli-helper");
 
 module.exports = class extends Generator {
+  constructor(args, opts) {
+    super(args, opts);
+    configurePkgCliOptions(this, opts);
+  }
+
   async prompting() {
     // Config checks
     requirePackages(this, ["core"]);
 
-    this.log(
-      yosay(
-        `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)",
-        )}. ${chalk.red(
-          "This command must be executed only once, and it will install al MUI dependencies.",
-        )}`,
-      ),
+    await promptPkgAccept(
+      this,
+      `Hi! Welcome to the official ${chalk.blue(
+        "Getapper NextJS Yeoman Generator (GeNYG)",
+      )}. ${chalk.red(
+        "This command must be executed only once, and it will install al MUI dependencies.",
+      )}`,
+      "pkg-mui",
     );
-
-    this.answers = await this.prompt([
-      {
-        type: "confirm",
-        name: "accept",
-        message: "Are you sure to proceed?",
-      },
-    ]);
-
-    if (!this.answers.accept) {
-      process.exit(0);
-    }
   }
 
   writing() {

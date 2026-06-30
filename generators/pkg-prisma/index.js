@@ -8,33 +8,30 @@ const {
   requirePackages,
   extendEnv,
 } = require("../../common");
+const {
+  configurePkgCliOptions,
+  promptPkgAccept,
+} = require("../../common/pkg-cli-helper");
 
 module.exports = class extends Generator {
+  constructor(args, opts) {
+    super(args, opts);
+    configurePkgCliOptions(this, opts);
+  }
+
   async prompting() {
     // Config checks
     requirePackages(this, ["core"]);
 
-    this.log(
-      yosay(
-        `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)",
-        )}. ${chalk.red(
-          "This command must be executed only once, and it will install Prisma and set up a PostgreSQL (Neon-ready) datasource.",
-        )}`,
-      ),
+    await promptPkgAccept(
+      this,
+      `Hi! Welcome to the official ${chalk.blue(
+        "Getapper NextJS Yeoman Generator (GeNYG)",
+      )}. ${chalk.red(
+        "This command must be executed only once, and it will install Prisma and set up a PostgreSQL (Neon-ready) datasource.",
+      )}`,
+      "pkg-prisma",
     );
-
-    this.answers = await this.prompt([
-      {
-        type: "confirm",
-        name: "accept",
-        message: "Are you sure to proceed?",
-      },
-    ]);
-
-    if (!this.answers.accept) {
-      process.exit(0);
-    }
   }
 
   writing() {

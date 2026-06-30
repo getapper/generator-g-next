@@ -142,9 +142,12 @@ You'll be prompted to confirm the installation.
 
 **CLI Mode:**
 ```bash
-# No CLI options available - always interactive
-yo g-next:pkg-core
+yo g-next:pkg-core --accept
 ```
+Automatically accepts the installation and overwrites existing files without confirmation.
+
+**Optional Parameters:**
+- `--accept` - Skip confirmation prompt and force overwrite (non-interactive mode)
 
 **Files Created:**
 - `.genyg.json` - GeNYG configuration file

@@ -2,51 +2,45 @@
 const Generator = require("../../common/yeoman-generator-base");
 const chalk = require("chalk");
 const yosay = require("yosay");
-const fs = require("fs");
-const path = require("path");
 const {
   getGenygConfigFile,
   extendConfigFile,
   requirePackages,
 } = require("../../common");
+const {
+  configurePkgCliOptions,
+  promptPkgAccept,
+} = require("../../common/pkg-cli-helper");
 
 module.exports = class extends Generator {
+  constructor(args, opts) {
+    super(args, opts);
+    configurePkgCliOptions(this, opts);
+  }
+
   async prompting() {
     // Config checks
     requirePackages(this, ["core"]);
 
-    this.log(
-      yosay(
-        `Hi! Welcome to the official ${chalk.blue(
-          "Getapper NextJS Yeoman Generator (GeNYG)"
-        )}. ${chalk.red(
-          "This command will install Redux, Sagas, Persist, React-Router, and everything needed to run SPAs in NextJS."
-        )}`
-      )
-    );
-
-    // Config checks
     const configFile = getGenygConfigFile(this);
     if (configFile.packages.spa) {
       this.log(
         yosay(
-          chalk.red("It looks like the GeNYG SPA files were already installed!")
-        )
+          chalk.red("It looks like the GeNYG SPA files were already installed!"),
+        ),
       );
       process.exit(0);
     }
 
-    this.answers = await this.prompt([
-      {
-        type: "confirm",
-        name: "accept",
-        message: "Are you sure to proceed?",
-      },
-    ]);
-
-    if (!this.answers.accept) {
-      process.exit(0);
-    }
+    await promptPkgAccept(
+      this,
+      `Hi! Welcome to the official ${chalk.blue(
+        "Getapper NextJS Yeoman Generator (GeNYG)",
+      )}. ${chalk.red(
+        "This command will install Redux, Sagas, Persist, React-Router, and everything needed to run SPAs in NextJS.",
+      )}`,
+      "pkg-spa",
+    );
   }
 
   writing() {
